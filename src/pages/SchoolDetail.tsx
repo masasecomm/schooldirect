@@ -1061,6 +1061,14 @@ const SchoolDetail = () => {
               accent="accent"
             />
             <LeadershipCard values={principalByYear} />
+            {school.latitude != null && school.longitude != null && schoolYear && (
+              <FeederZoneCard
+                lat={school.latitude}
+                lon={school.longitude}
+                selfId={school.id}
+                year={schoolYear}
+              />
+            )}
           </div>
         </div>
       </main>
