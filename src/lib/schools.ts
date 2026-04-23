@@ -98,10 +98,14 @@ export const displayName = (school: { name: string; phase?: string | null }) => 
   return suffix ? `${formatted} ${suffix}` : formatted;
 };
 
-export const uniqueSorted = (values: (string | null)[]) =>
-  Array.from(new Set(values.filter((v): v is string => !!v))).sort((a, b) =>
-    a.localeCompare(b),
-  );
+export const uniqueSorted = (values: (string | number | null | undefined)[]) =>
+  Array.from(
+    new Set(
+      values
+        .filter((v) => v !== null && v !== undefined && v !== "")
+        .map((v) => String(v)),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
 
 export const getFacets = (year: DataYear) => {
   const schools = getSchools(year);
