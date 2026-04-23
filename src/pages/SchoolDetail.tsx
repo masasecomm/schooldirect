@@ -20,6 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { findSchool, titleCase, displayName, cleanAddress } from "@/lib/schools";
+import { useYear } from "@/lib/year-context";
 import { toast } from "@/hooks/use-toast";
 
 const Detail = ({
@@ -43,8 +44,9 @@ const Detail = ({
 );
 
 const SchoolDetail = () => {
+  const { year } = useYear();
   const { id } = useParams<{ id: string }>();
-  const school = useMemo(() => (id ? findSchool(id) : undefined), [id]);
+  const school = useMemo(() => (id ? findSchool(year, id) : undefined), [id, year]);
   const [copied, setCopied] = useState<string | null>(null);
 
   const copy = (label: string, value: string) => {
