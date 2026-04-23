@@ -280,6 +280,7 @@ const LeadershipCard = ({
             {entries.map((e, i) => {
               const prevKey = i > 0 ? entries[i - 1].key : "";
               const changed = !!(e.key && prevKey && e.key !== prevKey);
+              const continued = !!(e.key && prevKey && e.key === prevKey);
               const isLast = i === entries.length - 1;
               return (
                 <li key={e.year} className="relative flex gap-3">
@@ -289,6 +290,8 @@ const LeadershipCard = ({
                         e.name
                           ? changed
                             ? "bg-accent text-accent-foreground"
+                            : continued
+                            ? "bg-primary-soft text-primary"
                             : "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground"
                       }`}
@@ -299,13 +302,20 @@ const LeadershipCard = ({
                   </div>
                   <div className="flex-1 pb-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-foreground">
-                        {e.name ?? "—"}
+                      <span
+                        className={`text-sm font-semibold ${
+                          continued ? "text-muted-foreground" : "text-foreground"
+                        }`}
+                      >
+                        {e.name ? (continued ? "Continued in role" : e.name) : "—"}
                       </span>
                       {changed && (
                         <Badge className="bg-accent text-accent-foreground hover:bg-accent/90">
                           New principal
                         </Badge>
+                      )}
+                      {!changed && !continued && e.name && i > 0 && (
+                        <Badge variant="outline">First on record</Badge>
                       )}
                     </div>
                     <div className="text-xs text-muted-foreground">{e.year}</div>
