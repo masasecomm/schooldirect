@@ -3,7 +3,7 @@ import { MapPin, Phone, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { School } from "@/lib/schools";
-import { titleCase } from "@/lib/schools";
+import { titleCase, displayName } from "@/lib/schools";
 
 export const SchoolCard = ({ school }: { school: School }) => {
   return (
@@ -28,7 +28,7 @@ export const SchoolCard = ({ school }: { school: School }) => {
         </div>
 
         <h3 className="text-base font-semibold leading-snug tracking-tight">
-          {titleCase(school.name)}
+          {displayName(school)}
         </h3>
 
         <div className="flex flex-col gap-1.5 text-sm text-muted-foreground">
