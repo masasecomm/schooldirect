@@ -1,16 +1,206 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect, useMemo, useState } from "react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { SiteHeader } from "@/components/schools/SiteHeader";
+import { SiteFooter } from "@/components/schools/SiteFooter";
+import { SchoolCard } from "@/components/schools/SchoolCard";
+import { FilterPanel, type Filters } from "@/components/schools/FilterPanel";
+import { schools, getFacets, titleCase } from "@/lib/schools";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const PAGE_SIZE = 24;
+
+const emptyFilters: Filters = { district: "", sector: "", phase: "", quintile: "", town: "" };
+
+const Index = () => {
+  const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Filters>(emptyFilters);
+  const [sort, setSort] = useState<"name" | "district">("name");
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
+  const facets = useMemo(() => getFacets(), []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let result = schools.filter((s) => {
+      if (filters.district && s.district !== filters.district) return false;
+      if (filters.sector && s.sector !== filters.sector) return false;
+      if (filters.phase && s.phase !== filters.phase) return false;
+      if (filters.quintile && s.quintile !== filters.quintile) return false;
+      if (filters.town && s.town !== filters.town) return false;
+      if (q) {
+        const hay = `${s.name} ${s.suburb ?? ""} ${s.town ?? ""} ${s.district ?? ""} ${s.emis}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    if (sort === "name") result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    else result = [...result].sort((a, b) => (a.district ?? "").localeCompare(b.district ?? "") || a.name.localeCompare(b.name));
+    return result;
+  }, [query, filters, sort]);
+
+  useEffect(() => setVisible(PAGE_SIZE), [query, filters, sort]);
+
+  const activeChips: { key: keyof Filters; value: string }[] = (Object.keys(filters) as (keyof Filters)[])
+    .filter((k) => filters[k])
+    .map((k) => ({ key: k, value: filters[k] }));
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="flex min-h-screen flex-col bg-background">
+      <SiteHeader />
+
+      <section
+        className="border-b border-border/60"
+        style={{ background: "var(--hero-gradient)" }}
+      >
+        <div className="container py-12 md:py-16">
+          <div className="mx-auto max-w-3xl text-center text-primary-foreground">
+            <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
+              Find a school in Gauteng
+            </h1>
+            <p className="mt-3 text-base opacity-90 md:text-lg">
+              Browse {schools.length.toLocaleString()} schools across the province. Search by name,
+              suburb, district or EMIS number.
+            </p>
+
+            <div className="relative mt-8">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Try “Sandton”, “Pretoria Boys”, “Soweto”…"
+                className="h-14 rounded-xl border-0 bg-background pl-12 pr-4 text-base text-foreground shadow-[var(--shadow-elevated)] focus-visible:ring-2 focus-visible:ring-primary-foreground/40"
+                aria-label="Search schools"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <main className="container flex-1 py-8">
+        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+          <aside className="hidden lg:block">
+            <div className="sticky top-20 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+              <FilterPanel
+                filters={filters}
+                facets={facets}
+                onChange={setFilters}
+                onClear={() => setFilters(emptyFilters)}
+              />
+            </div>
+          </aside>
+
+          <section>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{filtered.length.toLocaleString()}</span>{" "}
+                {filtered.length === 1 ? "school" : "schools"} found
+              </p>
+
+              <div className="flex items-center gap-2">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm" className="lg:hidden">
+                      <SlidersHorizontal className="h-4 w-4" />
+                      Filters
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[320px] sm:w-[360px]">
+                    <SheetHeader>
+                      <SheetTitle>Filters</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      <FilterPanel
+                        filters={filters}
+                        facets={facets}
+                        onChange={setFilters}
+                        onClear={() => setFilters(emptyFilters)}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+                  <SelectTrigger className="h-9 w-[160px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Sort: Name (A–Z)</SelectItem>
+                    <SelectItem value="district">Sort: District</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {activeChips.length > 0 && (
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                {activeChips.map(({ key, value }) => (
+                  <Badge key={key} variant="secondary" className="gap-1 pr-1">
+                    <span className="text-xs">{titleCase(value)}</span>
+                    <button
+                      onClick={() => setFilters({ ...filters, [key]: "" })}
+                      className="rounded-sm p-0.5 hover:bg-muted-foreground/10"
+                      aria-label={`Remove ${key} filter`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                <button
+                  onClick={() => setFilters(emptyFilters)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
+
+            {filtered.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+                <p className="text-base font-medium">No schools match your search</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Try clearing some filters or using a different search term.
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => {
+                    setQuery("");
+                    setFilters(emptyFilters);
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {filtered.slice(0, visible).map((s) => (
+                    <SchoolCard key={s.id} school={s} />
+                  ))}
+                </div>
+                {visible < filtered.length && (
+                  <div className="mt-8 flex justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                    >
+                      Load more ({(filtered.length - visible).toLocaleString()} remaining)
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+        </div>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
