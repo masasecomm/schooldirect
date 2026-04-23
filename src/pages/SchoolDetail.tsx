@@ -133,10 +133,20 @@ const HistoryCard = ({
 };
 
 const SchoolDetail = () => {
-  const { year } = useYear();
   const { id } = useParams<{ id: string }>();
-  const school = useMemo(() => (id ? findSchool(year, id) : undefined), [id, year]);
-  const school2023 = useMemo(() => (id ? findSchool("2023", id) : undefined), [id]);
+  // Multi-year lookup. The "primary" record is the most recent year that has data.
+  const records = useMemo(() => {
+    const map = {} as Record<DataYear, ReturnType<typeof findSchool>>;
+    for (const y of HISTORY_YEARS) map[y] = id ? findSchool(y, id) : undefined;
+    return map;
+  }, [id]);
+  const school = useMemo(() => {
+    for (let i = HISTORY_YEARS.length - 1; i >= 0; i--) {
+      const r = records[HISTORY_YEARS[i]];
+      if (r) return r;
+    }
+    return undefined;
+  }, [records]);
   const [copied, setCopied] = useState<string | null>(null);
 
   const copy = (label: string, value: string) => {
@@ -175,6 +185,22 @@ const SchoolDetail = () => {
   const mapsEmbedUrl = mapQuery
     ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`
     : null;
+
+  const learnersByYear = HISTORY_YEARS.reduce(
+    (acc, y) => ({ ...acc, [y]: records[y]?.learners ?? null }),
+    {} as Record<DataYear, number | null>,
+  );
+  const educatorsByYear = HISTORY_YEARS.reduce(
+    (acc, y) => ({ ...acc, [y]: records[y]?.educators ?? null }),
+    {} as Record<DataYear, number | null>,
+  );
+  const principalByYear = HISTORY_YEARS.reduce(
+    (acc, y) => ({
+      ...acc,
+      [y]: records[y]?.principal ? titleCase(records[y]!.principal) : null,
+    }),
+    {} as Record<DataYear, string | null>,
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
