@@ -50,6 +50,7 @@ const SchoolDetail = () => {
   const { year } = useYear();
   const { id } = useParams<{ id: string }>();
   const school = useMemo(() => (id ? findSchool(year, id) : undefined), [id, year]);
+  const school2023 = useMemo(() => (id ? findSchool("2023", id) : undefined), [id]);
   const [copied, setCopied] = useState<string | null>(null);
 
   const copy = (label: string, value: string) => {
