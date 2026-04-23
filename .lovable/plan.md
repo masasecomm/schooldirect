@@ -1,48 +1,64 @@
 
-# Gauteng Schools Directory (2023)
 
-A clean, modern public website where parents and students can browse and search all schools in the Gauteng 2023 directory.
+## Goal
 
-## Data
-- Convert `Gauteng2023.xlsx` into a static JSON file bundled with the app (no backend, fast loads).
-- Normalize fields like school name, EMIS number, district, sector (public/independent), phase (primary/secondary/combined), quintile, address, suburb, town, postal code, phone, email, principal — based on whatever columns exist in the sheet.
+Extract every **2026 Decentralised Walk-In Centre** from the four uploaded posters into a single structured dataset, and render it as a clean, browsable list page in the app. After this lands, you'll tell me what to do with it next (link from school pages, filter by location, etc.).
 
-## Pages
+## What gets built
 
-**Home / Directory (`/`)**
-- Hero: "Find a school in Gauteng" with a large search bar (search by name, suburb, district, EMIS).
-- Filter sidebar: District, Sector, Phase, Quintile, Town/Suburb.
-- Active filter chips + "Clear all".
-- Result count + sort (A–Z, by district).
-- Results as cards in a responsive grid: name, type badges, suburb, phone, "View details" link.
-- Pagination (or infinite scroll) for performance with thousands of schools.
+### 1. Data file: `src/data/walk-in-centres.json`
 
-**School detail (`/schools/:id`)**
-- Full info: name, all contact details, address block, principal, phase, sector, quintile, EMIS.
-- "Copy phone / email" buttons, click-to-call, click-to-email.
-- "Open in Google Maps" link using the address.
-- Back to directory.
+I'll OCR/transcribe all four posters into one JSON array. Each entry:
 
-**About (`/about`)**
-- Short note: data source, year (2023), disclaimer that info may be outdated, who it's for.
+```json
+{
+  "region": "Ekurhuleni",
+  "subRegion": "Ekurhuleni North",
+  "centre": "District Office (Walk-In Centre)",
+  "address": "Munpen Building, 78 Howard Avenue, Benoni",
+  "areasServed": ["Birchleigh", "Kempton Park", "Edenvale", "..."],
+  "contacts": [
+    { "name": "V. Petlo", "phone": "082 562 8053" },
+    { "name": "O. Mzimela", "phone": "082 562 7878" }
+  ]
+}
+```
 
-**404** — keep existing NotFound.
+Covers the four posters:
+- **Ekurhuleni** (Ekurhuleni North, Ekurhuleni South, Gauteng East)
+- **Johannesburg** (JHB Central, East, West, North, South)
+- **Tshwane** (Gauteng North, Tshwane North, Tshwane South, Tshwane West)
+- **Sedibeng** (Gauteng West, Sedibeng West, Sedibeng East)
 
-## UX details
-- Sticky header with logo/title + search.
-- Mobile: filters collapse into a slide-over drawer.
-- Empty state when no results match.
-- Skeleton loaders while JSON loads.
-- Fully keyboard-accessible.
+### 2. Helper: `src/lib/walk-in-centres.ts`
 
-## Style
-- Clean & modern, light theme.
-- Friendly accent color (calm blue/teal), generous whitespace, rounded cards, subtle shadows.
-- Sans-serif (Inter), clear typographic hierarchy.
-- All colors & tokens defined in `index.css` + `tailwind.config.ts` (semantic design tokens, no hardcoded colors in components).
+Typed loader + small utilities (group by region, search by area name).
 
-## Tech
-- React + Vite + Tailwind + shadcn/ui (already in the project).
-- React Router for `/`, `/schools/:id`, `/about`.
-- Static `src/data/schools.json` generated once from the uploaded XLSX.
-- Client-side fuzzy search + filtering with `useMemo`.
+### 3. New page: `/admissions` (route added in `App.tsx`)
+
+A simple list view, matching the existing site style (SiteHeader / SiteFooter, cards, tokens from `index.css`):
+
+- Page header: "2026 Online Admissions — Walk-In Centres (Grade 1 & 8)"
+- Search box: filter by centre, area, or contact name
+- Region filter chips: Ekurhuleni / Johannesburg / Tshwane / Sedibeng / All
+- Grouped sections by sub-region, each centre as a card showing:
+  - Centre name + address (with "Open in Maps" link)
+  - Areas served as small badges
+  - Contacts list with click-to-call (`tel:`) and copy-number buttons
+
+### 4. Nav entry
+
+Add an "Admissions" link in `SiteHeader` so the page is discoverable.
+
+## Out of scope (for now)
+
+- No linking from individual school pages yet — waiting for your next instruction.
+- No matching of a school's suburb to its walk-in centre yet.
+- No backend / Lovable Cloud needed; data is static JSON.
+
+## Technical notes
+
+- All four images will be transcribed in one pass; I'll spot-check for OCR mistakes in phone numbers.
+- Phone numbers stored as display strings (e.g. `"082 562 8053"`); a normalised digits-only field can be added later if needed for `tel:` links — initially I'll just strip spaces inline.
+- No new dependencies.
+
