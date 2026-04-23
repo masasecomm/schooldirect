@@ -1,5 +1,6 @@
 import data2023 from "@/data/schools-2023.json";
 import data2024 from "@/data/schools-2024.json";
+import data2025 from "@/data/schools-2025.json";
 
 export interface School {
   id: string;
@@ -19,6 +20,7 @@ export interface School {
   streetAddress: string | null;
   postalAddress: string | null;
   telephone: string | null;
+  email?: string | null;
   principal: string | null;
   quintile: string | null;
   noFee: string | null;
@@ -30,13 +32,14 @@ export interface School {
   latitude: number | null;
 }
 
-export type DataYear = "2023" | "2024";
+export type DataYear = "2023" | "2024" | "2025";
 
-export const AVAILABLE_YEARS: DataYear[] = ["2024", "2023"];
+export const AVAILABLE_YEARS: DataYear[] = ["2025", "2024", "2023"];
 
 const datasets: Record<DataYear, School[]> = {
   "2023": data2023 as School[],
   "2024": data2024 as School[],
+  "2025": data2025 as School[],
 };
 
 export const getSchools = (year: DataYear): School[] => datasets[year];

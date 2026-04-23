@@ -7,7 +7,7 @@ interface YearContextValue {
 }
 
 const STORAGE_KEY = "gauteng-schools-year";
-const DEFAULT_YEAR: DataYear = "2024";
+const DEFAULT_YEAR: DataYear = "2025";
 
 const defaultValue: YearContextValue = {
   year: DEFAULT_YEAR,
