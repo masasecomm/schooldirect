@@ -15,13 +15,22 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Compass,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
-import { findSchool, titleCase, displayName, cleanAddress, AVAILABLE_YEARS, type DataYear } from "@/lib/schools";
+import {
+  findSchool,
+  titleCase,
+  displayName,
+  cleanAddress,
+  getSchools,
+  AVAILABLE_YEARS,
+  type DataYear,
+} from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
 
 const Detail = ({
