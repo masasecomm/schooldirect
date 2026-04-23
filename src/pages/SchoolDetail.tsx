@@ -15,13 +15,22 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Compass,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
-import { findSchool, titleCase, displayName, cleanAddress, AVAILABLE_YEARS, type DataYear } from "@/lib/schools";
+import {
+  findSchool,
+  titleCase,
+  displayName,
+  cleanAddress,
+  getSchools,
+  AVAILABLE_YEARS,
+  type DataYear,
+} from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
 
 const Detail = ({
@@ -679,6 +688,166 @@ const LeadershipCard = ({
   );
 };
 
+/**
+ * Feeder Zone card. Uses the school's coordinates to find every unique
+ * locality (suburb / township / town) of any other school within a 5km
+ * radius, computed via the Haversine formula on the bundled dataset.
+ */
+const FEEDER_RADIUS_KM = 5;
+
+const haversineKm = (
+  aLat: number,
+  aLon: number,
+  bLat: number,
+  bLon: number,
+): number => {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(bLat - aLat);
+  const dLon = toRad(bLon - aLon);
+  const lat1 = toRad(aLat);
+  const lat2 = toRad(bLat);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.sin(dLon / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+  return 2 * R * Math.asin(Math.sqrt(h));
+};
+
+type FeederArea = {
+  name: string;
+  kind: "Suburb" | "Township" | "Town";
+  distance: number; // km, distance of nearest school in this area
+  schoolCount: number;
+};
+
+const FeederZoneCard = ({
+  lat,
+  lon,
+  selfId,
+  year,
+}: {
+  lat: number;
+  lon: number;
+  selfId: string;
+  year: DataYear;
+}) => {
+  const areas = useMemo<FeederArea[]>(() => {
+    const all = getSchools(year);
+    // Map key = `${kind}|${normalised name}` so we don't double-count when
+    // the same locality appears in different fields.
+    const map = new Map<string, FeederArea>();
+    for (const s of all) {
+      if (s.id === selfId) continue;
+      if (s.latitude == null || s.longitude == null) continue;
+      const d = haversineKm(lat, lon, s.latitude, s.longitude);
+      if (d > FEEDER_RADIUS_KM) continue;
+      const candidates: { kind: FeederArea["kind"]; raw: string | null | undefined }[] = [
+        { kind: "Suburb", raw: s.suburb },
+        { kind: "Township", raw: s.township },
+        { kind: "Town", raw: s.town },
+      ];
+      for (const { kind, raw } of candidates) {
+        if (!raw) continue;
+        const name = titleCase(raw);
+        if (!name) continue;
+        const key = `${kind}|${name.toLowerCase()}`;
+        const existing = map.get(key);
+        if (existing) {
+          existing.schoolCount += 1;
+          if (d < existing.distance) existing.distance = d;
+        } else {
+          map.set(key, { name, kind, distance: d, schoolCount: 1 });
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.distance - b.distance);
+  }, [lat, lon, selfId, year]);
+
+  const kindStyles: Record<FeederArea["kind"], string> = {
+    Suburb: "bg-primary-soft text-primary",
+    Township: "bg-accent/15 text-accent",
+    Town: "bg-muted text-foreground",
+  };
+
+  return (
+    <Card className="overflow-hidden shadow-[var(--shadow-card)]">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Compass className="h-3.5 w-3.5" />
+              Catchment
+            </div>
+            <h2 className="mt-1 text-lg font-semibold">Feeder Zone</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Areas within {FEEDER_RADIUS_KM} km of the school
+            </p>
+          </div>
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
+            <Compass className="h-5 w-5" />
+          </div>
+        </div>
+
+        {/* Headline */}
+        <div className="mt-5 flex items-end gap-3">
+          <div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Areas in zone
+            </div>
+            <div className="text-4xl font-bold tracking-tight leading-none">
+              {areas.length}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              within {FEEDER_RADIUS_KM} km radius
+            </div>
+          </div>
+        </div>
+
+        {areas.length === 0 ? (
+          <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+            No neighbouring areas found within {FEEDER_RADIUS_KM} km.
+          </div>
+        ) : (
+          <ol className="mt-5 max-h-80 space-y-2 overflow-y-auto pr-1">
+            {areas.map((a) => (
+              <li
+                key={`${a.kind}-${a.name}`}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-semibold text-foreground">
+                      {a.name}
+                    </span>
+                    <span
+                      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${kindStyles[a.kind]}`}
+                    >
+                      {a.kind}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    {a.schoolCount} {a.schoolCount === 1 ? "school" : "schools"} nearby
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-sm font-bold text-foreground">
+                    {a.distance < 1
+                      ? `${Math.round(a.distance * 1000)} m`
+                      : `${a.distance.toFixed(1)} km`}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    away
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const SchoolDetail = () => {
   const { id } = useParams<{ id: string }>();
   // Multi-year lookup. The "primary" record is the most recent year that has data.
@@ -691,6 +860,12 @@ const SchoolDetail = () => {
     for (let i = HISTORY_YEARS.length - 1; i >= 0; i--) {
       const r = records[HISTORY_YEARS[i]];
       if (r) return r;
+    }
+    return undefined;
+  }, [records]);
+  const schoolYear = useMemo<DataYear | undefined>(() => {
+    for (let i = HISTORY_YEARS.length - 1; i >= 0; i--) {
+      if (records[HISTORY_YEARS[i]]) return HISTORY_YEARS[i];
     }
     return undefined;
   }, [records]);
@@ -886,6 +1061,14 @@ const SchoolDetail = () => {
               accent="accent"
             />
             <LeadershipCard values={principalByYear} />
+            {school.latitude != null && school.longitude != null && schoolYear && (
+              <FeederZoneCard
+                lat={school.latitude}
+                lon={school.longitude}
+                selfId={school.id}
+                year={schoolYear}
+              />
+            )}
           </div>
         </div>
       </main>
