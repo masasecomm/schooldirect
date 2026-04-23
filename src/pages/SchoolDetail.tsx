@@ -853,8 +853,6 @@ const FeederZoneCard = ({
   );
 };
 
-const SchoolDetail = () => {
-
 /**
  * Walk-In Centre card. For PUBLIC schools, matches the school's locality
  * (suburb / township / town / municipality) against the bundled
@@ -968,7 +966,7 @@ const WalkInCentreCard = ({
   );
 };
 
-const SchoolDetailInner = () => {
+const SchoolDetail = () => {
   const { id } = useParams<{ id: string }>();
   // Multi-year lookup. The "primary" record is the most recent year that has data.
   const records = useMemo(() => {
