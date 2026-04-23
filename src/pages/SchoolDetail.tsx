@@ -16,6 +16,7 @@ import {
   TrendingDown,
   Minus,
   Compass,
+  School as SchoolIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -989,6 +990,145 @@ const WalkInCentreCard = ({
   );
 };
 
+/**
+ * Lists schools of the same Phase that share the school's township, suburb,
+ * or town. Helps families compare nearby options at the same level.
+ */
+const SimilarSchoolsCard = ({
+  school,
+  year,
+}: {
+  school: ReturnType<typeof findSchool>;
+  year: DataYear;
+}) => {
+  const similar = useMemo(() => {
+    if (!school?.phase) return [] as { school: NonNullable<ReturnType<typeof findSchool>>; matchedField: "Township" | "Suburb" | "Town"; matchedValue: string }[];
+    const norm = (v?: string | null) => (v ?? "").trim().toLowerCase();
+    const phase = norm(school.phase);
+    const fields: { key: "Township" | "Suburb" | "Town"; raw: string | null | undefined }[] = [
+      { key: "Township", raw: school.township },
+      { key: "Suburb", raw: school.suburb },
+      { key: "Town", raw: school.town },
+    ];
+    const targets = fields
+      .map((f) => ({ key: f.key, value: norm(f.raw) }))
+      .filter((f) => f.value.length > 0);
+    if (targets.length === 0) return [];
+
+    const all = getSchools(year);
+    const seen = new Set<string>();
+    const out: { school: NonNullable<ReturnType<typeof findSchool>>; matchedField: "Township" | "Suburb" | "Town"; matchedValue: string }[] = [];
+    for (const s of all) {
+      if (s.id === school.id) continue;
+      if (norm(s.phase) !== phase) continue;
+      let match: { key: "Township" | "Suburb" | "Town"; value: string } | null = null;
+      for (const t of targets) {
+        if (
+          (t.key === "Township" && norm(s.township) === t.value) ||
+          (t.key === "Suburb" && norm(s.suburb) === t.value) ||
+          (t.key === "Town" && norm(s.town) === t.value)
+        ) {
+          match = t;
+          break;
+        }
+      }
+      if (!match) continue;
+      if (seen.has(s.id)) continue;
+      seen.add(s.id);
+      out.push({ school: s, matchedField: match.key, matchedValue: titleCase(match.value) });
+    }
+    // Stable sort: same-field matches together, then alphabetical by name.
+    const order: Record<string, number> = { Township: 0, Suburb: 1, Town: 2 };
+    out.sort((a, b) => {
+      const f = order[a.matchedField] - order[b.matchedField];
+      if (f !== 0) return f;
+      return a.school.name.localeCompare(b.school.name);
+    });
+    return out;
+  }, [school, year]);
+
+  if (!school?.phase) return null;
+
+  const phaseLabel = titleCase(school.phase);
+  const fieldStyles: Record<"Township" | "Suburb" | "Town", string> = {
+    Township: "bg-accent/15 text-accent",
+    Suburb: "bg-primary-soft text-primary",
+    Town: "bg-muted text-foreground",
+  };
+
+  return (
+    <Card className="overflow-hidden shadow-[var(--shadow-card)]">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <SchoolIcon className="h-3.5 w-3.5" />
+              Nearby same-phase
+            </div>
+            <h2 className="mt-1 text-lg font-semibold">Similar Schools</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {phaseLabel} schools in the same township, suburb, or town
+            </p>
+          </div>
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
+            <SchoolIcon className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="mt-5 flex items-end gap-3">
+          <div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Schools found
+            </div>
+            <div className="text-4xl font-bold tracking-tight leading-none">
+              {similar.length}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">{phaseLabel.toLowerCase()} school{similar.length === 1 ? "" : "s"}</div>
+          </div>
+        </div>
+
+        {similar.length === 0 ? (
+          <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+            No other {phaseLabel.toLowerCase()} schools found in the same area.
+          </div>
+        ) : (
+          <ol className="mt-5 max-h-80 space-y-2 overflow-y-auto pr-1">
+            {similar.map((item) => (
+              <li
+                key={item.school.id}
+                className="rounded-lg border border-border bg-card px-3 py-2"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      to={`/schools/${item.school.id}`}
+                      className="block truncate text-sm font-semibold text-foreground hover:text-primary hover:underline"
+                    >
+                      {displayName(item.school)}
+                    </Link>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      <span
+                        className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${fieldStyles[item.matchedField]}`}
+                      >
+                        {item.matchedField}: {item.matchedValue}
+                      </span>
+                      {item.school.sector && (
+                        <span className="text-[11px] text-muted-foreground">
+                          {titleCase(item.school.sector)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const SchoolDetail = () => {
   const { id } = useParams<{ id: string }>();
   // Multi-year lookup. The "primary" record is the most recent year that has data.
@@ -1212,6 +1352,9 @@ const SchoolDetail = () => {
             )}
             {school.sector?.toUpperCase() === "PUBLIC" && (
               <WalkInCentreCard school={school} />
+            )}
+            {schoolYear && (
+              <SimilarSchoolsCard school={school} year={schoolYear} />
             )}
           </div>
         </div>
