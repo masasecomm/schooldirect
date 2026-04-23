@@ -32,6 +32,11 @@ import {
   type DataYear,
 } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
+import {
+  findWalkInCentresForSchool,
+  mapsHref as walkInMapsHref,
+  telHref,
+} from "@/lib/walk-in-centres";
 
 const Detail = ({
   icon: Icon,
@@ -848,6 +853,119 @@ const FeederZoneCard = ({
   );
 };
 
+/**
+ * Walk-In Centre card. For PUBLIC schools, matches the school's locality
+ * (suburb / township / town / municipality) against the bundled
+ * 2026 Decentralised Walk-In Centre dataset and shows the relevant
+ * centre(s) parents can visit for Grade 1 / Grade 8 admissions.
+ */
+const WalkInCentreCard = ({
+  school,
+}: {
+  school: {
+    suburb?: string | null;
+    township?: string | null;
+    town?: string | null;
+    municipality?: string | null;
+  };
+}) => {
+  const matches = useMemo(() => findWalkInCentresForSchool(school), [school]);
+
+  return (
+    <Card className="overflow-hidden shadow-[var(--shadow-card)]">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Building2 className="h-3.5 w-3.5" />
+              2026 Admissions
+            </div>
+            <h2 className="mt-1 text-lg font-semibold">Walk-In Centre</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              For Grade 1 &amp; Grade 8 application support
+            </p>
+          </div>
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
+            <Building2 className="h-5 w-5" />
+          </div>
+        </div>
+
+        {matches.length === 0 ? (
+          <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+            No matching walk-in centre found for this area.{" "}
+            <Link to="/admissions" className="font-medium text-primary hover:underline">
+              Browse all centres
+            </Link>
+            .
+          </div>
+        ) : (
+          <ul className="mt-5 space-y-3">
+            {matches.slice(0, 3).map((m, i) => (
+              <li
+                key={`${m.centre.address}-${m.matchedArea}-${i}`}
+                className="rounded-xl border border-border bg-card p-4"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">
+                    {m.centre.subRegion}
+                  </span>
+                  <Badge variant="outline" className="font-normal">
+                    {m.centre.region}
+                  </Badge>
+                  <Badge className="bg-accent text-accent-foreground hover:bg-accent/90">
+                    Matched: {m.matchedArea}
+                  </Badge>
+                </div>
+                <a
+                  href={walkInMapsHref(m.centre.address)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-flex items-start gap-1.5 text-sm text-muted-foreground hover:text-primary"
+                >
+                  <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>{m.centre.address}</span>
+                </a>
+                {m.centre.contacts.length > 0 && (
+                  <ul className="mt-3 space-y-1.5">
+                    {m.centre.contacts.slice(0, 3).map((p, j) => (
+                      <li
+                        key={j}
+                        className="flex items-center justify-between gap-2 text-sm"
+                      >
+                        <span className="truncate text-foreground">{p.name}</span>
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1.5 px-2 text-xs"
+                        >
+                          <a href={telHref(p.phone)}>
+                            <Phone className="h-3 w-3" />
+                            {p.phone}
+                          </a>
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+            {matches.length > 3 && (
+              <li className="text-center text-xs text-muted-foreground">
+                +{matches.length - 3} more matching{" "}
+                {matches.length - 3 === 1 ? "centre" : "centres"} —{" "}
+                <Link to="/admissions" className="font-medium text-primary hover:underline">
+                  view all
+                </Link>
+              </li>
+            )}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const SchoolDetail = () => {
   const { id } = useParams<{ id: string }>();
   // Multi-year lookup. The "primary" record is the most recent year that has data.
@@ -1068,6 +1186,9 @@ const SchoolDetail = () => {
                 selfId={school.id}
                 year={schoolYear}
               />
+            )}
+            {school.sector?.toUpperCase() === "PUBLIC" && (
+              <WalkInCentreCard school={school} />
             )}
           </div>
         </div>
