@@ -90,11 +90,12 @@ const phaseSuffix = (phase?: string | null): string | null => {
  * Display name: if the school's name is a single word (e.g. "Muzomuhle"),
  * append its phase (Primary/Secondary/etc.) so the user knows what type it is.
  */
-export const displayName = (school: { name: string; phase?: string | null }) => {
-  const formatted = titleCase(school.name);
-  const wordCount = school.name.trim().split(/\s+/).length;
+export const displayName = (school: { name?: string | null; phase?: string | null } | null | undefined) => {
+  const rawName = school?.name ?? "";
+  const formatted = titleCase(rawName);
+  const wordCount = rawName.trim().split(/\s+/).filter(Boolean).length;
   if (wordCount > 1) return formatted;
-  const suffix = phaseSuffix(school.phase);
+  const suffix = phaseSuffix(school?.phase);
   return suffix ? `${formatted} ${suffix}` : formatted;
 };
 
