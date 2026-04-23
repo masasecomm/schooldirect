@@ -70,12 +70,11 @@ const SchoolDetail = () => {
     );
   }
 
-  const mapQuery =
-    school.latitude && school.longitude
-      ? `${school.latitude},${school.longitude}`
-      : school.streetAddress
-      ? school.streetAddress
-      : null;
+  const mapQuery = school.streetAddress
+    ? cleanAddress(school.streetAddress)
+    : school.latitude && school.longitude
+    ? `${school.latitude},${school.longitude}`
+    : null;
 
   const mapsUrl = mapQuery
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`
