@@ -870,6 +870,24 @@ const WalkInCentreCard = ({
   };
 }) => {
   const matches = useMemo(() => findWalkInCentresForSchool(school), [school]);
+  const uniqueMatches = useMemo(() => {
+    const map = new Map<
+      string,
+      { centre: (typeof matches)[number]["centre"]; matchedAreas: string[] }
+    >();
+    for (const m of matches) {
+      const key = `${m.centre.region}|${m.centre.subRegion}|${m.centre.address}`;
+      const existing = map.get(key);
+      if (existing) {
+        if (!existing.matchedAreas.includes(m.matchedArea)) {
+          existing.matchedAreas.push(m.matchedArea);
+        }
+      } else {
+        map.set(key, { centre: m.centre, matchedAreas: [m.matchedArea] });
+      }
+    }
+    return Array.from(map.values());
+  }, [matches]);
 
   return (
     <Card className="overflow-hidden shadow-[var(--shadow-card)]">
@@ -890,7 +908,7 @@ const WalkInCentreCard = ({
           </div>
         </div>
 
-        {matches.length === 0 ? (
+        {uniqueMatches.length === 0 ? (
           <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
             No matching walk-in centre found for this area.{" "}
             <Link to="/admissions" className="font-medium text-primary hover:underline">
@@ -900,9 +918,9 @@ const WalkInCentreCard = ({
           </div>
         ) : (
           <ul className="mt-5 space-y-3">
-            {matches.slice(0, 3).map((m, i) => (
+            {uniqueMatches.slice(0, 3).map((m, i) => (
               <li
-                key={`${m.centre.address}-${m.matchedArea}-${i}`}
+                key={`${m.centre.region}-${m.centre.subRegion}-${m.centre.address}-${i}`}
                 className="rounded-xl border border-border bg-card p-4"
               >
                 <div className="flex flex-wrap items-center gap-2">
@@ -912,9 +930,14 @@ const WalkInCentreCard = ({
                   <Badge variant="outline" className="font-normal">
                     {m.centre.region}
                   </Badge>
-                  <Badge className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    Matched: {m.matchedArea}
-                  </Badge>
+                  {m.matchedAreas.map((area) => (
+                    <Badge
+                      key={area}
+                      className="bg-accent text-accent-foreground hover:bg-accent/90"
+                    >
+                      Matched: {area}
+                    </Badge>
+                  ))}
                 </div>
                 <a
                   href={walkInMapsHref(m.centre.address)}
@@ -950,10 +973,10 @@ const WalkInCentreCard = ({
                 )}
               </li>
             ))}
-            {matches.length > 3 && (
+            {uniqueMatches.length > 3 && (
               <li className="text-center text-xs text-muted-foreground">
-                +{matches.length - 3} more matching{" "}
-                {matches.length - 3 === 1 ? "centre" : "centres"} —{" "}
+                +{uniqueMatches.length - 3} more matching{" "}
+                {uniqueMatches.length - 3 === 1 ? "centre" : "centres"} —{" "}
                 <Link to="/admissions" className="font-medium text-primary hover:underline">
                   view all
                 </Link>
