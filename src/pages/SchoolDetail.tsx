@@ -198,12 +198,16 @@ const SchoolDetail = () => {
                   <Detail icon={MapPin} label="Setting" value={titleCase(school.urbanRural)} />
                 )}
                 {school.learners != null && (
-                  <Detail icon={Users} label="Learners (2023)" value={school.learners.toLocaleString()} />
+                  <Detail
+                    icon={Users}
+                    label={`Learners (${year})`}
+                    value={school.learners.toLocaleString()}
+                  />
                 )}
                 {school.educators != null && (
                   <Detail
                     icon={GraduationCap}
-                    label="Educators (2023)"
+                    label={`Educators (${year})`}
                     value={school.educators.toLocaleString()}
                   />
                 )}
