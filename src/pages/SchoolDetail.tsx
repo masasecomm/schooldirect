@@ -1357,6 +1357,11 @@ const SchoolDetail = () => {
             {schoolYear && (
               <SimilarSchoolsCard school={school} year={schoolYear} />
             )}
+            <ContactSchoolCard
+              schoolName={displayName(school.name)}
+              schoolEmail={school.email}
+              schoolPhone={school.telephone}
+            />
           </div>
         </div>
       </main>
