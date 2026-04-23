@@ -9,7 +9,12 @@ interface YearContextValue {
 const STORAGE_KEY = "gauteng-schools-year";
 const DEFAULT_YEAR: DataYear = "2024";
 
-const YearContext = createContext<YearContextValue | undefined>(undefined);
+const defaultValue: YearContextValue = {
+  year: DEFAULT_YEAR,
+  setYear: () => {},
+};
+
+const YearContext = createContext<YearContextValue>(defaultValue);
 
 export const YearProvider = ({ children }: { children: ReactNode }) => {
   const [year, setYearState] = useState<DataYear>(() => {
@@ -27,8 +32,4 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useYear = (): YearContextValue => {
-  const ctx = useContext(YearContext);
-  if (!ctx) throw new Error("useYear must be used within YearProvider");
-  return ctx;
-};
+export const useYear = (): YearContextValue => useContext(YearContext);
