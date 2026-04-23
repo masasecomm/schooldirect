@@ -501,25 +501,23 @@ const SchoolDetail = () => {
           </Card>
 
           <div className="lg:col-span-3 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            <HistoryCard
+            <NumericHistoryCard
               icon={Users}
               subtitle="Learner enrolment"
               title="Learners over time"
+              unit="learners"
               values={learnersByYear}
+              accent="primary"
             />
-            <HistoryCard
+            <NumericHistoryCard
               icon={GraduationCap}
               subtitle="Teaching staff"
               title="Educators over time"
+              unit="educators"
               values={educatorsByYear}
+              accent="accent"
             />
-            <HistoryCard
-              icon={User}
-              subtitle="Leadership"
-              title="Principal history"
-              values={principalByYear}
-              showTrend={false}
-            />
+            <LeadershipCard values={principalByYear} />
           </div>
         </div>
       </main>
