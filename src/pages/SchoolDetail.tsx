@@ -46,6 +46,108 @@ const Detail = ({
   </div>
 );
 
+const LearnersCard = ({
+  currentYear,
+  currentLearners,
+  previousLearners,
+  educators,
+}: {
+  currentYear: string;
+  currentLearners: number;
+  previousLearners: number | null;
+  educators: number | null;
+}) => {
+  const diff = previousLearners != null ? currentLearners - previousLearners : null;
+  const pct =
+    previousLearners && previousLearners > 0 && diff != null
+      ? (diff / previousLearners) * 100
+      : null;
+
+  const trendUp = diff != null && diff > 0;
+  const trendDown = diff != null && diff < 0;
+  const TrendIcon = trendUp ? TrendingUp : trendDown ? TrendingDown : Minus;
+  const trendClass = trendUp
+    ? "text-emerald-600 bg-emerald-50"
+    : trendDown
+    ? "text-rose-600 bg-rose-50"
+    : "text-muted-foreground bg-muted";
+
+  const ratio = educators && educators > 0 ? currentLearners / educators : null;
+
+  return (
+    <Card className="lg:col-span-3 shadow-[var(--shadow-card)]">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Users className="h-3.5 w-3.5" />
+              Learner enrolment
+            </div>
+            <h2 className="mt-1 text-lg font-semibold">Learners ({currentYear})</h2>
+          </div>
+          {diff != null && pct != null && (
+            <div
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${trendClass}`}
+            >
+              <TrendIcon className="h-3.5 w-3.5" />
+              {diff > 0 ? "+" : ""}
+              {diff.toLocaleString()} ({pct >= 0 ? "+" : ""}
+              {pct.toFixed(1)}%)
+            </div>
+          )}
+        </div>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-lg border border-border bg-background p-4">
+            <div className="text-xs font-medium text-muted-foreground">Total ({currentYear})</div>
+            <div className="mt-1 text-2xl font-bold tracking-tight">
+              {currentLearners.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-background p-4">
+            <div className="text-xs font-medium text-muted-foreground">Total (2023)</div>
+            <div className="mt-1 text-2xl font-bold tracking-tight">
+              {previousLearners != null ? (
+                previousLearners.toLocaleString()
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-background p-4">
+            <div className="text-xs font-medium text-muted-foreground">Learner : Educator</div>
+            <div className="mt-1 text-2xl font-bold tracking-tight">
+              {ratio != null ? `${ratio.toFixed(1)}:1` : <span className="text-muted-foreground">—</span>}
+            </div>
+          </div>
+        </div>
+
+        {previousLearners != null && diff != null && (
+          <p className="mt-4 text-sm text-muted-foreground">
+            {trendUp && (
+              <>
+                Enrolment grew by{" "}
+                <span className="font-medium text-foreground">{diff.toLocaleString()}</span> learners
+                since 2023.
+              </>
+            )}
+            {trendDown && (
+              <>
+                Enrolment dropped by{" "}
+                <span className="font-medium text-foreground">{Math.abs(diff).toLocaleString()}</span>{" "}
+                learners since 2023.
+              </>
+            )}
+            {diff === 0 && <>Enrolment is unchanged from 2023.</>}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const SchoolDetail = () => {
   const { year } = useYear();
   const { id } = useParams<{ id: string }>();
