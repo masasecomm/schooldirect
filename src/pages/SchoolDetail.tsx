@@ -863,6 +863,12 @@ const SchoolDetail = () => {
     }
     return undefined;
   }, [records]);
+  const schoolYear = useMemo<DataYear | undefined>(() => {
+    for (let i = HISTORY_YEARS.length - 1; i >= 0; i--) {
+      if (records[HISTORY_YEARS[i]]) return HISTORY_YEARS[i];
+    }
+    return undefined;
+  }, [records]);
   const [copied, setCopied] = useState<string | null>(null);
 
   const copy = (label: string, value: string) => {
