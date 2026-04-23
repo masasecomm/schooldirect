@@ -206,6 +206,57 @@ const LearnerEnrolmentCard = ({
           })}
         </div>
 
+        {/* Vertical bar chart */}
+        {max > 0 && (
+          <div className="mt-6">
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Year-on-year comparison
+            </div>
+            <div className="mt-3 flex h-40 items-end justify-around gap-3 rounded-xl border border-border bg-muted/30 px-4 pt-4 pb-2">
+              {series.map((s, i) => {
+                const heightPct =
+                  typeof s.value === "number" && max > 0
+                    ? (s.value / max) * 100
+                    : 0;
+                const prev = i > 0 ? series[i - 1].value : null;
+                const isLatest = s.year === latest?.year;
+                return (
+                  <div
+                    key={s.year}
+                    className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
+                  >
+                    <span className="text-[11px] font-semibold text-foreground">
+                      {typeof s.value === "number"
+                        ? s.value.toLocaleString()
+                        : "—"}
+                    </span>
+                    <div
+                      className={`w-full max-w-[48px] rounded-t-md transition-all ${
+                        isLatest
+                          ? "bg-primary"
+                          : "bg-primary/50"
+                      }`}
+                      style={{ height: `${heightPct}%`, minHeight: heightPct > 0 ? 4 : 0 }}
+                      aria-label={`${s.year}: ${
+                        typeof s.value === "number" ? s.value : "no data"
+                      } learners`}
+                    />
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-[11px] font-medium text-muted-foreground">
+                        {s.year}
+                      </span>
+                      {typeof s.value === "number" &&
+                        typeof prev === "number" && (
+                          <TrendChip from={prev} to={s.value} />
+                        )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Footer: scale legend + average */}
         <div className="mt-5 space-y-2">
           {max > 0 && (
