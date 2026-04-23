@@ -1,11 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AVAILABLE_YEARS, type DataYear } from "@/lib/schools";
-import { useYear } from "@/lib/year-context";
 
 export const SiteHeader = () => {
-  const { year, setYear } = useYear();
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70">
       <div className="container flex h-16 items-center justify-between gap-4">
@@ -15,7 +11,7 @@ export const SiteHeader = () => {
           </span>
           <span className="flex flex-col leading-tight">
             <span className="text-sm font-bold tracking-tight">Gauteng Schools</span>
-            <span className="text-[11px] font-medium text-muted-foreground">Directory · {year}</span>
+            <span className="text-[11px] font-medium text-muted-foreground">Directory · 2023–2025</span>
           </span>
         </Link>
         <nav className="flex items-center gap-2 text-sm">
@@ -40,18 +36,6 @@ export const SiteHeader = () => {
           >
             About
           </NavLink>
-          <Select value={year} onValueChange={(v) => setYear(v as DataYear)}>
-            <SelectTrigger className="h-9 w-[92px]" aria-label="Select data year">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-              {AVAILABLE_YEARS.map((y) => (
-                <SelectItem key={y} value={y}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </nav>
       </div>
     </header>
