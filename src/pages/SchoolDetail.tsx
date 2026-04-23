@@ -712,14 +712,7 @@ const SchoolDetail = () => {
           </Card>
 
           <div className="lg:col-span-3 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            <NumericHistoryCard
-              icon={Users}
-              subtitle="Learner enrolment"
-              title="Learners over time"
-              unit="learners"
-              values={learnersByYear}
-              accent="primary"
-            />
+            <LearnerEnrolmentCard values={learnersByYear} />
             <NumericHistoryCard
               icon={GraduationCap}
               subtitle="Teaching staff"
