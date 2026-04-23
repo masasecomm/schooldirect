@@ -83,6 +83,154 @@ const TrendChip = ({
 };
 
 /**
+ * Single human pictogram. Filled when "active" (representing learners present),
+ * outlined/muted otherwise. Uses currentColor so the parent can theme it.
+ */
+const HumanFigure = ({ active }: { active: boolean }) => (
+  <svg
+    viewBox="0 0 24 48"
+    className={`h-10 w-5 transition-colors ${
+      active ? "text-primary" : "text-muted-foreground/25"
+    }`}
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    {/* head */}
+    <circle cx="12" cy="6" r="5" />
+    {/* body: shoulders + torso */}
+    <path d="M3 18c0-4 4-6 9-6s9 2 9 6v10c0 1.5-1 2.5-2.5 2.5H5.5C4 30.5 3 29.5 3 28V18z" />
+    {/* legs */}
+    <rect x="5" y="30" width="5.5" height="16" rx="1.2" />
+    <rect x="13.5" y="30" width="5.5" height="16" rx="1.2" />
+  </svg>
+);
+
+/**
+ * Learner Enrolment card with human-figure pictograms.
+ * Each row = one year. A row of FIGURE_COUNT figures shows the proportion
+ * relative to the highest value across the displayed years.
+ */
+const LearnerEnrolmentCard = ({
+  values,
+}: {
+  values: Record<DataYear, number | null>;
+}) => {
+  const FIGURE_COUNT = 10;
+  const series = HISTORY_YEARS.map((y) => ({ year: y, value: values[y] }));
+  const numeric = series.filter(
+    (s): s is { year: DataYear; value: number } => typeof s.value === "number",
+  );
+  const max = numeric.length ? Math.max(...numeric.map((s) => s.value)) : 0;
+  const latest = [...series].reverse().find((s) => typeof s.value === "number");
+  const earliest = series.find((s) => typeof s.value === "number");
+  const overallDiff =
+    latest && earliest && latest.year !== earliest.year
+      ? latest.value - earliest.value
+      : null;
+  const avg = numeric.length
+    ? Math.round(numeric.reduce((sum, s) => sum + s.value, 0) / numeric.length)
+    : null;
+
+  return (
+    <Card className="overflow-hidden shadow-[var(--shadow-card)]">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Users className="h-3.5 w-3.5" />
+              Learner enrolment
+            </div>
+            <h2 className="mt-1 text-lg font-semibold">Learners over time</h2>
+          </div>
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
+            <Users className="h-5 w-5" />
+          </div>
+        </div>
+
+        {/* Headline */}
+        <div className="mt-5 flex items-end gap-3">
+          <div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Latest ({latest?.year ?? "—"})
+            </div>
+            <div className="text-4xl font-bold tracking-tight leading-none">
+              {latest ? latest.value.toLocaleString() : "—"}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">learners</div>
+          </div>
+          {overallDiff != null && earliest && latest && (
+            <div className="ml-auto flex flex-col items-end gap-1">
+              <TrendChip from={earliest.value} to={latest.value} size="md" />
+              <div className="text-[11px] text-muted-foreground">
+                vs {earliest.year}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Pictogram rows */}
+        <div className="mt-6 space-y-4">
+          {series.map((s) => {
+            const ratio =
+              typeof s.value === "number" && max > 0 ? s.value / max : 0;
+            // At least 1 figure if there's any value, so a non-zero year is visible.
+            const filled =
+              typeof s.value === "number" && s.value > 0
+                ? Math.max(1, Math.round(ratio * FIGURE_COUNT))
+                : 0;
+            return (
+              <div key={s.year}>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-muted-foreground">
+                    {s.year}
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {typeof s.value === "number"
+                      ? s.value.toLocaleString()
+                      : "—"}
+                  </span>
+                </div>
+                <div
+                  className="mt-1.5 flex items-end gap-1"
+                  role="img"
+                  aria-label={`${s.year}: ${
+                    typeof s.value === "number" ? s.value : "no data"
+                  } learners`}
+                >
+                  {Array.from({ length: FIGURE_COUNT }).map((_, i) => (
+                    <HumanFigure key={i} active={i < filled} />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer: scale legend + average */}
+        <div className="mt-5 space-y-2">
+          {max > 0 && (
+            <div className="flex items-center justify-between rounded-lg border border-dashed border-border bg-primary-soft/40 px-3 py-2 text-[11px] text-muted-foreground">
+              <span>Each figure ≈</span>
+              <span className="font-semibold text-foreground">
+                {Math.round(max / FIGURE_COUNT).toLocaleString()} learners
+              </span>
+            </div>
+          )}
+          {avg != null && (
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">3-year average</span>
+              <span className="font-semibold text-foreground">
+                {avg.toLocaleString()} learners
+              </span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+/**
  * Numeric history card with bar-chart style infographic.
  * Highlights the latest value, overall change vs first year, and per-year bars.
  */
