@@ -167,23 +167,15 @@ const SchoolDetail = () => {
               </div>
 
               {mapsUrl && (
-                <div className="mt-6 space-y-3">
-                  <div className="overflow-hidden rounded-xl border border-border">
-                    <iframe
-                      title={`Map of ${displayName(school)}`}
-                      src={mapsEmbedUrl!}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      className="h-72 w-full border-0"
-                      allowFullScreen
-                    />
-                  </div>
-                  <Button asChild variant="outline" size="sm">
-                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4" />
-                      Open in Google Maps
-                    </a>
-                  </Button>
+                <div className="mt-6 overflow-hidden rounded-xl border border-border">
+                  <iframe
+                    title={`Map of ${displayName(school)}`}
+                    src={mapsEmbedUrl!}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="h-72 w-full border-0"
+                    allowFullScreen
+                  />
                 </div>
               )}
             </CardContent>
