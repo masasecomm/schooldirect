@@ -70,10 +70,19 @@ const SchoolDetail = () => {
     );
   }
 
-  const mapsUrl = school.streetAddress
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(school.streetAddress)}`
-    : school.latitude && school.longitude
-    ? `https://www.google.com/maps/search/?api=1&query=${school.latitude},${school.longitude}`
+  const mapQuery =
+    school.latitude && school.longitude
+      ? `${school.latitude},${school.longitude}`
+      : school.streetAddress
+      ? school.streetAddress
+      : null;
+
+  const mapsUrl = mapQuery
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`
+    : null;
+
+  const mapsEmbedUrl = mapQuery
+    ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`
     : null;
 
   return (
