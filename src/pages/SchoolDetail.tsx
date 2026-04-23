@@ -210,34 +210,59 @@ const LeadershipCard = ({
 }: {
   values: Record<DataYear, string | null>;
 }) => {
-  // Normalise a name for identity comparison: lowercase, strip punctuation
-  // and collapse whitespace. Two records that normalise to the same key are
-  // assumed to be the same person (e.g. "M. Dlamini" === "M Dlamini").
-  const normaliseKey = (n: string) =>
-    n.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  // Tokenise a name into meaningful parts: lowercase, strip punctuation,
+  // and drop common titles / single-letter initials so we can fuzzy-match
+  // records that refer to the same person captured differently over years.
+  // e.g. "Emmanuel Mohale" and "Selaelo Emmanuel Mohale" share {emmanuel, mohale}
+  // and "Madisha Ms" and "Mathewes Madisha" share {madisha}.
+  const TITLES = new Set([
+    "mr", "mrs", "ms", "miss", "dr", "prof", "mnr", "mev", "rev",
+  ]);
+  const tokenise = (n: string): Set<string> => {
+    const tokens = n
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, " ")
+      .split(/\s+/)
+      .filter((t) => t.length >= 2 && !TITLES.has(t));
+    return new Set(tokens);
+  };
 
-  // Build a canonical display name per identity key. When the same person
-  // appears in multiple years, keep the longest version of the name (most
-  // complete: e.g. "Mr M Dlamini" over "M Dlamini").
-  const canonicalByKey = new Map<string, string>();
+  // Two names are considered the same person if they share at least one
+  // non-trivial token (typically a surname or distinctive first name).
+  const samePerson = (a: Set<string>, b: Set<string>) => {
+    for (const t of a) if (b.has(t)) return true;
+    return false;
+  };
+
+  // Build groups of related names. Each group gets a stable key (the first
+  // raw name encountered) and a canonical display name = longest variant.
+  type Group = { key: string; tokens: Set<string>; canonical: string };
+  const groups: Group[] = [];
+  const yearToGroupKey = new Map<DataYear, string>();
   for (const y of HISTORY_YEARS) {
     const raw = values[y];
     if (!raw) continue;
-    const key = normaliseKey(raw);
-    if (!key) continue;
-    const existing = canonicalByKey.get(key);
-    if (!existing || raw.length > existing.length) {
-      canonicalByKey.set(key, raw);
+    const tokens = tokenise(raw);
+    if (tokens.size === 0) continue;
+    let group = groups.find((g) => samePerson(g.tokens, tokens));
+    if (!group) {
+      group = { key: raw, tokens: new Set(tokens), canonical: raw };
+      groups.push(group);
+    } else {
+      // Merge tokens so future comparisons can chain (A~B, B~C ⇒ A~C).
+      for (const t of tokens) group.tokens.add(t);
+      if (raw.length > group.canonical.length) group.canonical = raw;
     }
+    yearToGroupKey.set(y, group.key);
   }
 
   const entries = HISTORY_YEARS.map((y) => {
-    const raw = values[y];
-    const key = raw ? normaliseKey(raw) : "";
+    const key = yearToGroupKey.get(y) ?? "";
+    const group = key ? groups.find((g) => g.key === key) : undefined;
     return {
       year: y,
       key,
-      name: key ? canonicalByKey.get(key) ?? raw : null,
+      name: group?.canonical ?? null,
     };
   });
   const known = entries.filter((e) => e.name);
