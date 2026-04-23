@@ -39,6 +39,30 @@ export const titleCase = (s?: string | null) => {
     .replace(/\b(Of|And|The|For|In|To|A)\b/g, (m) => m.toLowerCase());
 };
 
+/**
+ * Cleans messy address strings:
+ * - removes empty comma segments ("a, , b" -> "a, b")
+ * - drops consecutive duplicate parts (case-insensitive)
+ * - trims whitespace and collapses spaces
+ * - applies title case
+ */
+export const cleanAddress = (s?: string | null): string => {
+  if (!s) return "";
+  const parts = s
+    .split(",")
+    .map((p) => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  const deduped: string[] = [];
+  for (const part of parts) {
+    const prev = deduped[deduped.length - 1];
+    if (!prev || prev.toLowerCase() !== part.toLowerCase()) {
+      deduped.push(part);
+    }
+  }
+  return titleCase(deduped.join(", "));
+};
+
 const phaseSuffix = (phase?: string | null): string | null => {
   if (!phase) return null;
   const p = phase.toUpperCase();
