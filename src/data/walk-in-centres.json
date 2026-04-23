@@ -1,0 +1,830 @@
+[
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni North",
+    "centre": "District Office (Walk-In Centre)",
+    "address": "Munpen Building, 78 Howard Avenue, Benoni",
+    "areasServed": ["Birchleigh", "Kempton Park", "Edenvale", "Edenglen", "Primrose", "Isando", "Croydon", "Bedfordview"],
+    "contacts": [
+      { "name": "V. Petlo", "phone": "082 562 8053" },
+      { "name": "O. Mzimela", "phone": "082 562 7878" },
+      { "name": "G. Bonga", "phone": "064 930 2912" },
+      { "name": "A. Mashigo", "phone": "082 562 6172" },
+      { "name": "L. Botolo", "phone": "011 746 8258" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni North",
+    "centre": "District Office (Walk-In Centre)",
+    "address": "Munpen Building, 78 Howard Avenue, Benoni",
+    "areasServed": ["Wattville", "Actonville", "Benoni", "Crystal Park", "Kingsway", "Chief Luthuli"],
+    "contacts": [
+      { "name": "A. Nsibande", "phone": "082 566 8796" },
+      { "name": "N. Morifi", "phone": "082 562 6926" },
+      { "name": "T. Motepe", "phone": "064 930 1098" },
+      { "name": "A. Sangweni", "phone": "082 969 4534" },
+      { "name": "K. Hlatshwayo", "phone": "011 746 8082" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni North",
+    "centre": "District Office (Walk-In Centre)",
+    "address": "Munpen Building, 78 Howard Avenue, Benoni",
+    "areasServed": ["Birchleigh", "Birch Acres", "Norkem Park", "Tembisa", "Daveyton", "Petit"],
+    "contacts": [
+      { "name": "F. Agulhas", "phone": "071 562 6501" },
+      { "name": "T. Mashigo", "phone": "064 930 0929" },
+      { "name": "M. Edom", "phone": "064 931 7856" },
+      { "name": "S. Kgatle", "phone": "082 771 6218" },
+      { "name": "M. Ndhlovu", "phone": "011 746 8124" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni North",
+    "centre": "District Office (Walk-In Centre)",
+    "address": "Munpen Building, 78 Howard Avenue, Benoni",
+    "areasServed": ["Tembisa", "Olifantsfontein", "Babsfontein", "Clayville"],
+    "contacts": [
+      { "name": "S. Maponya", "phone": "071 560 6653" },
+      { "name": "M. Moloi", "phone": "066 487 2632" },
+      { "name": "T. Motshaisa", "phone": "082 562 6754" },
+      { "name": "G. Mpahane", "phone": "066 487 2608" },
+      { "name": "N. Thelele", "phone": "011 746 8072" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni North",
+    "centre": "Office of the District Director",
+    "address": "Munpen Building, 78 Howard Avenue, Benoni",
+    "areasServed": [],
+    "contacts": [
+      { "name": "E. Sigama", "phone": "011 746 8087" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni South",
+    "centre": "Ekurhuleni South District Office",
+    "address": "2 Robin Close Infinity Office Park, Meyersdal",
+    "areasServed": ["Greenfields"],
+    "contacts": [
+      { "name": "R. Tsoari", "phone": "066 487 2821" },
+      { "name": "L. Mgobhozi", "phone": "082 562 8138" },
+      { "name": "H. Mabaso", "phone": "082 389 2993" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni South",
+    "centre": "Ekurhuleni South District Office",
+    "address": "2 Robin Close Infinity Office Park, Meyersdal",
+    "areasServed": ["Katlehong"],
+    "contacts": [
+      { "name": "D. Reddy", "phone": "082 483 3886" },
+      { "name": "N. Shandu", "phone": "082 483 2626" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni South",
+    "centre": "Ekurhuleni South District Office",
+    "address": "2 Robin Close Infinity Office Park, Meyersdal",
+    "areasServed": ["Reiger Park"],
+    "contacts": [
+      { "name": "M. Mokoena", "phone": "064 929 4447" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni South",
+    "centre": "Ekurhuleni South District Office",
+    "address": "2 Robin Close Infinity Office Park, Meyersdal",
+    "areasServed": ["Sunward Park"],
+    "contacts": [
+      { "name": "B. Louw", "phone": "082 556 9569" },
+      { "name": "B. Fatyela", "phone": "082 556 7993" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Ekurhuleni South",
+    "centre": "Ekurhuleni South District Office",
+    "address": "2 Robin Close Infinity Office Park, Meyersdal",
+    "areasServed": ["Alberton"],
+    "contacts": [
+      { "name": "G. Mthimkhulu", "phone": "072 388 0964" }
+    ]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Gauteng East",
+    "centre": "Gauteng East District Office",
+    "address": "The Vanues, Springs. Telkom Building, Cnr 2nd Avenue and 5th Street",
+    "areasServed": ["Etwatwa"],
+    "contacts": [{ "name": "A. Kunene", "phone": "082 562 6071" }]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Gauteng East",
+    "centre": "Gauteng East District Office",
+    "address": "The Vanues, Springs. Telkom Building, Cnr 2nd Avenue and 5th Street",
+    "areasServed": ["Kwa-Thema"],
+    "contacts": [{ "name": "N. Soga", "phone": "071 579 4798" }]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Gauteng East",
+    "centre": "Gauteng East District Office",
+    "address": "The Vanues, Springs. Telkom Building, Cnr 2nd Avenue and 5th Street",
+    "areasServed": ["Brakpan"],
+    "contacts": [{ "name": "M. Adams", "phone": "071 474 7121" }]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Gauteng East",
+    "centre": "Gauteng East District Office",
+    "address": "The Vanues, Springs. Telkom Building, Cnr 2nd Avenue and 5th Street",
+    "areasServed": ["Tsakane"],
+    "contacts": [{ "name": "S. Modisane", "phone": "082 562 5875" }]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Gauteng East",
+    "centre": "Gauteng East District Office",
+    "address": "The Vanues, Springs. Telkom Building, Cnr 2nd Avenue and 5th Street",
+    "areasServed": ["Springs"],
+    "contacts": [{ "name": "N. Soga", "phone": "071 579 4798" }]
+  },
+  {
+    "region": "Ekurhuleni",
+    "subRegion": "Gauteng East",
+    "centre": "Gauteng East District Office",
+    "address": "The Vanues, Springs. Telkom Building, Cnr 2nd Avenue and 5th Street",
+    "areasServed": ["Duduza", "Nigel"],
+    "contacts": [{ "name": "S. Seete", "phone": "082 562 5142" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg Central",
+    "centre": "Johannesburg Central District Office",
+    "address": "Cnr of Chris Hani and Morolla, Pimville Soweto",
+    "areasServed": ["Soweto", "Eldorado Park", "Lenasia", "Southern Suburbs", "Freedom Park"],
+    "contacts": [{ "name": "R. Ramdath", "phone": "064 929 9033" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg Central",
+    "centre": "District Office / Acting District Director",
+    "address": "44 Wolfgang Avenue, Norwood",
+    "areasServed": ["Norwood"],
+    "contacts": [{ "name": "D. Mkhondwane", "phone": "082 562 5665" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg East",
+    "centre": "District Office",
+    "address": "44 Wolfgang Avenue, Norwood",
+    "areasServed": ["Norwood"],
+    "contacts": [{ "name": "T. Siyaya", "phone": "082 552 9130" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg East",
+    "centre": "Alexandra Parliamentary Constituency Office",
+    "address": "8th Avenue, Alexandra",
+    "areasServed": ["Alexandra"],
+    "contacts": [{ "name": "P. Mashishi", "phone": "064 738 0301" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg East",
+    "centre": "Halfway House Primary School",
+    "address": "Van Heerde Road Halfway Gardens",
+    "areasServed": ["Midrand", "Ivory"],
+    "contacts": [{ "name": "A. Mashaba", "phone": "082 564 0311" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg East",
+    "centre": "Morningside Teacher Centre",
+    "address": "17 North Road, Morningside",
+    "areasServed": ["Sandton"],
+    "contacts": [
+      { "name": "V. I. Mashapa", "phone": "082 483 4100" },
+      { "name": "L. Dube", "phone": "064 931 3100" },
+      { "name": "T. Duplessis", "phone": "084 880 9411" },
+      { "name": "T. Borchardt", "phone": "082 562 7540" },
+      { "name": "K. Macheke", "phone": "082 562 6936" }
+    ]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg East",
+    "centre": "Waverley Girls High School",
+    "address": "Corner Athol Road, Highlands North",
+    "areasServed": ["Waverley", "Norwood", "Highlands North"],
+    "contacts": [
+      { "name": "S. Van Schalkwyk", "phone": "064 934 1306" },
+      { "name": "E. Mamosebo", "phone": "072 475 1975" }
+    ]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg East",
+    "centre": "Barnato Park High School",
+    "address": "Beatricelynn, Berea",
+    "areasServed": ["Inner city"],
+    "contacts": [
+      { "name": "A. Williams", "phone": "072 393 9950" },
+      { "name": "N. Phahlane", "phone": "064 934 1296" }
+    ]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg East",
+    "centre": "Eastgate Primary School",
+    "address": "15 York Avenue, Kensington",
+    "areasServed": ["Inner-city"],
+    "contacts": [{ "name": "K. Nthlane", "phone": "082 600 7588" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg East",
+    "centre": "Bonwelong Primary School",
+    "address": "8495 Dlamini Drive, Ivory Park",
+    "areasServed": ["Ivory Park"],
+    "contacts": [{ "name": "T. Mhlanga", "phone": "071 563 3760" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg West",
+    "centre": "Thakgisa Teacher Centre",
+    "address": "2031, Zone 9, Meadowlands",
+    "areasServed": ["Meadowlands", "Orlando West", "Dobsonville", "Braamfischerville"],
+    "contacts": [{ "name": "V. Maseko", "phone": "082 562 5395" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg West",
+    "centre": "White House Centre",
+    "address": "Ruth First Street, Tshepisong, Soweto, 1754",
+    "areasServed": ["Doornkop", "Slovoville", "Tshepisong", "Lufhereng"],
+    "contacts": [{ "name": "P. Moeng", "phone": "076 817 5711" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg West",
+    "centre": "Johannesburg West District Office",
+    "address": "20 Goldman Street, Florida 1710",
+    "areasServed": ["Florida", "Roodepoort Area"],
+    "contacts": [{ "name": "S. Mafona", "phone": "066 487 2740" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg North",
+    "centre": "Tirisano Mmogo Primary School",
+    "address": "Brazil Evenue, Cosmo City, Roodepoort",
+    "areasServed": ["Cosmo City", "Zandspruit"],
+    "contacts": [{ "name": "M. Ledwaba", "phone": "082 562 8178" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg North",
+    "centre": "Muzomuhle Primary School",
+    "address": "Mgababa Street, Diesloot, JHB",
+    "areasServed": ["Diepsloot", "Lanseria"],
+    "contacts": [
+      { "name": "P. Swart", "phone": "083 725 3171" },
+      { "name": "P. Swart", "phone": "082 520 2281" }
+    ]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg North",
+    "centre": "Sharonlea Primary School",
+    "address": "Camphers Street, Sharonlea, Randburg",
+    "areasServed": ["Randburg"],
+    "contacts": []
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg North",
+    "centre": "Laerskool Esperanza",
+    "address": "Stonewall Rd, Newlands, Johannesburg",
+    "areasServed": ["Parktown", "Linden", "Melville", "Crosby", "Westbury", "Bosmont"],
+    "contacts": [{ "name": "A. Phukwane", "phone": "082 562 6194" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg North",
+    "centre": "Bree Primary School",
+    "address": "7th Avenue, Mayfair West, Johannesburg",
+    "areasServed": ["Orlando", "Noordgesig", "Riverlea", "Mayfair", "Fordsburg"],
+    "contacts": [{ "name": "P. Nhlapo", "phone": "084 970 1526" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg North",
+    "centre": "Boipelo Teacher Centre",
+    "address": "Mokoena Street, Klipspruit, Soweto",
+    "areasServed": ["Pimville", "Diepkloof"],
+    "contacts": [{ "name": "S. Thakordas", "phone": "084 500 6508" }]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg South",
+    "centre": "Johannesburg South District Office",
+    "address": "100 Northern Parkway, Crownwood Building, Ormonde, Sharpeville",
+    "areasServed": ["Thembelihle", "Lehae", "Eikenhof", "Kibler Park", "Liefde en Vrede", "Mulbarton", "Bassonia", "South Hills", "Rosettenville"],
+    "contacts": [
+      { "name": "L. Rikhotso", "phone": "066 487 2800" },
+      { "name": "F. Mokubela", "phone": "082 562 7453" },
+      { "name": "M. Ngwenya", "phone": "064 934 0128" },
+      { "name": "J. Buthelezi", "phone": "064 933 6313" },
+      { "name": "N. Matthews", "phone": "084 721 4538" }
+    ]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg South",
+    "centre": "Lenasia South High School",
+    "address": "Sheffield Road, Lenasia South Road, Lenasia South Area",
+    "areasServed": ["Finetown", "Grasmere", "Kanana Park", "Zakariyya Park", "Vlakfontein", "Lenasia South", "Ennerdale", "Lawley"],
+    "contacts": [
+      { "name": "E. Mukwevho", "phone": "066 487 2618" },
+      { "name": "L. Molefe", "phone": "071 474 6055" },
+      { "name": "T. Benson", "phone": "082 600 0000" }
+    ]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg South",
+    "centre": "Orange Farm, Tshepana Primary School",
+    "address": "12655 Vilakazi Street, Extension 7A, Stredford, Orange Farm",
+    "areasServed": ["The Whole Orange Farm area"],
+    "contacts": [
+      { "name": "M. Malimagovha", "phone": "082 562 5879" },
+      { "name": "J. Baartjies", "phone": "077 609 6169" },
+      { "name": "Malay", "phone": "082 552 3893" }
+    ]
+  },
+  {
+    "region": "Johannesburg",
+    "subRegion": "Johannesburg South",
+    "centre": "Johannesburg South District Office",
+    "address": "Southern Suburb",
+    "areasServed": ["100 Northern Parkways, Ormonde"],
+    "contacts": [
+      { "name": "F. Mokubela", "phone": "082 562 7453" },
+      { "name": "J. Buthelezi", "phone": "076 985 4726" },
+      { "name": "M. Nkululo", "phone": "082 564 0012" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Gauteng North District Office",
+    "address": "86 Watermeyer Street, Val De Grace",
+    "areasServed": ["Val De Grace", "Pretoria"],
+    "contacts": [
+      { "name": "G. M. Z. Kosi", "phone": "082 562 7489" },
+      { "name": "G. M. Z. Kosi", "phone": "060 995 3736" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Baweze Primary School",
+    "address": "310 Section A, Ekangala, Bronkhorstspruit",
+    "areasServed": ["Ekangala"],
+    "contacts": [
+      { "name": "A.T. Mpangela", "phone": "082 556 6371" },
+      { "name": "A.T. Mpangela", "phone": "013 934 4302" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Dan Kutumela Secondary School",
+    "address": "2 Mothibe Drive, Zithobeni, Bronkhorstspruit",
+    "areasServed": ["Zithobeni"],
+    "contacts": [
+      { "name": "S.R. Mokoena", "phone": "082 561 5896" },
+      { "name": "S.R. Mokoena", "phone": "013 937 0126" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Chokoe Primary School",
+    "address": "3643 Tswelopele Drive, Refilwe, Cullinan",
+    "areasServed": ["Refilwe"],
+    "contacts": [
+      { "name": "J.K. Makola", "phone": "082 556 3372" },
+      { "name": "J.K. Makola", "phone": "081 323 9880" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Rethabile Primary School",
+    "address": "90 JR Portion 53, Klipdrift, Hammanskraal",
+    "areasServed": ["Hammanskraal"],
+    "contacts": [{ "name": "A. Sefike", "phone": "082 556 3401" }]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Bronkhorstspruit Primary School",
+    "address": "365 Cnr Verbena & Madelief Str, Riamar Park",
+    "areasServed": ["Bronkhorstspruit"],
+    "contacts": [
+      { "name": "S.J. Tshabangu", "phone": "082 556 8056" },
+      { "name": "S.J. Tshabangu", "phone": "013 932 0160" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Kutumela Molefe Primary School",
+    "address": "364 Zwartkoppies Farm, Old Bhs road, Donkerhoek",
+    "areasServed": ["Donkerhoek"],
+    "contacts": [
+      { "name": "P.A.P Moemise", "phone": "082 484 0660" },
+      { "name": "P.A.P Moemise", "phone": "012 802 1560" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Sihluziwe Primary School",
+    "address": "1105 Section F, Ekangala, Bronkhorstspruit, 1021",
+    "areasServed": ["Ekangala (Dark City)"],
+    "contacts": [
+      { "name": "N. Sibizo", "phone": "082 556 1345" },
+      { "name": "N. Sibizo", "phone": "012 942 5334" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Gauteng North",
+    "centre": "Sinenhlanhla Primary School",
+    "address": "1279 Iqwiningi street, Proper Sec, Rethabiseng",
+    "areasServed": ["Rethabiseng"],
+    "contacts": [
+      { "name": "M.M. Ntuli", "phone": "082 600 7440" },
+      { "name": "M.M. Ntuli", "phone": "012 612 0902" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane North",
+    "centre": "Soshanguve Resource Centre",
+    "address": "Thutong Street, Block DD, Soshanguve",
+    "areasServed": ["Soshanguve"],
+    "contacts": [
+      { "name": "J. Mohlala", "phone": "066 487 2659" },
+      { "name": "T. Madonsela", "phone": "071 573 4956" },
+      { "name": "R. Mothokwa", "phone": "079 891 7808" },
+      { "name": "L. Maluleke", "phone": "066 487 2781" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane North",
+    "centre": "Temba Resource Centre",
+    "address": "2227 Manyeleti Section, Opposite Kgetsi-ya-Tsie Middle School, Temba",
+    "areasServed": ["Hammanskraal"],
+    "contacts": [
+      { "name": "O. Mankuruoane", "phone": "082 562 5371" },
+      { "name": "L. Mukwevho", "phone": "079 991 7988" },
+      { "name": "S. Aphiri", "phone": "076 040 1991" },
+      { "name": "J. Sefora", "phone": "082 562 6968" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane North",
+    "centre": "Dilopye Special School",
+    "address": "146 Dilopye Village, Hammanskraal (Opposite Dilopye Clinic)",
+    "areasServed": ["Hammanskraal"],
+    "contacts": [
+      { "name": "L. Moeletsi", "phone": "066 487 2705" },
+      { "name": "T. Masetse", "phone": "072 371 5553" },
+      { "name": "G. Ngomane", "phone": "071 577 2860" },
+      { "name": "A. Dawood", "phone": "066 487 2745" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane North",
+    "centre": "Tshwane North District Office",
+    "address": "Wonderboom Junction Mall, Cnr Lavender and Lavender West Streets",
+    "areasServed": ["Wonderboom"],
+    "contacts": [
+      { "name": "H. Madue", "phone": "071 338 6393" },
+      { "name": "K. Magagane", "phone": "064 932 8205" },
+      { "name": "R. Mangwathe", "phone": "066 487 2805" },
+      { "name": "M. Mokebe", "phone": "066 487 2738" },
+      { "name": "D. Modiba", "phone": "071 571 4652" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane South",
+    "centre": "Laerskool Oost Einde",
+    "address": "52 Justice Mohammed Street, Sunnyside",
+    "areasServed": ["PTA Central", "PTA East"],
+    "contacts": [
+      { "name": "M.G. Seletisha", "phone": "082 562 7335" },
+      { "name": "M. Nethonzhe", "phone": "072 393 4952" },
+      { "name": "E. Masingi", "phone": "064 832 6358" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane South",
+    "centre": "Lemoshanang Teachers Centre",
+    "address": "Cnr Maraba and Nchabeleng Streets",
+    "areasServed": ["Atteridgeville", "Pretoria West"],
+    "contacts": [
+      { "name": "I. Shongwe", "phone": "066 487 2725" },
+      { "name": "A. Raboshakga", "phone": "082 557 0697" },
+      { "name": "J. Ngobene", "phone": "067 415 7293" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane South",
+    "centre": "Mamelodi Teachers Centre",
+    "address": "Cnr Serapeng and Tsamaya Road Mamelodi East",
+    "areasServed": ["Derdeepoort", "Lindpark", "East Lynn", "Silverton", "La Montagne", "Meyerspark", "Nellmapius Schools", "Eersterust Schools", "Mamelodi East and West Schools"],
+    "contacts": [
+      { "name": "L. Makondo", "phone": "066 487 2661" },
+      { "name": "G. Mabotja", "phone": "060 999 6993" },
+      { "name": "E. Mabotja", "phone": "064 929 0046" },
+      { "name": "D. Tloubatla", "phone": "079 891 8298" },
+      { "name": "N. Mamakoko", "phone": "060 760 8006" },
+      { "name": "K. Phukubye", "phone": "064 930 6290" },
+      { "name": "B. Kgomo", "phone": "007 677 6388" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane West",
+    "centre": "Thuto Thebe Teachers Centre",
+    "address": "2830 Sedumedi Street, Unit 2, Garankuwa",
+    "areasServed": ["All Areas"],
+    "contacts": [
+      { "name": "Dr M.S. Sekhu", "phone": "082 562 7556" },
+      { "name": "M.M. Rammuki", "phone": "071 579 2029" },
+      { "name": "R.M. Tleane", "phone": "066 487 2827" },
+      { "name": "C. Kemp", "phone": "062 718 0339" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane West",
+    "centre": "Seshegong Secondary School",
+    "address": "11654 Lindani Street",
+    "areasServed": ["Olievenhoutbosch"],
+    "contacts": [
+      { "name": "Dr W. Kobola", "phone": "064 933 7056" },
+      { "name": "Ms G. Zwane", "phone": "072 394 1661" },
+      { "name": "Dr A. Prinsloo", "phone": "082 411 3858" }
+    ]
+  },
+  {
+    "region": "Tshwane",
+    "subRegion": "Tshwane West",
+    "centre": "Ikeleng Primary School",
+    "address": "138 Phase 2, Winterveld",
+    "areasServed": ["Mabopane", "Winterveld"],
+    "contacts": [
+      { "name": "Dr R.S.M. Ndhlovu", "phone": "066 487 2734" },
+      { "name": "Dr R.S.M. Ndhlovu", "phone": "064 980 0264" }
+    ]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Fochville Secondary School",
+    "address": "105 Kraalkop Street, Kokosi, Fochville 2515",
+    "areasServed": ["Kokosi", "Fochville"],
+    "contacts": [{ "name": "M. Bhana", "phone": "066 487 2690" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "H/S Carletonville",
+    "address": "Kaolin And Dolomite Street",
+    "areasServed": ["Carletonville"],
+    "contacts": [{ "name": "E. Ditsi", "phone": "071 573 5330" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "H/S Wonderfontein",
+    "address": "Cnr. Wegkop and Bloukraans Street, Carletonville 2500",
+    "areasServed": ["Carltonville"],
+    "contacts": [{ "name": "M. Mothupi", "phone": "066 487 2776" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Room 13 Randfontein Satellite Office",
+    "address": "108 Maughum Road, Randfontein, 175",
+    "areasServed": ["Randfontein"],
+    "contacts": [{ "name": "M. Moeketsi", "phone": "072 672 1581" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Simunye Teachers Centre",
+    "address": "553 Reaikaga, Simunye Bekkersdal",
+    "areasServed": ["Simunye"],
+    "contacts": [{ "name": "M. Magagula", "phone": "071 537 5050" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Kgothalang Secondary School",
+    "address": "Mehlomakhulu",
+    "areasServed": ["Bekkersdal"],
+    "contacts": [{ "name": "R. Luka", "phone": "082 562 7247" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Wesfields Primary School",
+    "address": "Kernite Street, Carletonville",
+    "areasServed": ["Carltonville"],
+    "contacts": [{ "name": "M. Makgomo", "phone": "066 487 2623" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Room 55 Randfontein District Office",
+    "address": "108 Maughum Road, Randfontein",
+    "areasServed": ["Randfontein"],
+    "contacts": [{ "name": "G. Mlambo", "phone": "073 212 3353" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Hoërskool Westonaria",
+    "address": "Van Der Stelstraat, Westonaria 1779",
+    "areasServed": ["Westonaria"],
+    "contacts": [{ "name": "J. Mhlontlo", "phone": "082 847 8745" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Room 12 Randfontein District Office",
+    "address": "108 Maughum Road, Randfontein 1759",
+    "areasServed": ["Randfontein"],
+    "contacts": [{ "name": "O. Dutywa", "phone": "078 978 9506" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Ithuteng Secondary School",
+    "address": "Portion Farm 16, Randfontein, Brandvlei",
+    "areasServed": ["Brandvlei"],
+    "contacts": [{ "name": "L. Tlhale", "phone": "066 487 2703" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Tswelelo Primary School",
+    "address": "21878 Leabua Street Mohlakeng Randfontein",
+    "areasServed": ["Mohlakeng"],
+    "contacts": [{ "name": "M. Khashane", "phone": "079 891 9400" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Mashudu Primary School",
+    "address": "2882 Lawrence Street, Rietvallei, Ext 1",
+    "areasServed": ["Swanieville"],
+    "contacts": [{ "name": "L. Daniels", "phone": "064 929 9420" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Atlholang Primary School",
+    "address": "9079 Sebenzisa Street Kagiso",
+    "areasServed": ["Kagiso"],
+    "contacts": [{ "name": "L. Mofokeng", "phone": "066 487 2713" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Madiba Comprehensive School",
+    "address": "Cnr Sebenzisa and Geba Street, Kagiso",
+    "areasServed": ["Kagiso"],
+    "contacts": [{ "name": "M. Mokgobanama", "phone": "071 567 0392" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Room 34 Krugersdorp District Office",
+    "address": "Cnr Human and Boshoff Street, Krugersdorp",
+    "areasServed": ["Krugersdorp CBD"],
+    "contacts": [{ "name": "N. Mathibe", "phone": "066 487 2833" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Magaliesburg Secondary School",
+    "address": "4 Schoeman Street, Ga-Mogale Village, Magaliesburg",
+    "areasServed": ["Magaliesburg"],
+    "contacts": [{ "name": "N. Ntshangase", "phone": "082 562 6066" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Diphalane Primary School",
+    "address": "1432 Matlaba Street, Munsieville",
+    "areasServed": ["Munsieville"],
+    "contacts": [{ "name": "T. Mabatha", "phone": "083 447 6501" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Room 34 Krugersdorp District Office",
+    "address": "Cnr Human and Boshoff Street, Krugersdorp",
+    "areasServed": ["Krugersdorp CBD"],
+    "contacts": [{ "name": "G. Xungu", "phone": "072 394 0790" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Gauteng West",
+    "centre": "Hoërskool Jan De Klerk",
+    "address": "282 Church Street",
+    "areasServed": ["Krugersdorp CBD"],
+    "contacts": [{ "name": "L. Booi", "phone": "073 326 3862" }]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Sedibeng West",
+    "centre": "Sedibeng West District Office",
+    "address": "No. 6 Samuel Street Zone 18 Sebokeng",
+    "areasServed": ["Boipatong", "Vanderbijlpark"],
+    "contacts": [
+      { "name": "M. Moloi", "phone": "064 932 5983" },
+      { "name": "P. Rampa", "phone": "082 562 5592" },
+      { "name": "K. Makgamatho", "phone": "064 932 5983" }
+    ]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Sedibeng West",
+    "centre": "Sedibeng West District Office",
+    "address": "No. 6 Samuel Street Zone 18 Sebokeng",
+    "areasServed": ["Bophelong", "Vanderbilpark"],
+    "contacts": [
+      { "name": "P. Morake", "phone": "082 562 5592" },
+      { "name": "M. Koma", "phone": "066 487 2750" }
+    ]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Sedibeng West",
+    "centre": "Sedibeng West District Office",
+    "address": "No. 6 Samuel Street Zone 18 Sebokeng",
+    "areasServed": ["Evaton West"],
+    "contacts": [
+      { "name": "N. Malindi", "phone": "071 561 7781" },
+      { "name": "M. Mokhema", "phone": "079 891 7425" },
+      { "name": "T. Motsei", "phone": "064 932 0505" }
+    ]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Sedibeng West",
+    "centre": "Sedibeng West District Office",
+    "address": "No. 6 Samuel Street Zone 18 Sebokeng",
+    "areasServed": ["Sebokeng"],
+    "contacts": [
+      { "name": "M. Tsolo", "phone": "082 562 7817" },
+      { "name": "B. Raborifi", "phone": "082 563 9998" },
+      { "name": "R. Matsoso", "phone": "082 441 5442" }
+    ]
+  },
+  {
+    "region": "Sedibeng",
+    "subRegion": "Sedibeng East",
+    "centre": "Sedibeng East District Office",
+    "address": "14 Cnr Kruger and Joubert Street, Vereeniging",
+    "areasServed": ["Sonland Park", "Arcon Park", "Waldrift", "Falconridge", "Unitas Park", "Three Rivers", "Vereeniging", "Sicelo", "Savanna City", "Walkerville", "Meyerton", "Daleside", "De Deur", "Roshnee", "Rust ter Vaal", "Lakeside Estate", "Tshepong"],
+    "contacts": [
+      { "name": "M. Ntholi", "phone": "082 562 5388" },
+      { "name": "P. Molefi", "phone": "066 301 4126" }
+    ]
+  }
+]
