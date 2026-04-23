@@ -322,8 +322,9 @@ const NumericHistoryCard = ({
     ? Math.round(numeric.reduce((sum, s) => sum + s.value, 0) / numeric.length)
     : null;
 
-  const barColor = accent === "accent" ? "bg-accent" : "bg-primary";
   const softBg = accent === "accent" ? "bg-accent/10 text-accent" : "bg-primary-soft text-primary";
+  const lineStroke = accent === "accent" ? "hsl(var(--accent))" : "hsl(var(--primary))";
+  const lineFill = accent === "accent" ? "hsl(var(--accent) / 0.15)" : "hsl(var(--primary) / 0.15)";
 
   return (
     <Card className="overflow-hidden shadow-[var(--shadow-card)]">
@@ -362,35 +363,142 @@ const NumericHistoryCard = ({
           )}
         </div>
 
-        {/* Bar chart */}
-        <div className="mt-6 space-y-3">
-          {series.map((s, i) => {
-            const prev = i > 0 ? series[i - 1].value : null;
-            const widthPct =
-              typeof s.value === "number" && max > 0 ? (s.value / max) * 100 : 0;
-            return (
-              <div key={s.year} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-muted-foreground">{s.year}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-foreground">
-                      {typeof s.value === "number" ? s.value.toLocaleString() : "—"}
-                    </span>
-                    {typeof s.value === "number" && typeof prev === "number" && (
-                      <TrendChip from={prev} to={s.value} />
-                    )}
-                  </div>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={`h-full rounded-full ${barColor} transition-all`}
-                    style={{ width: `${widthPct}%` }}
+        {/* Line chart */}
+        {(() => {
+          // SVG dimensions in viewBox units. Scales responsively via width=100%.
+          const W = 320;
+          const H = 140;
+          const padX = 24;
+          const padTop = 24;
+          const padBottom = 28;
+          const innerW = W - padX * 2;
+          const innerH = H - padTop - padBottom;
+          const minVal = numeric.length ? Math.min(...numeric.map((s) => s.value)) : 0;
+          // Pad the y-range slightly so the line doesn't sit flush at top/bottom.
+          const range = max - minVal || max || 1;
+          const yPad = range * 0.15;
+          const yMin = Math.max(0, minVal - yPad);
+          const yMax = max + yPad;
+          const yRange = yMax - yMin || 1;
+
+          const points = series.map((s, i) => {
+            const x = padX + (series.length === 1 ? innerW / 2 : (i / (series.length - 1)) * innerW);
+            const y =
+              typeof s.value === "number"
+                ? padTop + innerH - ((s.value - yMin) / yRange) * innerH
+                : null;
+            return { ...s, x, y };
+          });
+          const valid = points.filter((p): p is typeof p & { y: number } => p.y !== null);
+          const linePath = valid
+            .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+            .join(" ");
+          const areaPath =
+            valid.length > 1
+              ? `${linePath} L ${valid[valid.length - 1].x} ${padTop + innerH} L ${valid[0].x} ${padTop + innerH} Z`
+              : "";
+
+          return (
+            <div className="mt-6">
+              <svg
+                viewBox={`0 0 ${W} ${H}`}
+                className="h-44 w-full"
+                role="img"
+                aria-label={`${title} line chart`}
+              >
+                {/* Gridlines */}
+                {[0, 0.5, 1].map((t) => {
+                  const y = padTop + innerH * t;
+                  return (
+                    <line
+                      key={t}
+                      x1={padX}
+                      x2={W - padX}
+                      y1={y}
+                      y2={y}
+                      stroke="hsl(var(--border))"
+                      strokeWidth={1}
+                      strokeDasharray="2 4"
+                    />
+                  );
+                })}
+                {/* Area under line */}
+                {areaPath && <path d={areaPath} fill={lineFill} />}
+                {/* Line */}
+                {linePath && (
+                  <path
+                    d={linePath}
+                    fill="none"
+                    stroke={lineStroke}
+                    strokeWidth={2.5}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
-                </div>
+                )}
+                {/* Points + labels */}
+                {points.map((p, i) => {
+                  if (p.y === null) return null;
+                  const prev = i > 0 ? series[i - 1].value : null;
+                  const isLatest = p.year === latest?.year;
+                  return (
+                    <g key={p.year}>
+                      <circle
+                        cx={p.x}
+                        cy={p.y}
+                        r={isLatest ? 5 : 3.5}
+                        fill="hsl(var(--card))"
+                        stroke={lineStroke}
+                        strokeWidth={2.5}
+                      />
+                      {/* Value label above point */}
+                      <text
+                        x={p.x}
+                        y={p.y - 10}
+                        textAnchor="middle"
+                        className="fill-foreground"
+                        style={{ fontSize: 10, fontWeight: 600 }}
+                      >
+                        {typeof p.value === "number" ? p.value.toLocaleString() : "—"}
+                      </text>
+                      {/* Year label below axis */}
+                      <text
+                        x={p.x}
+                        y={H - 10}
+                        textAnchor="middle"
+                        className="fill-muted-foreground"
+                        style={{ fontSize: 10, fontWeight: 500 }}
+                      >
+                        {p.year}
+                      </text>
+                      {/* hint of trend in title */}
+                      {typeof p.value === "number" && typeof prev === "number" && (
+                        <title>{`${p.year}: ${p.value.toLocaleString()} (${
+                          p.value - prev >= 0 ? "+" : ""
+                        }${(p.value - prev).toLocaleString()})`}</title>
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* Per-year deltas below chart */}
+              <div className="mt-2 flex items-center justify-around gap-2 text-[11px]">
+                {series.map((s, i) => {
+                  const prev = i > 0 ? series[i - 1].value : null;
+                  return (
+                    <div key={s.year} className="flex flex-1 justify-center">
+                      {typeof s.value === "number" && typeof prev === "number" ? (
+                        <TrendChip from={prev} to={s.value} />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })()}
 
         {/* Footer stats */}
         {avg != null && (
