@@ -18,7 +18,7 @@ const emptyFilters: Filters = { district: "", sector: "", phase: "", quintile: "
 const Index = () => {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<Filters>(emptyFilters);
-  const [sort, setSort] = useState<"name" | "district">("name");
+  const [sort, setSort] = useState<"learners" | "name" | "district">("learners");
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const facets = useMemo(() => getFacets(), []);
@@ -37,8 +37,15 @@ const Index = () => {
       }
       return true;
     });
-    if (sort === "name") result = [...result].sort((a, b) => a.name.localeCompare(b.name));
-    else result = [...result].sort((a, b) => (a.district ?? "").localeCompare(b.district ?? "") || a.name.localeCompare(b.name));
+    if (sort === "learners")
+      result = [...result].sort((a, b) => (b.learners ?? -1) - (a.learners ?? -1));
+    else if (sort === "name")
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    else
+      result = [...result].sort(
+        (a, b) =>
+          (a.district ?? "").localeCompare(b.district ?? "") || a.name.localeCompare(b.name),
+      );
     return result;
   }, [query, filters, sort]);
 
@@ -128,6 +135,7 @@ const Index = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="learners">Sort: Learners (high–low)</SelectItem>
                     <SelectItem value="name">Sort: Name (A–Z)</SelectItem>
                     <SelectItem value="district">Sort: District</SelectItem>
                   </SelectContent>
