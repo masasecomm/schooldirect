@@ -210,11 +210,39 @@ const LeadershipCard = ({
 }: {
   values: Record<DataYear, string | null>;
 }) => {
-  const entries = HISTORY_YEARS.map((y) => ({ year: y, name: values[y] }));
+  // Normalise a name for identity comparison: lowercase, strip punctuation
+  // and collapse whitespace. Two records that normalise to the same key are
+  // assumed to be the same person (e.g. "M. Dlamini" === "M Dlamini").
+  const normaliseKey = (n: string) =>
+    n.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+
+  // Build a canonical display name per identity key. When the same person
+  // appears in multiple years, keep the longest version of the name (most
+  // complete: e.g. "Mr M Dlamini" over "M Dlamini").
+  const canonicalByKey = new Map<string, string>();
+  for (const y of HISTORY_YEARS) {
+    const raw = values[y];
+    if (!raw) continue;
+    const key = normaliseKey(raw);
+    if (!key) continue;
+    const existing = canonicalByKey.get(key);
+    if (!existing || raw.length > existing.length) {
+      canonicalByKey.set(key, raw);
+    }
+  }
+
+  const entries = HISTORY_YEARS.map((y) => {
+    const raw = values[y];
+    const key = raw ? normaliseKey(raw) : "";
+    return {
+      year: y,
+      key,
+      name: key ? canonicalByKey.get(key) ?? raw : null,
+    };
+  });
   const known = entries.filter((e) => e.name);
-  const uniqueNames = Array.from(new Set(known.map((e) => e.name as string)));
-  const changes = uniqueNames.length > 1 ? uniqueNames.length - 1 : 0;
-  const tenure = known.length;
+  const uniqueKeys = Array.from(new Set(known.map((e) => e.key)));
+  const changes = uniqueKeys.length > 1 ? uniqueKeys.length - 1 : 0;
   const current = [...entries].reverse().find((e) => e.name);
 
   return (
@@ -250,8 +278,8 @@ const LeadershipCard = ({
           </div>
           <ol className="mt-3 space-y-3">
             {entries.map((e, i) => {
-              const prev = i > 0 ? entries[i - 1].name : null;
-              const changed = !!(e.name && prev && e.name !== prev);
+              const prevKey = i > 0 ? entries[i - 1].key : "";
+              const changed = !!(e.key && prevKey && e.key !== prevKey);
               const isLast = i === entries.length - 1;
               return (
                 <li key={e.year} className="relative flex gap-3">
@@ -292,7 +320,7 @@ const LeadershipCard = ({
         <div className="mt-2 grid grid-cols-2 gap-2">
           <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
             <div className="text-[11px] text-muted-foreground">Distinct leaders</div>
-            <div className="text-lg font-bold">{uniqueNames.length || "—"}</div>
+            <div className="text-lg font-bold">{uniqueKeys.length || "—"}</div>
           </div>
           <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
             <div className="text-[11px] text-muted-foreground">Changes</div>
