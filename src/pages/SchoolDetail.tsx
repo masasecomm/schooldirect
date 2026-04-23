@@ -258,6 +258,17 @@ const SchoolDetail = () => {
                 {school.principal && (
                   <Detail icon={User} label="Principal" value={titleCase(school.principal)} />
                 )}
+                {school.email && (
+                  <Detail
+                    icon={Mail}
+                    label="Email"
+                    value={
+                      <a href={`mailto:${school.email}`} className="text-primary hover:underline">
+                        {school.email}
+                      </a>
+                    }
+                  />
+                )}
                 {school.streetAddress && (
                   <Detail
                     icon={MapPin}
