@@ -1214,6 +1214,9 @@ const SchoolDetail = () => {
             {school.sector?.toUpperCase() === "PUBLIC" && (
               <WalkInCentreCard school={school} />
             )}
+            {schoolYear && (
+              <SimilarSchoolsCard school={school} year={schoolYear} />
+            )}
           </div>
         </div>
       </main>
