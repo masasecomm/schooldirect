@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
+import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
 import {
   findSchool,
   titleCase,
