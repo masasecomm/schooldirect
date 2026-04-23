@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
-import { findSchool, titleCase } from "@/lib/schools";
+import { findSchool, titleCase, displayName } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
 
 const Detail = ({
@@ -104,7 +104,7 @@ const SchoolDetail = () => {
         </div>
 
         <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-          {titleCase(school.name)}
+          {displayName(school)}
         </h1>
         {school.district && (
           <p className="mt-1 text-muted-foreground">{titleCase(school.district)} District</p>
