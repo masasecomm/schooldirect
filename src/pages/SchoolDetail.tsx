@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
-import { findSchool, titleCase, displayName } from "@/lib/schools";
+import { findSchool, titleCase, displayName, cleanAddress } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
 
 const Detail = ({
@@ -146,25 +146,37 @@ const SchoolDetail = () => {
                   <Detail
                     icon={MapPin}
                     label="Street address"
-                    value={titleCase(school.streetAddress)}
+                    value={cleanAddress(school.streetAddress)}
                   />
                 )}
                 {school.postalAddress && (
                   <Detail
                     icon={Mail}
                     label="Postal address"
-                    value={titleCase(school.postalAddress)}
+                    value={cleanAddress(school.postalAddress)}
                   />
                 )}
               </div>
 
               {mapsUrl && (
-                <Button asChild variant="outline" className="mt-6">
-                  <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4" />
-                    Open in Google Maps
-                  </a>
-                </Button>
+                <div className="mt-6 space-y-3">
+                  <div className="overflow-hidden rounded-xl border border-border">
+                    <iframe
+                      title={`Map of ${displayName(school)}`}
+                      src={mapsEmbedUrl!}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="h-72 w-full border-0"
+                      allowFullScreen
+                    />
+                  </div>
+                  <Button asChild variant="outline" size="sm">
+                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4" />
+                      Open in Google Maps
+                    </a>
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
