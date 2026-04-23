@@ -225,11 +225,17 @@ const LearnerEnrolmentCard = ({
                     key={s.year}
                     className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
                   >
-                    <span className="text-[11px] font-semibold text-foreground">
-                      {typeof s.value === "number"
-                        ? s.value.toLocaleString()
-                        : "—"}
-                    </span>
+                    <div className="flex flex-col items-center gap-0.5">
+                      {typeof s.value === "number" &&
+                        typeof prev === "number" && (
+                          <TrendChip from={prev} to={s.value} />
+                        )}
+                      <span className="text-[11px] font-semibold text-foreground">
+                        {typeof s.value === "number"
+                          ? s.value.toLocaleString()
+                          : "—"}
+                      </span>
+                    </div>
                     <div
                       className={`w-full max-w-[48px] rounded-t-md transition-all ${
                         isLatest
@@ -241,15 +247,9 @@ const LearnerEnrolmentCard = ({
                         typeof s.value === "number" ? s.value : "no data"
                       } learners`}
                     />
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-[11px] font-medium text-muted-foreground">
-                        {s.year}
-                      </span>
-                      {typeof s.value === "number" &&
-                        typeof prev === "number" && (
-                          <TrendChip from={prev} to={s.value} />
-                        )}
-                    </div>
+                    <span className="text-[11px] font-medium text-muted-foreground">
+                      {s.year}
+                    </span>
                   </div>
                 );
               })}
