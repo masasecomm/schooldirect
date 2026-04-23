@@ -1358,7 +1358,7 @@ const SchoolDetail = () => {
               <SimilarSchoolsCard school={school} year={schoolYear} />
             )}
             <ContactSchoolCard
-              schoolName={displayName(school.name)}
+              schoolName={displayName(school)}
               schoolEmail={school.email}
               schoolPhone={school.telephone}
             />
