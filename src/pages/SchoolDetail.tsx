@@ -212,7 +212,7 @@ const LearnerEnrolmentCard = ({
             <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               Year-on-year comparison
             </div>
-            <div className="mt-3 flex h-40 items-end justify-around gap-3 rounded-xl border border-border bg-muted/30 px-4 pt-4 pb-2">
+            <div className="mt-3 flex h-56 items-end justify-around gap-3 rounded-xl border border-border bg-muted/30 px-4 pt-4 pb-2">
               {series.map((s, i) => {
                 const heightPct =
                   typeof s.value === "number" && max > 0
@@ -225,7 +225,8 @@ const LearnerEnrolmentCard = ({
                     key={s.year}
                     className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
                   >
-                    <div className="flex flex-col items-center gap-0.5">
+                    {/* Labels area: fixed height so bars below always share the same scale */}
+                    <div className="flex h-14 flex-col items-center justify-end gap-0.5">
                       {typeof s.value === "number" &&
                         typeof prev === "number" && (
                           <TrendChip from={prev} to={s.value} />
@@ -236,17 +237,21 @@ const LearnerEnrolmentCard = ({
                           : "—"}
                       </span>
                     </div>
-                    <div
-                      className={`w-full max-w-[48px] rounded-t-md transition-all ${
-                        isLatest
-                          ? "bg-primary"
-                          : "bg-primary/50"
-                      }`}
-                      style={{ height: `${heightPct}%`, minHeight: heightPct > 0 ? 4 : 0 }}
-                      aria-label={`${s.year}: ${
-                        typeof s.value === "number" ? s.value : "no data"
-                      } learners`}
-                    />
+                    {/* Bar area: fills remaining vertical space, bars scale within it */}
+                    <div className="flex w-full flex-1 items-end justify-center">
+                      <div
+                        className={`w-full max-w-[48px] rounded-t-md transition-all ${
+                          isLatest ? "bg-primary" : "bg-primary/50"
+                        }`}
+                        style={{
+                          height: `${heightPct}%`,
+                          minHeight: heightPct > 0 ? 4 : 0,
+                        }}
+                        aria-label={`${s.year}: ${
+                          typeof s.value === "number" ? s.value : "no data"
+                        } learners`}
+                      />
+                    </div>
                     <span className="text-[11px] font-medium text-muted-foreground">
                       {s.year}
                     </span>
