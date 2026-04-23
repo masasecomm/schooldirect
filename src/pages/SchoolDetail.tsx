@@ -32,6 +32,11 @@ import {
   type DataYear,
 } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
+import {
+  findWalkInCentresForSchool,
+  mapsHref as walkInMapsHref,
+  telHref,
+} from "@/lib/walk-in-centres";
 
 const Detail = ({
   icon: Icon,
