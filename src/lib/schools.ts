@@ -1,4 +1,5 @@
-import rawData from "@/data/schools.json";
+import data2023 from "@/data/schools-2023.json";
+import data2024 from "@/data/schools-2024.json";
 
 export interface School {
   id: string;
@@ -29,7 +30,16 @@ export interface School {
   latitude: number | null;
 }
 
-export const schools = rawData as School[];
+export type DataYear = "2023" | "2024";
+
+export const AVAILABLE_YEARS: DataYear[] = ["2024", "2023"];
+
+const datasets: Record<DataYear, School[]> = {
+  "2023": data2023 as School[],
+  "2024": data2024 as School[],
+};
+
+export const getSchools = (year: DataYear): School[] => datasets[year];
 
 export const titleCase = (s?: string | null) => {
   if (!s) return "";
@@ -90,12 +100,16 @@ export const uniqueSorted = (values: (string | null)[]) =>
     a.localeCompare(b),
   );
 
-export const getFacets = () => ({
-  districts: uniqueSorted(schools.map((s) => s.district)),
-  sectors: uniqueSorted(schools.map((s) => s.sector)),
-  phases: uniqueSorted(schools.map((s) => s.phase)),
-  quintiles: uniqueSorted(schools.map((s) => s.quintile)),
-  towns: uniqueSorted(schools.map((s) => s.town)),
-});
+export const getFacets = (year: DataYear) => {
+  const schools = getSchools(year);
+  return {
+    districts: uniqueSorted(schools.map((s) => s.district)),
+    sectors: uniqueSorted(schools.map((s) => s.sector)),
+    phases: uniqueSorted(schools.map((s) => s.phase)),
+    quintiles: uniqueSorted(schools.map((s) => s.quintile)),
+    towns: uniqueSorted(schools.map((s) => s.town)),
+  };
+};
 
-export const findSchool = (id: string) => schools.find((s) => s.id === id);
+export const findSchool = (year: DataYear, id: string) =>
+  getSchools(year).find((s) => s.id === id);
