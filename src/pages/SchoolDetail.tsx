@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
+import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
 import {
   findSchool,
   titleCase,
@@ -1356,6 +1357,11 @@ const SchoolDetail = () => {
             {schoolYear && (
               <SimilarSchoolsCard school={school} year={schoolYear} />
             )}
+            <ContactSchoolCard
+              schoolName={displayName(school)}
+              schoolEmail={school.email}
+              schoolPhone={school.telephone}
+            />
           </div>
         </div>
       </main>
