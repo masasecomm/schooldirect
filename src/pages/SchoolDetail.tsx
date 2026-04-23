@@ -201,13 +201,6 @@ const SchoolDetail = () => {
                 {school.urbanRural && (
                   <Detail icon={MapPin} label="Setting" value={titleCase(school.urbanRural)} />
                 )}
-                {school.learners != null && (
-                  <Detail
-                    icon={Users}
-                    label={`Learners (${year})`}
-                    value={school.learners.toLocaleString()}
-                  />
-                )}
                 {school.educators != null && (
                   <Detail
                     icon={GraduationCap}
@@ -218,6 +211,17 @@ const SchoolDetail = () => {
               </div>
             </CardContent>
           </Card>
+
+          {school.learners != null && (
+            <LearnersCard
+              currentYear={year}
+              currentLearners={school.learners}
+              previousLearners={
+                year !== "2023" && school2023?.learners != null ? school2023.learners : null
+              }
+              educators={school.educators}
+            />
+          )}
         </div>
       </main>
 
