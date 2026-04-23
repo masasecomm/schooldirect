@@ -9,19 +9,22 @@ import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { SchoolCard } from "@/components/schools/SchoolCard";
 import { FilterPanel, type Filters } from "@/components/schools/FilterPanel";
-import { schools, getFacets, titleCase } from "@/lib/schools";
+import { getSchools, getFacets, titleCase } from "@/lib/schools";
+import { useYear } from "@/lib/year-context";
 
 const PAGE_SIZE = 24;
 
 const emptyFilters: Filters = { district: "", sector: "", phase: "", quintile: "", town: "" };
 
 const Index = () => {
+  const { year } = useYear();
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [sort, setSort] = useState<"learners" | "name" | "district">("learners");
   const [visible, setVisible] = useState(PAGE_SIZE);
 
-  const facets = useMemo(() => getFacets(), []);
+  const schools = useMemo(() => getSchools(year), [year]);
+  const facets = useMemo(() => getFacets(year), [year]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -47,9 +50,9 @@ const Index = () => {
           (a.district ?? "").localeCompare(b.district ?? "") || a.name.localeCompare(b.name),
       );
     return result;
-  }, [query, filters, sort]);
+  }, [query, filters, sort, schools]);
 
-  useEffect(() => setVisible(PAGE_SIZE), [query, filters, sort]);
+  useEffect(() => setVisible(PAGE_SIZE), [query, filters, sort, year]);
 
   const activeChips: { key: keyof Filters; value: string }[] = (Object.keys(filters) as (keyof Filters)[])
     .filter((k) => filters[k])
