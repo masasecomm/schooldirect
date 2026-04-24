@@ -10,8 +10,8 @@ export const SiteHeader = () => {
             <GraduationCap className="h-5 w-5" />
           </span>
           <span className="flex flex-col leading-tight">
-            <span className="text-sm font-bold tracking-tight">Gauteng Schools</span>
-            <span className="text-[11px] font-medium text-muted-foreground">Directory · 2023–2025</span>
+            <span className="text-sm font-bold tracking-tight">School Direct</span>
+            <span className="text-[11px] font-medium text-muted-foreground">Find a school near you</span>
           </span>
         </Link>
         <nav className="flex items-center gap-2 text-sm">
