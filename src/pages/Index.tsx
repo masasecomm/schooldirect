@@ -108,9 +108,9 @@ const Index = () => {
       <main className="container flex-1 py-8">
         <div className="mx-auto mb-10 max-w-3xl text-center">
           <p className="text-base text-muted-foreground md:text-lg">
-            We give parents more than EMIS numbers and Circuits details; we tell you
-            if your school of choice is growing or declining in learner totals year by
-            year and more. One page, one decision, no guesswork.
+            Beyond EMIS numbers and circuit data, we give you the full picture. Track
+            learner enrollment trends year-over-year to see if your school of choice
+            is thriving or shrinking. One page. One decision. No guesswork.
           </p>
         </div>
 
