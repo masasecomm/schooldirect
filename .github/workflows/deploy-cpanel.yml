@@ -1,5 +1,6 @@
 name: Build and Deploy to cPanel
 
+# Deploys dist/ to cPanel via FTP on every push to main.
 on:
   push:
     branches: [main]
