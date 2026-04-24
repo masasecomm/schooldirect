@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X, MessageSquare, RotateCcw } from "lucide-react";
+import { Search, SlidersHorizontal, X, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -68,10 +68,10 @@ const Index = () => {
         <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
           <div className="mx-auto max-w-3xl text-center text-primary-foreground">
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
-              Find a school in Gauteng
+              Know your desired school
             </h1>
             <p className="mt-3 text-base opacity-90 md:text-lg">
-              Browse {schools.length.toLocaleString()} schools across the province. Search by name,
+              Browse {schools.length.toLocaleString()} schools across the country. Search by name,
               suburb, district or EMIS number.
             </p>
 
@@ -87,14 +87,6 @@ const Index = () => {
                     aria-label="Search schools"
                   />
                 </div>
-                <a
-                  href="#contact"
-                  className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
-                  aria-label="Contact a school"
-                  title="Contact"
-                >
-                  <MessageSquare className="h-5 w-5" />
-                </a>
                 <button
                   type="button"
                   onClick={() => {
