@@ -42,6 +42,55 @@ const norm = (s: string) =>
     .trim();
 
 /**
+ * Tiny Levenshtein distance — used to forgive small spelling differences
+ * between the official dataset (e.g. "Ennerdale") and the messy school
+ * records (e.g. "ENNERADALE").
+ */
+const editDistance = (a: string, b: string): number => {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const m = a.length;
+  const n = b.length;
+  let prev = new Array(n + 1).fill(0).map((_, i) => i);
+  let curr = new Array(n + 1).fill(0);
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+    }
+    [prev, curr] = [curr, prev];
+  }
+  return prev[n];
+};
+
+/**
+ * Returns true if the school candidate string and the centre's served area
+ * should be considered a match. Handles:
+ *  - exact normalised equality
+ *  - substring containment in either direction
+ *  - small typos (edit distance ≤ 2 on words of length ≥ 5)
+ *  - token overlap for multi-word areas (e.g. "Kempton Park" vs "Kempton")
+ */
+const areaMatches = (candidate: string, area: string): boolean => {
+  if (!candidate || !area) return false;
+  if (candidate === area) return true;
+  if (candidate.includes(area) || area.includes(candidate)) return true;
+
+  const candTokens = candidate.split(" ").filter((t) => t.length >= 4);
+  const areaTokens = area.split(" ").filter((t) => t.length >= 4);
+  for (const ct of candTokens) {
+    for (const at of areaTokens) {
+      if (ct === at) return true;
+      const maxLen = Math.max(ct.length, at.length);
+      if (maxLen >= 5 && editDistance(ct, at) <= 2) return true;
+    }
+  }
+  return false;
+};
+
+/**
  * Match a school's location against the walk-in centres' `areasServed` lists.
  * Returns all centres whose served area names overlap with any of the
  * school's locality fields (suburb, township, town, municipality).
@@ -65,18 +114,27 @@ export const findWalkInCentresForSchool = (school: {
     .filter((v) => v.n.length > 0);
   if (candidates.length === 0) return [];
 
+  // Skip overly generic locality values that would otherwise create false
+  // positives across the whole metro (e.g. school.town === "JOHANNESBURG").
+  const GENERIC = new Set([
+    "johannesburg",
+    "tshwane",
+    "ekurhuleni",
+    "sedibeng",
+    "pretoria",
+    "gauteng",
+  ]);
+
   const matches: WalkInMatch[] = [];
   const seen = new Set<string>();
   for (const c of walkInCentres) {
     for (const area of c.areasServed) {
       const an = norm(area);
       if (!an) continue;
-      const hit = candidates.find(
-        (cand) =>
-          cand.n === an ||
-          cand.n.includes(an) ||
-          an.includes(cand.n),
-      );
+      const hit = candidates.find((cand) => {
+        if (GENERIC.has(cand.n) && cand.n !== an) return false;
+        return areaMatches(cand.n, an);
+      });
       if (hit) {
         const key = `${c.region}|${c.subRegion}|${c.address}|${c.contacts.map((p) => p.phone).join(",")}|${area}`;
         if (seen.has(key)) continue;
