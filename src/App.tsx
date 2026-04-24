@@ -21,6 +21,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/south-africa/gauteng/:slug" element={<SchoolDetail />} />
+          {/* Backwards-compat: old /schools/:slug links still resolve */}
           <Route path="/schools/:slug" element={<SchoolDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/admissions" element={<Admissions />} />
