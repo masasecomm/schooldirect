@@ -287,34 +287,7 @@ export const ContactSchoolCard = ({ schoolName, emisId }: Props) => {
               <FileSpreadsheet className="h-4 w-4" />
               Submit enquiry
             </Button>
-            <Button
-              type="button"
-              className="flex-1"
-              disabled={submitting}
-              onClick={handleSubmit(sendVia("email"))}
-            >
-              <Send className="h-4 w-4" />
-              Send via Email
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              disabled={submitting}
-              onClick={handleSubmit(sendVia("whatsapp"))}
-            >
-              <Phone className="h-4 w-4" />
-              Send via WhatsApp
-            </Button>
           </div>
-
-          {(!schoolEmail || !schoolPhone) && (
-            <p className="text-[11px] text-muted-foreground">
-              {!schoolEmail && "No email is listed for this school. "}
-              {!schoolPhone && "No phone is listed for this school. "}
-              Available channels are limited above.
-            </p>
-          )}
         </form>
       </CardContent>
     </Card>
