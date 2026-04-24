@@ -25,6 +25,14 @@ import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
   findSchool,
   titleCase,
   displayName,
@@ -1227,6 +1235,26 @@ const SchoolDetail = () => {
       <SiteHeader />
 
       <main className="container flex-1 py-8">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">South Africa</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">Gauteng</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="break-all">{schoolSlug(school)}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <Link
           to="/"
           className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
