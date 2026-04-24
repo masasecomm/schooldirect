@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, MessageSquare, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -66,7 +66,7 @@ const Index = () => {
         className="border-b border-border/60"
         style={{ background: "var(--hero-gradient)" }}
       >
-        <div className="container py-12 md:py-16">
+        <div className="container py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center text-primary-foreground">
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
               Find a school in Gauteng
@@ -76,15 +76,39 @@ const Index = () => {
               suburb, district or EMIS number.
             </p>
 
-            <div className="relative mt-8">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Try “Sandton”, “Pretoria Boys”, “Soweto”…"
-                className="h-14 rounded-xl border-0 bg-background pl-12 pr-4 text-base text-foreground shadow-[var(--shadow-elevated)] focus-visible:ring-2 focus-visible:ring-primary-foreground/40"
-                aria-label="Search schools"
-              />
+            <div className="mx-auto mt-10 max-w-2xl">
+              <div className="flex items-center gap-2 rounded-full bg-background/95 p-2 shadow-[var(--shadow-elevated)] ring-1 ring-black/5 backdrop-blur">
+                <div className="relative flex-1">
+                  <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+                  <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search schools, suburbs, districts…"
+                    className="h-14 rounded-full border-0 bg-transparent pl-14 pr-4 text-base text-foreground shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    aria-label="Search schools"
+                  />
+                </div>
+                <a
+                  href="#contact"
+                  className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
+                  aria-label="Contact a school"
+                  title="Contact"
+                >
+                  <MessageSquare className="h-5 w-5" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    setFilters(emptyFilters);
+                  }}
+                  className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
+                  aria-label="Reset filters"
+                  title="Reset filters"
+                >
+                  <RotateCcw className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
