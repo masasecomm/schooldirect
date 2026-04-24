@@ -121,3 +121,30 @@ export const getFacets = (year: DataYear) => {
 
 export const findSchool = (year: DataYear, id: string) =>
   getSchools(year).find((s) => s.id === id);
+
+/**
+ * Build a URL-safe slug from a school: "<kebab-name>-<EMIS id>".
+ * Example: { name: "Eqinisweni Secondary School", id: "700261719" }
+ *   -> "eqinisweni-secondary-school-700261719"
+ * The trailing numeric ID guarantees uniqueness and lets us recover the
+ * school even if two schools share the same name.
+ */
+export const schoolSlug = (school: { name?: string | null; id: string }): string => {
+  const base = (school.name ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "") // strip accents
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return base ? `${base}-${school.id}` : school.id;
+};
+
+/** Extract the trailing numeric EMIS id from a slug like "name-700261719". */
+export const idFromSlug = (slug: string): string => {
+  const m = slug.match(/(\d+)$/);
+  return m ? m[1] : slug;
+};
+
+/** Convenience: build the canonical school detail URL. */
+export const schoolHref = (school: { name?: string | null; id: string }) =>
+  `/schools/${schoolSlug(school)}`;

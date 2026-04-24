@@ -21,7 +21,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/schools/:id" element={<SchoolDetail />} />
+          <Route path="/schools/:slug" element={<SchoolDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/admissions" element={<Admissions />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -31,6 +31,9 @@ import {
   cleanAddress,
   getSchools,
   AVAILABLE_YEARS,
+  idFromSlug,
+  schoolHref,
+  schoolSlug,
   type DataYear,
 } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
@@ -1102,7 +1105,7 @@ const SimilarSchoolsCard = ({
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <Link
-                      to={`/schools/${item.school.id}`}
+                      to={schoolHref(item.school)}
                       className="block truncate text-sm font-semibold text-foreground hover:text-primary hover:underline"
                     >
                       {displayName(item.school)}
@@ -1131,7 +1134,11 @@ const SimilarSchoolsCard = ({
 };
 
 const SchoolDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  // Slug format: "<kebab-name>-<EMIS id>". Old links of the form
+  // "/schools/<id>" still work because idFromSlug returns the trailing digits.
+  const id = slug ? idFromSlug(slug) : undefined;
   // Multi-year lookup. The "primary" record is the most recent year that has data.
   const records = useMemo(() => {
     const map = {} as Record<DataYear, ReturnType<typeof findSchool>>;
@@ -1145,6 +1152,15 @@ const SchoolDetail = () => {
     }
     return undefined;
   }, [records]);
+  // If the user landed on a non-canonical URL (e.g. just the EMIS id, or a
+  // wrong/old slug), redirect to the canonical "<name>-<id>" slug.
+  useEffect(() => {
+    if (!school || !slug) return;
+    const canonical = schoolSlug(school);
+    if (slug !== canonical) {
+      navigate(`/schools/${canonical}`, { replace: true });
+    }
+  }, [school, slug, navigate]);
   const schoolYear = useMemo<DataYear | undefined>(() => {
     for (let i = HISTORY_YEARS.length - 1; i >= 0; i--) {
       if (records[HISTORY_YEARS[i]]) return HISTORY_YEARS[i];
