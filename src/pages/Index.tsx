@@ -108,9 +108,9 @@ const Index = () => {
       <main className="container flex-1 py-8">
         <div className="mx-auto mb-10 max-w-3xl text-center">
           <p className="text-base text-muted-foreground md:text-lg">
-            On every school page you get the EMIS number, learner totals year by year,
-            principal name, fees, quintile, language of learning, and the contact details
-            the school does not always publish. One page, one decision, no guesswork.
+            We give parents more than EMIS numbers and Circuits details; we tell you
+            if your school of choice is growing or declining in learner totals year by
+            year and more. One page, one decision, no guesswork.
           </p>
         </div>
 
