@@ -181,7 +181,7 @@ export const ContactSchoolCard = ({ schoolName, emisId }: Props) => {
             </div>
             <h2 className="mt-1 text-lg font-semibold">Contact {schoolName}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Send an admission enquiry directly to the school via email or WhatsApp.
+              Let us help you contact the school
             </p>
           </div>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
