@@ -17,6 +17,7 @@ import {
   Minus,
   Compass,
   School as SchoolIcon,
+  Award,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,8 @@ import {
   schoolSlug,
   formatPhone,
   type DataYear,
+  getMatricResults,
+  type MatricResults,
 } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
 import {
