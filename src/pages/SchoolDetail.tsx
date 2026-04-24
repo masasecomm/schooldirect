@@ -1240,13 +1240,13 @@ const SchoolDetail = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/">South Africa</Link>
+                <Link to="/south-africa">South Africa</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/">Gauteng</Link>
+                <Link to="/south-africa/gauteng">Gauteng</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
