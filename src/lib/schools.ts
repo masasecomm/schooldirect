@@ -167,3 +167,42 @@ export const formatPhone = (raw?: string | null): string => {
   if (digits.length === 10) return digits;
   return original;
 };
+
+/**
+ * Compare the school's learner count in the given year against the previous
+ * available year, matched by EMIS id. Returns null when there is no comparable
+ * prior-year record or either count is missing.
+ */
+export interface LearnerTrend {
+  direction: "up" | "down" | "flat";
+  current: number;
+  previous: number;
+  delta: number;
+  percent: number;
+  previousYear: DataYear;
+}
+
+const previousYearOf = (year: DataYear): DataYear | null => {
+  if (year === "2025") return "2024";
+  if (year === "2024") return "2023";
+  return null;
+};
+
+export const getLearnerTrend = (
+  school: { id: string; learners: number | null },
+  year: DataYear,
+): LearnerTrend | null => {
+  const prevYear = previousYearOf(year);
+  if (!prevYear) return null;
+  const current = school.learners;
+  if (typeof current !== "number" || current <= 0) return null;
+  const prev = datasets[prevYear].find((s) => s.id === school.id);
+  const previous = prev?.learners;
+  if (typeof previous !== "number" || previous <= 0) return null;
+  const delta = current - previous;
+  const percent = (delta / previous) * 100;
+  let direction: LearnerTrend["direction"] = "flat";
+  if (percent >= 1) direction = "up";
+  else if (percent <= -1) direction = "down";
+  return { direction, current, previous, delta, percent, previousYear: prevYear };
+};
