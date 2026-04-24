@@ -147,4 +147,4 @@ export const idFromSlug = (slug: string): string => {
 
 /** Convenience: build the canonical school detail URL. */
 export const schoolHref = (school: { name?: string | null; id: string }) =>
-  `/schools/${schoolSlug(school)}`;
+  `/south-africa/gauteng/${schoolSlug(school)}`;

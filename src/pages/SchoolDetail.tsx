@@ -1165,8 +1165,9 @@ const SchoolDetail = () => {
   useEffect(() => {
     if (!school || !slug) return;
     const canonical = schoolSlug(school);
-    if (slug !== canonical) {
-      navigate(`/schools/${canonical}`, { replace: true });
+    const canonicalPath = `/south-africa/gauteng/${canonical}`;
+    if (slug !== canonical || window.location.pathname !== canonicalPath) {
+      navigate(canonicalPath, { replace: true });
     }
   }, [school, slug, navigate]);
   const schoolYear = useMemo<DataYear | undefined>(() => {
@@ -1239,13 +1240,13 @@ const SchoolDetail = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/">South Africa</Link>
+                <Link to="/south-africa">South Africa</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/">Gauteng</Link>
+                <Link to="/south-africa/gauteng">Gauteng</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
