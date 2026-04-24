@@ -164,8 +164,8 @@ export const ContactSchoolCard = ({
       const ok = await postToSheet(v);
       if (ok) {
         toast({
-          title: "Enquiry submitted",
-          description: `Your enquiry for ${schoolName} has been recorded.`,
+          title: "✓ Enquiry submitted successfully",
+          description: `Your enquiry for ${schoolName} has been recorded. The school will be in touch.`,
         });
         form.reset();
       }
