@@ -68,11 +68,11 @@ const Index = () => {
         <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
           <div className="mx-auto max-w-3xl text-center text-primary-foreground">
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
-              Know your desired school
+              Every school in South Africa, in one place
             </h1>
             <p className="mt-3 text-base opacity-90 md:text-lg">
-              Browse {schools.length.toLocaleString()} schools across the country. Search by name,
-              suburb, district or EMIS number.
+              We track {schools.length.toLocaleString()} schools by EMIS number, district, fees,
+              quintile and contact details. Search the data the schools do not publish themselves.
             </p>
 
             <div className="mx-auto mt-10 max-w-2xl">
