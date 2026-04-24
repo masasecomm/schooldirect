@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
-import { GraduationCap, Home } from "lucide-react";
+import { Home } from "lucide-react";
+import logoImg from "@/assets/school-direct-logo.png";
 
 type SiteHeaderProps = {
   /** When true, the header floats over a dark hero (logo + nav use light colors). */
@@ -38,8 +39,12 @@ export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
     <header className={overHero ? wrapperBase : wrapperSolid}>
       <div className="container flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-3 font-semibold">
-          <span className={`grid h-16 w-16 place-items-center rounded-2xl ${logoBadge}`}>
-            <GraduationCap className="h-9 w-9" />
+          <span className={`grid h-16 w-16 place-items-center overflow-hidden rounded-2xl ${logoBadge}`}>
+            <img
+              src={logoImg}
+              alt="School Direct logo"
+              className="h-full w-full object-contain p-1"
+            />
           </span>
           <span className="flex flex-col leading-tight">
             <span className={`text-2xl font-bold tracking-tight ${logoText}`}>School Direct</span>
