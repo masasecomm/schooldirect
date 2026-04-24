@@ -14,9 +14,7 @@ export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
 
   const logoText = overHero ? "text-primary-foreground" : "text-foreground";
   const logoSub = overHero ? "text-primary-foreground/80" : "text-muted-foreground";
-  const logoBadge = overHero
-    ? "bg-background/95 text-primary"
-    : "bg-primary text-primary-foreground";
+  const logoBadge = "bg-white text-primary";
 
   const navWrap = overHero
     ? "rounded-full bg-background/95 px-2 py-1.5 shadow-[var(--shadow-elevated)] ring-1 ring-black/5 backdrop-blur"
