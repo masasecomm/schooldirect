@@ -100,3 +100,55 @@ jobs:
           local-dir: ./dist/
           dangerous-clean-slate: ${{ github.event.inputs.clean_slate == 'true' }}
           log-level: minimal
+
+      - name: Verify live site shows new build
+        env:
+          SITE_URL: https://schooldirect.org
+          EXPECTED_TEXT: "School Direct"
+        run: |
+          set -euo pipefail
+
+          echo "Waiting 20s for FTP/CDN to settle…"
+          sleep 20
+
+          echo "==> Step 1: Fetch homepage and check it returns 200"
+          HTML=""
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i: GET $SITE_URL/"
+            if HTML=$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$SITE_URL/?cachebust=$(date +%s)"); then
+              echo "Homepage OK ($(echo "$HTML" | wc -c) bytes)"
+              break
+            fi
+            echo "Homepage not reachable yet, retrying in 10s…"
+            sleep 10
+          done
+          if [ -z "$HTML" ]; then
+            echo "::error::Homepage $SITE_URL never returned 200 after 5 attempts."
+            exit 1
+          fi
+
+          echo "==> Step 2: Locate the JS bundle reference inside index.html"
+          # Vite emits something like /assets/index-XXXXXXXX.js — pick the first match.
+          BUNDLE=$(echo "$HTML" | grep -oE '/assets/[A-Za-z0-9_.-]+\.js' | head -n1 || true)
+          if [ -z "$BUNDLE" ]; then
+            echo "::error::Could not find a /assets/*.js reference in the deployed index.html."
+            echo "----- index.html (first 200 lines) -----"
+            echo "$HTML" | head -n 200
+            exit 1
+          fi
+          echo "Found bundle: $BUNDLE"
+
+          echo "==> Step 3: Download bundle and check it contains \"$EXPECTED_TEXT\""
+          BUNDLE_URL="${SITE_URL}${BUNDLE}"
+          if ! curl -fsSL --max-time 30 "$BUNDLE_URL" -o /tmp/bundle.js; then
+            echo "::error::Failed to download bundle at $BUNDLE_URL"
+            exit 1
+          fi
+
+          if grep -q "$EXPECTED_TEXT" /tmp/bundle.js; then
+            echo "::notice::Live site is serving the new build — \"$EXPECTED_TEXT\" found in $BUNDLE."
+          else
+            echo "::error::Deploy verification FAILED — \"$EXPECTED_TEXT\" not found in $BUNDLE."
+            echo "The FTP upload may have skipped files, or your CDN/cPanel is still serving an older bundle."
+            exit 1
+          fi
