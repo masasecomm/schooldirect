@@ -1165,8 +1165,9 @@ const SchoolDetail = () => {
   useEffect(() => {
     if (!school || !slug) return;
     const canonical = schoolSlug(school);
-    if (slug !== canonical) {
-      navigate(`/schools/${canonical}`, { replace: true });
+    const canonicalPath = `/south-africa/gauteng/${canonical}`;
+    if (slug !== canonical || window.location.pathname !== canonicalPath) {
+      navigate(canonicalPath, { replace: true });
     }
   }, [school, slug, navigate]);
   const schoolYear = useMemo<DataYear | undefined>(() => {
