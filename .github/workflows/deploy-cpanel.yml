@@ -1,15 +1,38 @@
-name: Build and Deploy to cPanel
+name: Deploy to production
 
 # Deploys dist/ to cPanel via FTP on every push to main.
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why are you redeploying? (optional note for the run log)"
+        required: false
+        default: "Manual redeploy"
+      clean_slate:
+        description: "Wipe remote folder before upload? (use only if site is broken)"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   build-and-deploy:
+    name: Build & deploy to cPanel
     runs-on: ubuntu-latest
     steps:
+      - name: Show trigger info
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Actor:        ${{ github.actor }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Reason:       ${{ github.event.inputs.reason }}"
+            echo "Clean slate:  ${{ github.event.inputs.clean_slate }}"
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -75,5 +98,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
           local-dir: ./dist/
-          dangerous-clean-slate: false
+          dangerous-clean-slate: ${{ github.event.inputs.clean_slate == 'true' }}
           log-level: minimal
