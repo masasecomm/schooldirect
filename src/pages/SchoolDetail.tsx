@@ -42,6 +42,7 @@ import {
   idFromSlug,
   schoolHref,
   schoolSlug,
+  formatPhone,
   type DataYear,
 } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
@@ -1296,11 +1297,11 @@ const SchoolDetail = () => {
                     label="Telephone"
                     value={
                       <div className="flex items-center gap-2">
-                        <a href={`tel:${school.telephone}`} className="text-primary hover:underline">
-                          {school.telephone}
+                        <a href={`tel:${formatPhone(school.telephone)}`} className="text-primary hover:underline">
+                          {formatPhone(school.telephone)}
                         </a>
                         <button
-                          onClick={() => copy("Phone", school.telephone!)}
+                          onClick={() => copy("Phone", formatPhone(school.telephone!))}
                           className="text-muted-foreground hover:text-foreground"
                           aria-label="Copy phone"
                         >

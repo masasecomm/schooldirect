@@ -148,3 +148,22 @@ export const idFromSlug = (slug: string): string => {
 /** Convenience: build the canonical school detail URL. */
 export const schoolHref = (school: { name?: string | null; id: string }) =>
   `/south-africa/gauteng/${schoolSlug(school)}`;
+
+/**
+ * Normalise a South African phone number to a 10-digit local format starting with 0.
+ * Strips spaces, dashes, brackets and a leading +27 / 27 country code, then ensures
+ * the result is padded with a leading 0 to make 10 digits.
+ * Returns the original string if it cannot be cleaned to 9 or 10 digits.
+ */
+export const formatPhone = (raw?: string | null): string => {
+  if (!raw) return "";
+  const original = String(raw).trim();
+  let digits = original.replace(/\D/g, "");
+  if (digits.startsWith("27") && digits.length >= 11) {
+    digits = digits.slice(2);
+  }
+  digits = digits.replace(/^0+/, "");
+  if (digits.length === 9) return `0${digits}`;
+  if (digits.length === 10) return digits;
+  return original;
+};

@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { MapPin, Phone, ArrowRight } from "lucide-react";
+import { MapPin, Phone, Users, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { School } from "@/lib/schools";
-import { titleCase, displayName, schoolHref } from "@/lib/schools";
+import { titleCase, displayName, schoolHref, formatPhone } from "@/lib/schools";
 
 export const SchoolCard = ({ school }: { school: School }) => {
   return (
@@ -43,7 +43,18 @@ export const SchoolCard = ({ school }: { school: School }) => {
           {school.telephone && (
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 shrink-0 text-primary/70" />
-              <span>{school.telephone}</span>
+              <span>{formatPhone(school.telephone)}</span>
+            </div>
+          )}
+          {typeof school.learners === "number" && school.learners > 0 && (
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 shrink-0 text-primary/70" />
+              <span>
+                <span className="font-medium text-foreground">
+                  {school.learners.toLocaleString()}
+                </span>{" "}
+                learners
+              </span>
             </div>
           )}
         </div>
