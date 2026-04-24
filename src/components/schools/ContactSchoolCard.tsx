@@ -164,8 +164,8 @@ export const ContactSchoolCard = ({
       const ok = await postToSheet(v);
       if (ok) {
         toast({
-          title: "Enquiry submitted",
-          description: `Your enquiry for ${schoolName} has been recorded.`,
+          title: "✓ Enquiry submitted successfully",
+          description: `Your enquiry for ${schoolName} has been recorded. The school will be in touch.`,
         });
         form.reset();
       }
@@ -178,8 +178,9 @@ export const ContactSchoolCard = ({
     setSubmitting(true);
     try {
       // Always record the enquiry to the sheet, then hand off to the chosen channel.
+      let sheetOk = false;
       if (hasContactSheetEndpoint()) {
-        await postToSheet(v);
+        sheetOk = await postToSheet(v);
       }
       const subject = `Admission enquiry — ${v.learnerName} (Grade ${v.gradeApplied})`;
       const body = buildMessageBody(v, schoolName);
@@ -202,6 +203,7 @@ export const ContactSchoolCard = ({
           title: "Opening your email app",
           description: `Your message to ${schoolName} is ready to send.`,
         });
+        if (sheetOk) form.reset();
       } else {
         if (!schoolPhone) {
           toast({
@@ -223,6 +225,7 @@ export const ContactSchoolCard = ({
           title: "Opening WhatsApp",
           description: `Your message to ${schoolName} is ready to send.`,
         });
+        if (sheetOk) form.reset();
       }
     } finally {
       setSubmitting(false);
