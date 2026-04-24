@@ -1,0 +1,78 @@
+name: Build and Deploy to cPanel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build project
+        run: bun run build
+
+      - name: Add .htaccess for SPA routing
+        run: |
+          cat > dist/.htaccess << 'HTACCESS'
+          # SPA routing for React Router
+          <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+            RewriteRule ^index\.html$ - [L]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule . /index.html [L]
+          </IfModule>
+
+          # Cache hashed assets aggressively
+          <IfModule mod_expires.c>
+            ExpiresActive On
+            ExpiresByType text/css "access plus 1 year"
+            ExpiresByType application/javascript "access plus 1 year"
+            ExpiresByType image/png "access plus 1 year"
+            ExpiresByType image/jpeg "access plus 1 year"
+            ExpiresByType image/svg+xml "access plus 1 year"
+            ExpiresByType image/webp "access plus 1 year"
+            ExpiresByType font/woff2 "access plus 1 year"
+          </IfModule>
+
+          # Never cache index.html
+          <FilesMatch "index\.html$">
+            <IfModule mod_headers.c>
+              Header set Cache-Control "no-cache, no-store, must-revalidate"
+            </IfModule>
+          </FilesMatch>
+
+          # Gzip compression
+          <IfModule mod_deflate.c>
+            AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+          </IfModule>
+          HTACCESS
+
+      - name: Deploy to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          local-dir: ./dist/
+          dangerous-clean-slate: false
+          log-level: minimal
