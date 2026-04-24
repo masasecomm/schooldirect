@@ -711,6 +711,209 @@ const LeadershipCard = ({
 };
 
 /**
+ * Matric Results card. Renders 3-year NSC pass rate history (2023–2025)
+ * from the official Department of Basic Education School Performance
+ * Report. Includes a bar chart, year-on-year trend chips, a pass-rate
+ * tier badge, and breakdowns of wrote / achieved / progressed learners.
+ */
+const passTier = (pct: number) => {
+  if (pct >= 95) return { label: "Top tier", cls: "bg-emerald-600 text-white" };
+  if (pct >= 85) return { label: "Strong", cls: "bg-emerald-500 text-white" };
+  if (pct >= 70) return { label: "On track", cls: "bg-amber-500 text-white" };
+  if (pct >= 50) return { label: "Needs support", cls: "bg-orange-500 text-white" };
+  return { label: "Underperforming", cls: "bg-rose-600 text-white" };
+};
+
+const MatricResultsCard = ({ results }: { results: MatricResults }) => {
+  const series = [
+    { year: "2023", ...results.y2023 },
+    { year: "2024", ...results.y2024 },
+    { year: "2025", ...results.y2025 },
+  ];
+  const latest = series[series.length - 1];
+  const earliest = series[0];
+  const maxPct = Math.max(...series.map((s) => s.pct), 100);
+  const tier = passTier(latest.pct);
+
+  const totalAchieved3yr = series.reduce((a, s) => a + s.achieved, 0);
+  const totalWrote3yr = series.reduce((a, s) => a + s.wrote, 0);
+  const avgPct = totalWrote3yr ? (totalAchieved3yr / totalWrote3yr) * 100 : 0;
+
+  return (
+    <Card className="overflow-hidden shadow-[var(--shadow-card)]">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Award className="h-3.5 w-3.5" />
+              NSC pass rate
+            </div>
+            <h2 className="mt-1 text-lg font-semibold">Matric results</h2>
+          </div>
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
+            <Award className="h-5 w-5" />
+          </div>
+        </div>
+
+        {/* Headline */}
+        <div className="mt-5 flex items-end gap-3">
+          <div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Latest ({latest.year})
+            </div>
+            <div className="text-4xl font-bold tracking-tight leading-none">
+              {latest.pct.toFixed(1)}%
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {latest.achieved.toLocaleString()} of{" "}
+              {latest.wrote.toLocaleString()} learners passed
+            </div>
+          </div>
+          <div className="ml-auto flex flex-col items-end gap-1">
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${tier.cls}`}
+            >
+              {tier.label}
+            </span>
+            <div className="text-[11px] text-muted-foreground">
+              vs {earliest.year}:{" "}
+              <span
+                className={
+                  latest.pct - earliest.pct >= 0
+                    ? "font-semibold text-emerald-700"
+                    : "font-semibold text-rose-700"
+                }
+              >
+                {latest.pct - earliest.pct >= 0 ? "+" : ""}
+                {(latest.pct - earliest.pct).toFixed(1)} pp
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bar chart */}
+        <div className="mt-6">
+          <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Year-on-year pass rate
+          </div>
+          <div className="mt-3 flex h-56 items-end justify-around gap-3 rounded-xl border border-border bg-muted/30 px-4 pt-4 pb-2">
+            {series.map((s, i) => {
+              const heightPct = (s.pct / maxPct) * 100;
+              const prev = i > 0 ? series[i - 1].pct : null;
+              const isLatest = i === series.length - 1;
+              const diff = prev != null ? s.pct - prev : null;
+              return (
+                <div
+                  key={s.year}
+                  className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
+                >
+                  <div className="flex h-14 flex-col items-center justify-end gap-0.5">
+                    {diff != null && (
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                          diff > 0
+                            ? "text-emerald-700 bg-emerald-100"
+                            : diff < 0
+                            ? "text-rose-700 bg-rose-100"
+                            : "text-muted-foreground bg-muted"
+                        }`}
+                      >
+                        {diff > 0 ? (
+                          <TrendingUp className="h-3 w-3" />
+                        ) : diff < 0 ? (
+                          <TrendingDown className="h-3 w-3" />
+                        ) : (
+                          <Minus className="h-3 w-3" />
+                        )}
+                        {diff > 0 ? "+" : ""}
+                        {diff.toFixed(1)}pp
+                      </span>
+                    )}
+                    <span className="text-[11px] font-semibold text-foreground">
+                      {s.pct.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex w-full flex-1 items-end justify-center">
+                    <div
+                      className={`w-full max-w-[48px] rounded-t-md transition-all ${
+                        isLatest ? "bg-primary" : "bg-primary/50"
+                      }`}
+                      style={{
+                        height: `${heightPct}%`,
+                        minHeight: heightPct > 0 ? 4 : 0,
+                      }}
+                      aria-label={`${s.year}: ${s.pct.toFixed(1)}% pass rate`}
+                    />
+                  </div>
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    {s.year}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Per-year breakdown */}
+        <div className="mt-5">
+          <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Year-by-year breakdown
+          </div>
+          <div className="mt-3 overflow-hidden rounded-lg border border-border">
+            <table className="w-full text-xs">
+              <thead className="bg-muted/50 text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 text-left font-semibold">Year</th>
+                  <th className="px-3 py-2 text-right font-semibold">Wrote</th>
+                  <th className="px-3 py-2 text-right font-semibold">Passed</th>
+                  <th className="px-3 py-2 text-right font-semibold">Progressed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {series.map((s) => (
+                  <tr key={s.year} className="border-t border-border">
+                    <td className="px-3 py-2 font-semibold">{s.year}</td>
+                    <td className="px-3 py-2 text-right">
+                      {s.wrote.toLocaleString()}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {s.achieved.toLocaleString()}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {s.progressed.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Footer stats */}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+            <div className="text-[11px] text-muted-foreground">3-year average</div>
+            <div className="text-lg font-bold">{avgPct.toFixed(1)}%</div>
+          </div>
+          <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+            <div className="text-[11px] text-muted-foreground">3-year pass total</div>
+            <div className="text-lg font-bold">
+              {totalAchieved3yr.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          Source: Department of Basic Education, 2025 NSC School Performance
+          Report. "Progressed" learners are those advanced to Grade 12 without
+          meeting the full Grade 11 promotion requirements.
+        </p>
+      </CardContent>
+    </Card>
+  );
+};
+
+/**
  * Feeder Zone card. Uses the school's coordinates to find every unique
  * locality (suburb / township / town) of any other school within a 5km
  * radius, computed via the Haversine formula on the bundled dataset.
