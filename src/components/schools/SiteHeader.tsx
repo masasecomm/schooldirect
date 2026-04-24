@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Home } from "lucide-react";
 
 type SiteHeaderProps = {
   /** When true, the header floats over a dark hero (logo + nav use light colors). */
@@ -48,7 +48,10 @@ export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
         </Link>
         <nav className={`flex items-center gap-1 text-sm ${navWrap}`}>
           <NavLink to="/" end className={({ isActive }) => linkClass(isActive)}>
-            Directory
+            <span className="inline-flex items-center gap-1.5">
+              <Home className="h-4 w-4" />
+              Home
+            </span>
           </NavLink>
           <NavLink to="/admissions" className={({ isActive }) => linkClass(isActive)}>
             Admissions
