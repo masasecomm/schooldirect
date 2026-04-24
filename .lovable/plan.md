@@ -1,26 +1,26 @@
-## Update footer to match the new logo
 
-The footer in `src/components/schools/SiteFooter.tsx` still shows the old branding:
+# Show Centre Number in the Matric Results block
 
-> © 2026 Gauteng Schools Directory · Public information
+The matric dataset (`src/data/matric-results.json`) already includes a `centreNo` field for every school that has matric results — it's the Department of Basic Education exam centre number used in the NSC results report. We'll surface it in the `MatricResultsCard` header so parents can cross-reference DBE publications.
 
-I'll change the left side of the footer to match the new logo wording from the header ("School Direct" / "Find a school near you"):
+## Change
 
-**New footer (left side):**
-> © 2026 School Direct · Find a school near you
+**File**: `src/pages/SchoolDetail.tsx` — inside `MatricResultsCard`, just under the "Matric results" heading, add a small line:
 
-The right side ("Data source: Gauteng Department of Education, 2023") stays unchanged — it's an attribution, not branding. Let me know if you want that removed or updated too.
+> Centre number: `12345678`
 
-### File changed
-- `src/components/schools/SiteFooter.tsx` — replace the left-side `<p>` text
+- Rendered in monospaced font for legibility.
+- Only renders if `results.centreNo` exists (defensive).
+- Same muted style as other meta lines in the card.
 
-### After approval
-Once you approve, the change pushes to GitHub and the deploy workflow auto-uploads to schooldirect.org within ~2–3 minutes.
+No other files need to change — `centreNo` is already exposed via `MatricResults` in `src/lib/schools.ts` and passed to the card.
 
----
+## Result
 
-**Heads-up — free shortcut for next time:** small text changes like this can be done without using AI credits via **Visual Edits** (the Edit button at the bottom-left of the chat box). Click the footer text → type the new text → Save. No prompt needed.
+On any school with matric data, the Matric Results card header will now read:
 
-<lov-actions>
-<lov-link url="https://docs.lovable.dev/features/visual-edit">Read more about Visual Edits</lov-link>
-</lov-actions>
+```
+GRADE 12 NSC PASS RATE
+Matric results
+Centre number: 12345678
+```

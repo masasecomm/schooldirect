@@ -749,6 +749,14 @@ const MatricResultsCard = ({ results }: { results: MatricResults }) => {
               Grade 12 NSC pass rate
             </div>
             <h2 className="mt-1 text-lg font-semibold">Matric results</h2>
+            {results.centreNo && (
+              <div className="mt-1 text-xs text-muted-foreground">
+                Centre number:{" "}
+                <span className="font-mono font-semibold text-foreground">
+                  {results.centreNo}
+                </span>
+              </div>
+            )}
           </div>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
             <Award className="h-5 w-5" />
