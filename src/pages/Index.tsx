@@ -106,6 +106,14 @@ const Index = () => {
       </section>
 
       <main className="container flex-1 py-8">
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <p className="text-base text-muted-foreground md:text-lg">
+            On every school page you get the EMIS number, learner totals year by year,
+            principal name, fees, quintile, language of learning, and the contact details
+            the school does not always publish. One page, one decision, no guesswork.
+          </p>
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
           <aside className="hidden lg:block">
             <div className="sticky top-20 rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
