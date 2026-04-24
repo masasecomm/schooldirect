@@ -1595,6 +1595,7 @@ const SchoolDetail = () => {
               accent="accent"
             />
             <LeadershipCard values={principalByYear} />
+            {matricResults && <MatricResultsCard results={matricResults} />}
             {school.latitude != null && school.longitude != null && schoolYear && (
               <FeederZoneCard
                 lat={school.latitude}
