@@ -43,7 +43,7 @@ export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
             <img
               src={logoImg}
               alt="School Direct logo"
-              className="h-full w-full object-contain p-1"
+              className="h-full w-full object-cover"
             />
           </span>
           <span className="flex flex-col leading-tight">
