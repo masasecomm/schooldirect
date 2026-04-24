@@ -43,7 +43,10 @@ export const SchoolCard = ({ school }: { school: School }) => {
           {school.principal && (
             <div className="flex items-center gap-2">
               <UserSquare2 className="h-4 w-4 shrink-0 text-primary/70" />
-              <span className="line-clamp-1">{titleCase(school.principal)}</span>
+              <span className="line-clamp-1">
+                <span className="font-medium text-foreground">{titleCase(school.principal)}</span>
+                <span className="text-muted-foreground"> (Principal)</span>
+              </span>
             </div>
           )}
           {typeof school.learners === "number" && school.learners > 0 && (
