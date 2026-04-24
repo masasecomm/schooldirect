@@ -102,28 +102,54 @@ export type WalkInMatch = {
   matchedOn: string; // the school field value that matched
 };
 
+const GENERIC_TOKENS = new Set([
+  "city",
+  "metropolitan",
+  "municipality",
+  "local",
+  "district",
+  "north",
+  "south",
+  "east",
+  "west",
+  "central",
+  "inner",
+  "park",
+  "town",
+  "view",
+  "ext",
+  "extension",
+  "johannesburg",
+  "tshwane",
+  "ekurhuleni",
+  "sedibeng",
+  "pretoria",
+  "gauteng",
+]);
+
+const stripGeneric = (s: string) =>
+  s
+    .split(" ")
+    .filter((t) => !GENERIC_TOKENS.has(t))
+    .join(" ")
+    .trim();
+
 export const findWalkInCentresForSchool = (school: {
   suburb?: string | null;
   township?: string | null;
   town?: string | null;
   municipality?: string | null;
 }): WalkInMatch[] => {
-  const candidates = [school.suburb, school.township, school.town, school.municipality]
+  // Municipality is intentionally excluded — it's metro-wide (e.g. "City of
+  // Johannesburg Metropolitan Municipality") and produces false positives.
+  const candidates = [school.suburb, school.township, school.town]
     .filter((v): v is string => !!v && v.trim().length > 0)
-    .map((v) => ({ raw: v, n: norm(v) }))
+    .map((v) => {
+      const n = norm(v);
+      return { raw: v, n, stripped: stripGeneric(n) };
+    })
     .filter((v) => v.n.length > 0);
   if (candidates.length === 0) return [];
-
-  // Skip overly generic locality values that would otherwise create false
-  // positives across the whole metro (e.g. school.town === "JOHANNESBURG").
-  const GENERIC = new Set([
-    "johannesburg",
-    "tshwane",
-    "ekurhuleni",
-    "sedibeng",
-    "pretoria",
-    "gauteng",
-  ]);
 
   const matches: WalkInMatch[] = [];
   const seen = new Set<string>();
@@ -131,9 +157,13 @@ export const findWalkInCentresForSchool = (school: {
     for (const area of c.areasServed) {
       const an = norm(area);
       if (!an) continue;
+      const aStripped = stripGeneric(an);
+      // If after stripping common words there's nothing left, the area is
+      // too generic on its own (e.g. "Inner city") to safely fuzzy-match.
+      if (!aStripped) continue;
       const hit = candidates.find((cand) => {
-        if (GENERIC.has(cand.n) && cand.n !== an) return false;
-        return areaMatches(cand.n, an);
+        if (!cand.stripped) return false;
+        return areaMatches(cand.stripped, aStripped);
       });
       if (hit) {
         const key = `${c.region}|${c.subRegion}|${c.address}|${c.contacts.map((p) => p.phone).join(",")}|${area}`;
