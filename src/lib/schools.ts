@@ -1,6 +1,7 @@
 import data2023 from "@/data/schools-2023.json";
 import data2024 from "@/data/schools-2024.json";
 import data2025 from "@/data/schools-2025.json";
+import matricData from "@/data/matric-results.json";
 
 export interface School {
   id: string;
@@ -43,6 +44,27 @@ const datasets: Record<DataYear, School[]> = {
 };
 
 export const getSchools = (year: DataYear): School[] => datasets[year];
+
+export interface MatricYearStats {
+  progressed: number;
+  wrote: number;
+  achieved: number;
+  pct: number;
+}
+
+export interface MatricResults {
+  centreNo: string;
+  name: string;
+  quintile: number;
+  y2023: MatricYearStats;
+  y2024: MatricYearStats;
+  y2025: MatricYearStats;
+}
+
+const matricByEmis = matricData as Record<string, MatricResults>;
+
+export const getMatricResults = (emis: string): MatricResults | null =>
+  matricByEmis[emis] ?? null;
 
 export const titleCase = (s?: string | null) => {
   if (!s) return "";
