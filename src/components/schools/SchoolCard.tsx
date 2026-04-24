@@ -3,7 +3,7 @@ import { MapPin, Phone, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { School } from "@/lib/schools";
-import { titleCase, displayName } from "@/lib/schools";
+import { titleCase, displayName, schoolHref } from "@/lib/schools";
 
 export const SchoolCard = ({ school }: { school: School }) => {
   return (
@@ -50,7 +50,7 @@ export const SchoolCard = ({ school }: { school: School }) => {
 
         <div className="mt-auto pt-2">
           <Link
-            to={`/schools/${school.id}`}
+            to={schoolHref(school)}
             className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
           >
             View details
