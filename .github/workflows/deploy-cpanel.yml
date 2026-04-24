@@ -23,6 +23,11 @@ jobs:
   build-and-deploy:
     name: Build & deploy to cPanel
     runs-on: ubuntu-latest
+    env:
+      # Opt into Node.js 24 for all JavaScript actions in this job.
+      # Silences the "Node.js 20 actions are deprecated" warning until
+      # action authors publish Node 24 builds.
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - name: Show trigger info
         run: |
