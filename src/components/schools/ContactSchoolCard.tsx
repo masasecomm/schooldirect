@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Mail, Send, Phone, MessageSquare, FileSpreadsheet } from "lucide-react";
+import { Mail, MessageSquare, FileSpreadsheet } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,8 +65,6 @@ type FormValues = z.infer<typeof formSchema>;
 type Props = {
   schoolName: string;
   emisId?: string;
-  schoolEmail?: string | null;
-  schoolPhone?: string | null;
 };
 
 const buildMessageBody = (v: FormValues, schoolName: string) =>
@@ -88,12 +86,7 @@ const buildMessageBody = (v: FormValues, schoolName: string) =>
     v.parentName,
   ].join("\n");
 
-export const ContactSchoolCard = ({
-  schoolName,
-  emisId,
-  schoolEmail,
-  schoolPhone,
-}: Props) => {
+export const ContactSchoolCard = ({ schoolName, emisId }: Props) => {
   const [submitting, setSubmitting] = useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -168,64 +161,6 @@ export const ContactSchoolCard = ({
           description: `Your enquiry for ${schoolName} has been recorded. The school will be in touch.`,
         });
         form.reset();
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const sendVia = (channel: "email" | "whatsapp") => async (v: FormValues) => {
-    setSubmitting(true);
-    try {
-      // Always record the enquiry to the sheet, then hand off to the chosen channel.
-      let sheetOk = false;
-      if (hasContactSheetEndpoint()) {
-        sheetOk = await postToSheet(v);
-      }
-      const subject = `Admission enquiry — ${v.learnerName} (Grade ${v.gradeApplied})`;
-      const body = buildMessageBody(v, schoolName);
-
-      if (channel === "email") {
-        if (!schoolEmail) {
-          toast({
-            title: "No email on file",
-            description:
-              "This school does not have an email address listed. Try WhatsApp or call instead.",
-            variant: "destructive",
-          });
-          return;
-        }
-        const href = `mailto:${encodeURIComponent(schoolEmail)}?subject=${encodeURIComponent(
-          subject,
-        )}&body=${encodeURIComponent(body)}`;
-        window.location.href = href;
-        toast({
-          title: "Opening your email app",
-          description: `Your message to ${schoolName} is ready to send.`,
-        });
-        if (sheetOk) form.reset();
-      } else {
-        if (!schoolPhone) {
-          toast({
-            title: "No phone on file",
-            description:
-              "This school does not have a phone number listed. Try email instead.",
-            variant: "destructive",
-          });
-          return;
-        }
-        const digits = schoolPhone.replace(/\D/g, "");
-        // South African numbers: convert leading 0 to country code 27.
-        const waNumber = digits.startsWith("0") ? `27${digits.slice(1)}` : digits;
-        const href = `https://wa.me/${waNumber}?text=${encodeURIComponent(
-          `*${subject}*\n\n${body}`,
-        )}`;
-        window.open(href, "_blank", "noopener,noreferrer");
-        toast({
-          title: "Opening WhatsApp",
-          description: `Your message to ${schoolName} is ready to send.`,
-        });
-        if (sheetOk) form.reset();
       }
     } finally {
       setSubmitting(false);
@@ -352,34 +287,7 @@ export const ContactSchoolCard = ({
               <FileSpreadsheet className="h-4 w-4" />
               Submit enquiry
             </Button>
-            <Button
-              type="button"
-              className="flex-1"
-              disabled={submitting}
-              onClick={handleSubmit(sendVia("email"))}
-            >
-              <Send className="h-4 w-4" />
-              Send via Email
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              disabled={submitting}
-              onClick={handleSubmit(sendVia("whatsapp"))}
-            >
-              <Phone className="h-4 w-4" />
-              Send via WhatsApp
-            </Button>
           </div>
-
-          {(!schoolEmail || !schoolPhone) && (
-            <p className="text-[11px] text-muted-foreground">
-              {!schoolEmail && "No email is listed for this school. "}
-              {!schoolPhone && "No phone is listed for this school. "}
-              Available channels are limited above.
-            </p>
-          )}
         </form>
       </CardContent>
     </Card>

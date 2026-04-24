@@ -1405,8 +1405,6 @@ const SchoolDetail = () => {
             <ContactSchoolCard
               schoolName={displayName(school)}
               emisId={String(school.id)}
-              schoolEmail={school.email}
-              schoolPhone={school.telephone}
             />
           </div>
         </div>
