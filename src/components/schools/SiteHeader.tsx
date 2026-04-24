@@ -1,49 +1,59 @@
 import { Link, NavLink } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
 
-export const SiteHeader = () => {
+type SiteHeaderProps = {
+  /** When true, the header floats over a dark hero (logo + nav use light colors). */
+  overHero?: boolean;
+};
+
+export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
+  const wrapperBase = "absolute left-0 right-0 top-0 z-40 w-full pt-6 md:pt-8";
+  const wrapperSolid =
+    "relative border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70 pt-0";
+
+  const logoText = overHero ? "text-primary-foreground" : "text-foreground";
+  const logoSub = overHero ? "text-primary-foreground/80" : "text-muted-foreground";
+  const logoBadge = overHero
+    ? "bg-background/95 text-primary"
+    : "bg-primary text-primary-foreground";
+
+  const navWrap = overHero
+    ? "rounded-full bg-background/95 px-2 py-1.5 shadow-[var(--shadow-elevated)] ring-1 ring-black/5 backdrop-blur"
+    : "";
+
+  const linkClass = (isActive: boolean) => {
+    if (overHero) {
+      return `rounded-full px-4 py-2 transition-colors ${
+        isActive
+          ? "bg-primary text-primary-foreground"
+          : "text-foreground/70 hover:text-foreground"
+      }`;
+    }
+    return `rounded-md px-3 py-2 transition-colors ${
+      isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+    }`;
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="container flex h-16 items-center justify-between gap-4">
+    <header className={overHero ? wrapperBase : wrapperSolid}>
+      <div className="container flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 font-semibold">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
+          <span className={`grid h-9 w-9 place-items-center rounded-lg ${logoBadge}`}>
             <GraduationCap className="h-5 w-5" />
           </span>
           <span className="flex flex-col leading-tight">
-            <span className="text-sm font-bold tracking-tight">School Direct</span>
-            <span className="text-[11px] font-medium text-muted-foreground">Find a school near you</span>
+            <span className={`text-sm font-bold tracking-tight ${logoText}`}>School Direct</span>
+            <span className={`text-[11px] font-medium ${logoSub}`}>Find a school near you</span>
           </span>
         </Link>
-        <nav className="flex items-center gap-2 text-sm">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              `rounded-md px-3 py-2 transition-colors ${
-                isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
-              }`
-            }
-          >
+        <nav className={`flex items-center gap-1 text-sm ${navWrap}`}>
+          <NavLink to="/" end className={({ isActive }) => linkClass(isActive)}>
             Directory
           </NavLink>
-          <NavLink
-            to="/admissions"
-            className={({ isActive }) =>
-              `rounded-md px-3 py-2 transition-colors ${
-                isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
-              }`
-            }
-          >
+          <NavLink to="/admissions" className={({ isActive }) => linkClass(isActive)}>
             Admissions
           </NavLink>
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              `rounded-md px-3 py-2 transition-colors ${
-                isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
-              }`
-            }
-          >
+          <NavLink to="/about" className={({ isActive }) => linkClass(isActive)}>
             About
           </NavLink>
         </nav>

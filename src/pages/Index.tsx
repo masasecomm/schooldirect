@@ -60,13 +60,12 @@ const Index = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <SiteHeader />
-
       <section
-        className="border-b border-border/60"
+        className="relative border-b border-border/60"
         style={{ background: "var(--hero-gradient)" }}
       >
-        <div className="container py-16 md:py-24">
+        <SiteHeader overHero />
+        <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
           <div className="mx-auto max-w-3xl text-center text-primary-foreground">
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
               Find a school in Gauteng
