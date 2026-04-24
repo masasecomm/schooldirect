@@ -714,7 +714,7 @@ const LeadershipCard = ({
  * Matric Results card. Renders 3-year NSC pass rate history (2023–2025)
  * from the official Department of Basic Education School Performance
  * Report. Includes a bar chart, year-on-year trend chips, a pass-rate
- * tier badge, and breakdowns of wrote / achieved / progressed learners.
+ * tier badge, and breakdowns of wrote / passed / failed learners.
  */
 const passTier = (pct: number) => {
   if (pct >= 95) return { label: "Top tier", cls: "bg-emerald-600 text-white" };
@@ -746,7 +746,7 @@ const MatricResultsCard = ({ results }: { results: MatricResults }) => {
           <div>
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <Award className="h-3.5 w-3.5" />
-              NSC pass rate
+              Grade 12 NSC pass rate
             </div>
             <h2 className="mt-1 text-lg font-semibold">Matric results</h2>
           </div>
@@ -866,24 +866,27 @@ const MatricResultsCard = ({ results }: { results: MatricResults }) => {
                   <th className="px-3 py-2 text-left font-semibold">Year</th>
                   <th className="px-3 py-2 text-right font-semibold">Wrote</th>
                   <th className="px-3 py-2 text-right font-semibold">Passed</th>
-                  <th className="px-3 py-2 text-right font-semibold">Progressed</th>
+                  <th className="px-3 py-2 text-right font-semibold">Failed</th>
                 </tr>
               </thead>
               <tbody>
-                {series.map((s) => (
-                  <tr key={s.year} className="border-t border-border">
-                    <td className="px-3 py-2 font-semibold">{s.year}</td>
-                    <td className="px-3 py-2 text-right">
-                      {s.wrote.toLocaleString()}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {s.achieved.toLocaleString()}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {s.progressed.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                {series.map((s) => {
+                  const failed = Math.max(0, s.wrote - s.achieved);
+                  return (
+                    <tr key={s.year} className="border-t border-border">
+                      <td className="px-3 py-2 font-semibold">{s.year}</td>
+                      <td className="px-3 py-2 text-right">
+                        {s.wrote.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2 text-right text-emerald-700 font-medium">
+                        {s.achieved.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2 text-right text-rose-700 font-medium">
+                        {failed.toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -904,9 +907,10 @@ const MatricResultsCard = ({ results }: { results: MatricResults }) => {
         </div>
 
         <p className="mt-3 text-[11px] text-muted-foreground">
-          Source: Department of Basic Education, 2025 NSC School Performance
-          Report. "Progressed" learners are those advanced to Grade 12 without
-          meeting the full Grade 11 promotion requirements.
+          Source: Department of Basic Education, 2025 NSC (National Senior
+          Certificate) School Performance Report. Figures reflect Grade 12
+          learners who wrote the matric exams. "Failed" is calculated as Wrote
+          minus Passed.
         </p>
       </CardContent>
     </Card>
