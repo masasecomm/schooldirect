@@ -1437,6 +1437,7 @@ const SchoolDetail = () => {
     }),
     {} as Record<DataYear, string | null>,
   );
+  const matricResults = getMatricResults(school.emis);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
