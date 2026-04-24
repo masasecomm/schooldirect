@@ -37,13 +37,13 @@ export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
   return (
     <header className={overHero ? wrapperBase : wrapperSolid}>
       <div className="container flex items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2 font-semibold">
-          <span className={`grid h-9 w-9 place-items-center rounded-lg ${logoBadge}`}>
-            <GraduationCap className="h-5 w-5" />
+        <Link to="/" className="flex items-center gap-3 font-semibold">
+          <span className={`grid h-16 w-16 place-items-center rounded-2xl ${logoBadge}`}>
+            <GraduationCap className="h-9 w-9" />
           </span>
           <span className="flex flex-col leading-tight">
-            <span className={`text-sm font-bold tracking-tight ${logoText}`}>School Direct</span>
-            <span className={`text-[11px] font-medium ${logoSub}`}>Find a school near you</span>
+            <span className={`text-2xl font-bold tracking-tight ${logoText}`}>School Direct</span>
+            <span className={`text-base font-medium ${logoSub}`}>Find a school near you</span>
           </span>
         </Link>
         <nav className={`flex items-center gap-1 text-sm ${navWrap}`}>
