@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Mail, Send, Phone, MessageSquare } from "lucide-react";
+import { Mail, Send, Phone, MessageSquare, FileSpreadsheet } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import {
+  CONTACT_SHEET_ENDPOINT,
+  hasContactSheetEndpoint,
+} from "@/lib/contact-endpoint";
 
 const RELATIONSHIPS = [
   "Mother",
@@ -60,6 +64,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 type Props = {
   schoolName: string;
+  emisId?: string;
   schoolEmail?: string | null;
   schoolPhone?: string | null;
 };
@@ -85,6 +90,7 @@ const buildMessageBody = (v: FormValues, schoolName: string) =>
 
 export const ContactSchoolCard = ({
   schoolName,
+  emisId,
   schoolEmail,
   schoolPhone,
 }: Props) => {
@@ -111,9 +117,70 @@ export const ContactSchoolCard = ({
 
   const relationship = watch("relationship");
 
+  const postToSheet = async (v: FormValues) => {
+    if (!hasContactSheetEndpoint()) {
+      toast({
+        title: "Submission endpoint not configured",
+        description:
+          "The Google Sheet endpoint is missing. Please add the Apps Script URL in src/lib/contact-endpoint.ts.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    try {
+      // Apps Script web apps redirect; use no-cors so the browser does not block the response read.
+      // Apps Script still receives and processes the POST.
+      await fetch(CONTACT_SHEET_ENDPOINT, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          schoolName,
+          emisId: emisId ?? "",
+          parentName: v.parentName,
+          relationship: v.relationship,
+          learnerName: v.learnerName,
+          learnerAge: v.learnerAge,
+          gradeApplied: v.gradeApplied,
+          message: v.message,
+          pageUrl: typeof window !== "undefined" ? window.location.href : "",
+        }),
+      });
+      return true;
+    } catch (err) {
+      console.error("Sheet submission failed", err);
+      toast({
+        title: "Could not record your enquiry",
+        description: "We will still try to open your chosen channel below.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  const submitToSheet = async (v: FormValues) => {
+    setSubmitting(true);
+    try {
+      const ok = await postToSheet(v);
+      if (ok) {
+        toast({
+          title: "Enquiry submitted",
+          description: `Your enquiry for ${schoolName} has been recorded.`,
+        });
+        form.reset();
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const sendVia = (channel: "email" | "whatsapp") => async (v: FormValues) => {
     setSubmitting(true);
     try {
+      // Always record the enquiry to the sheet, then hand off to the chosen channel.
+      if (hasContactSheetEndpoint()) {
+        await postToSheet(v);
+      }
       const subject = `Admission enquiry — ${v.learnerName} (Grade ${v.gradeApplied})`;
       const body = buildMessageBody(v, schoolName);
 
@@ -272,6 +339,16 @@ export const ContactSchoolCard = ({
           </div>
 
           <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1"
+              disabled={submitting}
+              onClick={handleSubmit(submitToSheet)}
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Submit enquiry
+            </Button>
             <Button
               type="button"
               className="flex-1"
