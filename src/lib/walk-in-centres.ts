@@ -139,6 +139,7 @@ export const findWalkInCentresForSchool = (school: {
   township?: string | null;
   town?: string | null;
   municipality?: string | null;
+  district?: string | null;
 }): WalkInMatch[] => {
   // Municipality is intentionally excluded — it's metro-wide (e.g. "City of
   // Johannesburg Metropolitan Municipality") and produces false positives.
@@ -149,7 +150,6 @@ export const findWalkInCentresForSchool = (school: {
       return { raw: v, n, stripped: stripGeneric(n) };
     })
     .filter((v) => v.n.length > 0);
-  if (candidates.length === 0) return [];
 
   const matches: WalkInMatch[] = [];
   const seen = new Set<string>();
@@ -173,5 +173,25 @@ export const findWalkInCentresForSchool = (school: {
       }
     }
   }
+
+  // Fallback: when no specific suburb/township/town match was found, fall
+  // back to the school's district. Every Gauteng district maps 1:1 to a
+  // walk-in centre subRegion (e.g. "EKURHULENI SOUTH" -> "Ekurhuleni South"),
+  // so this guarantees parents always see at least their district office.
+  if (matches.length === 0 && school.district) {
+    const districtNorm = norm(school.district);
+    for (const c of walkInCentres) {
+      if (norm(c.subRegion) !== districtNorm) continue;
+      const key = `${c.region}|${c.subRegion}|${c.address}|${c.contacts.map((p) => p.phone).join(",")}|district`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      matches.push({
+        centre: c,
+        matchedArea: c.subRegion,
+        matchedOn: school.district,
+      });
+    }
+  }
+
   return matches;
 };
