@@ -68,7 +68,7 @@ export const getMatricResults = (emis: string): MatricResults | null =>
 
 export const titleCase = (s?: string | null) => {
   if (!s) return "";
-  return s
+  return String(s)
     .toLowerCase()
     .replace(/\b([a-z])/g, (m) => m.toUpperCase())
     .replace(/\b(Of|And|The|For|In|To|A)\b/g, (m) => m.toLowerCase());
