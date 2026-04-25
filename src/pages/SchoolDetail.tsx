@@ -1099,6 +1099,7 @@ const WalkInCentreCard = ({
     township?: string | null;
     town?: string | null;
     municipality?: string | null;
+    district?: string | null;
   };
 }) => {
   const matches = useMemo(() => findWalkInCentresForSchool(school), [school]);
