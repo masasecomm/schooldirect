@@ -1029,6 +1029,144 @@ const LeadershipCard = ({
   const changes = uniqueKeys.length > 1 ? uniqueKeys.length - 1 : 0;
   const current = [...entries].reverse().find((e) => e.name);
 
+  // Build a CV record per distinct principal up-front so we can render the
+  // current principal's CV inside the highlight block, and the rest below.
+  const phaseUp = (phase || "").toUpperCase();
+  const isSecondary = phaseUp.includes("SECONDARY") || phaseUp.includes("COMBINED");
+
+  type PrincipalCv = {
+    key: string;
+    name: string;
+    tenureStart: DataYear;
+    tenureEnd: DataYear;
+    impactSentence: string;
+    historySentence: string;
+    previousPosts: ReturnType<typeof findPrincipalAtOtherSchools>;
+  };
+
+  const buildCv = (key: string): PrincipalCv | null => {
+    const yearsForKey = entries.filter((e) => e.key === key).map((e) => e.year);
+    if (yearsForKey.length === 0) return null;
+    const entryForKey = entries.find((e) => e.key === key);
+    const name = entryForKey?.name ?? key;
+    const rawNameForLookup = entryForKey?.rawName ?? key;
+    const tenureStart = yearsForKey[0];
+    const tenureEnd = yearsForKey[yearsForKey.length - 1];
+
+    const yearBefore = (() => {
+      const idx = HISTORY_YEARS.indexOf(tenureStart);
+      return idx > 0 ? HISTORY_YEARS[idx - 1] : tenureStart;
+    })();
+
+    const learnFrom = learners?.[yearBefore] ?? null;
+    const learnTo = learners?.[tenureEnd] ?? null;
+    const eduFrom = educators?.[yearBefore] ?? null;
+    const eduTo = educators?.[tenureEnd] ?? null;
+
+    const describeChange = (
+      from: number | null,
+      to: number | null,
+      singular: string,
+    ): string | null => {
+      if (from == null || to == null || from <= 0) return null;
+      const diff = to - from;
+      const pct = (diff / from) * 100;
+      if (Math.abs(pct) < 1) {
+        return `${singular} numbers held steady at about ${to.toLocaleString()}`;
+      }
+      const verb = diff > 0 ? "grew" : "dropped";
+      return `${singular} numbers ${verb} from ${from.toLocaleString()} to ${to.toLocaleString()} (${diff > 0 ? "+" : ""}${pct.toFixed(0)}%)`;
+    };
+
+    const learnerPhrase = describeChange(learnFrom, learnTo, "Learner");
+    const educatorPhrase = describeChange(eduFrom, eduTo, "Educator");
+
+    let matricPhrase: string | null = null;
+    if (isSecondary && matric) {
+      const yKey = `y${tenureEnd}` as "y2023" | "y2024" | "y2025";
+      const yKeyBefore = `y${yearBefore}` as "y2023" | "y2024" | "y2025";
+      const endStats = matric[yKey];
+      const beforeStats = matric[yKeyBefore];
+      if (endStats?.pct != null && beforeStats?.pct != null && yearBefore !== tenureEnd) {
+        const diff = endStats.pct - beforeStats.pct;
+        const dir = diff >= 0 ? "improved" : "slipped";
+        matricPhrase = `the matric pass rate ${dir} from ${beforeStats.pct.toFixed(1)}% to ${endStats.pct.toFixed(1)}% (${diff >= 0 ? "+" : ""}${diff.toFixed(1)} points)`;
+      } else if (endStats?.pct != null) {
+        matricPhrase = `the matric pass rate stood at ${endStats.pct.toFixed(1)}% in ${tenureEnd}`;
+      }
+    }
+
+    const previousPosts = currentSchoolId
+      ? findPrincipalAtOtherSchools(rawNameForLookup, currentSchoolId)
+      : [];
+
+    const tenureClause =
+      tenureStart === tenureEnd
+        ? `In ${tenureStart}, while ${name} was on record as principal,`
+        : `Between ${yearBefore === tenureStart ? tenureStart : `${yearBefore} and ${tenureEnd}`}, while ${name} was on record as principal,`;
+    const impactParts: string[] = [];
+    if (learnerPhrase) impactParts.push(learnerPhrase.toLowerCase());
+    if (educatorPhrase) impactParts.push(educatorPhrase.toLowerCase());
+    if (matricPhrase) impactParts.push(matricPhrase);
+    const impactSentence =
+      impactParts.length > 0
+        ? `${tenureClause} ${impactParts.join("; ")}.`
+        : `On record as principal in ${tenureStart === tenureEnd ? tenureStart : `${tenureStart}-${tenureEnd}`}. We do not have enough comparable data to describe the change during this period.`;
+
+    let historySentence: string;
+    if (previousPosts.length === 0) {
+      historySentence = `Our directory of every Gauteng school shows no other postings for ${name} between 2023 and 2025, so this appears to be the only school where ${name} has been recorded as principal in our dataset.`;
+    } else {
+      const list = previousPosts.slice(0, 4).map((p) => p.schoolName).join(", ");
+      const more = previousPosts.length > 4 ? `, plus ${previousPosts.length - 4} more` : "";
+      historySentence = `The same name also appears as principal at ${previousPosts.length} other school${previousPosts.length === 1 ? "" : "s"} in our Gauteng directory: ${list}${more}. This suggests prior leadership experience elsewhere in the province.`;
+    }
+
+    return {
+      key,
+      name,
+      tenureStart,
+      tenureEnd,
+      impactSentence,
+      historySentence,
+      previousPosts,
+    };
+  };
+
+  const allCvs = uniqueKeys.map(buildCv).filter((c): c is PrincipalCv => !!c);
+  const currentCv = current?.key ? allCvs.find((c) => c.key === current.key) ?? null : null;
+  const pastCvs = allCvs.filter((c) => c.key !== currentCv?.key);
+
+  const renderCvBody = (cv: PrincipalCv) => (
+    <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">
+      <p>
+        <span className="font-semibold text-foreground">Impact at this school. </span>
+        {cv.impactSentence}
+      </p>
+      <p>
+        <span className="font-semibold text-foreground">Career history. </span>
+        {cv.historySentence}
+      </p>
+      {cv.previousPosts.length > 0 && (
+        <ul className="mt-1.5 space-y-1 pl-1 text-sm">
+          {cv.previousPosts.slice(0, 5).map((p) => (
+            <li key={p.schoolId}>
+              <Link
+                to={schoolHref({ name: p.schoolName, id: p.schoolId })}
+                className="text-primary hover:underline"
+              >
+                {p.schoolName}
+              </Link>
+              <span className="text-muted-foreground">
+                {p.district ? ` · ${p.district}` : ""} · listed {p.year}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+
   return (
     <Card className="overflow-hidden shadow-[var(--shadow-card)]">
       <CardContent className="p-6">
@@ -1053,6 +1191,14 @@ const LeadershipCard = ({
           <div className="mt-1 text-xl font-bold tracking-tight text-foreground">
             {current?.name ?? "—"}
           </div>
+          {currentCv && (
+            <div className="mt-4 border-t border-border/60 pt-4">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Principal CV
+              </div>
+              <div className="mt-2">{renderCvBody(currentCv)}</div>
+            </div>
+          )}
         </div>
 
         {/* Timeline */}
@@ -1124,115 +1270,15 @@ const LeadershipCard = ({
 
         {/* Per-principal CV: tenure, what changed during their time, other schools they appear at */}
         {(() => {
-          if (uniqueKeys.length === 0) return null;
-
-          const phaseUp = (phase || "").toUpperCase();
-          const isSecondary = phaseUp.includes("SECONDARY") || phaseUp.includes("COMBINED");
-
-          // For each distinct principal: list of years they held the post on record.
-          const cvs = uniqueKeys.map((key) => {
-            const yearsForKey = entries.filter((e) => e.key === key).map((e) => e.year);
-            const entryForKey = entries.find((e) => e.key === key);
-            const name = entryForKey?.name ?? key;
-            // Use the raw (un-prefixed) name for cross-school matching so the
-            // honorific we added doesn't pollute the token search.
-            const rawNameForLookup = entryForKey?.rawName ?? key;
-            const tenureStart = yearsForKey[0];
-            const tenureEnd = yearsForKey[yearsForKey.length - 1];
-
-            // Compare metrics from the year BEFORE tenure start (if available) to tenure end.
-            const yearBefore = (() => {
-              const idx = HISTORY_YEARS.indexOf(tenureStart);
-              return idx > 0 ? HISTORY_YEARS[idx - 1] : tenureStart;
-            })();
-
-            // Compute raw deltas so we can write a fluent paragraph.
-            const learnFrom = learners?.[yearBefore] ?? null;
-            const learnTo = learners?.[tenureEnd] ?? null;
-            const eduFrom = educators?.[yearBefore] ?? null;
-            const eduTo = educators?.[tenureEnd] ?? null;
-
-            const describeChange = (
-              from: number | null,
-              to: number | null,
-              singular: string,
-            ): string | null => {
-              if (from == null || to == null || from <= 0) return null;
-              const diff = to - from;
-              const pct = (diff / from) * 100;
-              if (Math.abs(pct) < 1) {
-                return `${singular} numbers held steady at about ${to.toLocaleString()}`;
-              }
-              const verb = diff > 0 ? "grew" : "dropped";
-              return `${singular} numbers ${verb} from ${from.toLocaleString()} to ${to.toLocaleString()} (${diff > 0 ? "+" : ""}${pct.toFixed(0)}%)`;
-            };
-
-            const learnerPhrase = describeChange(learnFrom, learnTo, "Learner");
-            const educatorPhrase = describeChange(eduFrom, eduTo, "Educator");
-
-            // Matric narrative – only when secondary/combined and we have data.
-            let matricPhrase: string | null = null;
-            if (isSecondary && matric) {
-              const yKey = `y${tenureEnd}` as "y2023" | "y2024" | "y2025";
-              const yKeyBefore = `y${yearBefore}` as "y2023" | "y2024" | "y2025";
-              const endStats = matric[yKey];
-              const beforeStats = matric[yKeyBefore];
-              if (endStats?.pct != null && beforeStats?.pct != null && yearBefore !== tenureEnd) {
-                const diff = endStats.pct - beforeStats.pct;
-                const dir = diff >= 0 ? "improved" : "slipped";
-                matricPhrase = `the matric pass rate ${dir} from ${beforeStats.pct.toFixed(1)}% to ${endStats.pct.toFixed(1)}% (${diff >= 0 ? "+" : ""}${diff.toFixed(1)} points)`;
-              } else if (endStats?.pct != null) {
-                matricPhrase = `the matric pass rate stood at ${endStats.pct.toFixed(1)}% in ${tenureEnd}`;
-              }
-            }
-
-            const previousPosts = currentSchoolId
-              ? findPrincipalAtOtherSchools(rawNameForLookup, currentSchoolId)
-              : [];
-
-            // Build the impact paragraph in plain language.
-            const tenureClause =
-              tenureStart === tenureEnd
-                ? `In ${tenureStart}, while ${name} was on record as principal,`
-                : `Between ${yearBefore === tenureStart ? tenureStart : `${yearBefore} and ${tenureEnd}`}, while ${name} was on record as principal,`;
-            const impactParts: string[] = [];
-            if (learnerPhrase) impactParts.push(learnerPhrase.toLowerCase());
-            if (educatorPhrase) impactParts.push(educatorPhrase.toLowerCase());
-            if (matricPhrase) impactParts.push(matricPhrase);
-            const impactSentence =
-              impactParts.length > 0
-                ? `${tenureClause} ${impactParts.join("; ")}.`
-                : `On record as principal in ${tenureStart === tenureEnd ? tenureStart : `${tenureStart}-${tenureEnd}`}. We do not have enough comparable data to describe the change during this period.`;
-
-            // Build the career-history sentence.
-            let historySentence: string;
-            if (previousPosts.length === 0) {
-              historySentence = `Our directory of every Gauteng school shows no other postings for ${name} between 2023 and 2025, so this appears to be the only school where ${name} has been recorded as principal in our dataset.`;
-            } else {
-              const list = previousPosts.slice(0, 4).map((p) => p.schoolName).join(", ");
-              const more = previousPosts.length > 4 ? `, plus ${previousPosts.length - 4} more` : "";
-              historySentence = `The same name also appears as principal at ${previousPosts.length} other school${previousPosts.length === 1 ? "" : "s"} in our Gauteng directory: ${list}${more}. This suggests prior leadership experience elsewhere in the province.`;
-            }
-
-            return {
-              key,
-              name,
-              tenureStart,
-              tenureEnd,
-              years: yearsForKey,
-              impactSentence,
-              historySentence,
-              previousPosts,
-            };
-          });
+          if (pastCvs.length === 0) return null;
 
           return (
             <div className="mt-5">
               <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Principal CV
+                Previous principals
               </div>
               <div className="mt-2 space-y-3">
-                {cvs.map((cv) => {
+                {pastCvs.map((cv) => {
                   const tenureLabel =
                     cv.tenureStart === cv.tenureEnd
                       ? `On record in ${cv.tenureStart}`
@@ -1251,33 +1297,7 @@ const LeadershipCard = ({
                         </Badge>
                       </div>
 
-                      <div className="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
-                        <p>
-                          <span className="font-semibold text-foreground">Impact at this school. </span>
-                          {cv.impactSentence}
-                        </p>
-                        <p>
-                          <span className="font-semibold text-foreground">Career history. </span>
-                          {cv.historySentence}
-                        </p>
-                        {cv.previousPosts.length > 0 && (
-                          <ul className="mt-1.5 space-y-1 pl-1 text-sm">
-                            {cv.previousPosts.slice(0, 5).map((p) => (
-                              <li key={p.schoolId}>
-                                <Link
-                                  to={schoolHref({ name: p.schoolName, id: p.schoolId })}
-                                  className="text-primary hover:underline"
-                                >
-                                  {p.schoolName}
-                                </Link>
-                                <span className="text-muted-foreground">
-                                  {p.district ? ` · ${p.district}` : ""} · listed {p.year}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
+                      <div className="mt-3">{renderCvBody(cv)}</div>
                     </div>
                   );
                 })}
