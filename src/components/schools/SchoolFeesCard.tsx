@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Banknote, Info, Users, Wallet } from "lucide-react";
+import { Banknote, Info, Users, Wallet, ExternalLink, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -28,6 +28,7 @@ const ALLOCATION: Record<QuintileNum, number> = {
 };
 
 const fmtRand = (n: number) => `R${n.toLocaleString("en-ZA")}`;
+const fmtRandRounded = (n: number) => `R${Math.ceil(n).toLocaleString("en-ZA")}`;
 
 const parseQuintile = (q?: string | null): QuintileNum | null => {
   if (!q) return null;
@@ -54,7 +55,9 @@ export const SchoolFeesCard = ({
     const isNoFee = q <= 3;
     const totalAllocation =
       typeof learners === "number" && learners > 0 ? perLearner * learners : null;
-    return { perLearner, isNoFee, totalAllocation };
+    const perLearnerMonthly = perLearner / 12;
+    const totalMonthly = totalAllocation != null ? totalAllocation / 12 : null;
+    return { perLearner, isNoFee, totalAllocation, perLearnerMonthly, totalMonthly };
   }, [q, learners]);
 
   if (!q || !data) {
@@ -67,7 +70,7 @@ export const SchoolFeesCard = ({
                 <Wallet className="h-3.5 w-3.5" />
                 School fees
               </div>
-              <h2 className="mt-1 text-lg font-semibold">Fees and funding</h2>
+              <h2 className="mt-1 text-lg font-semibold">{schoolName} Fees</h2>
             </div>
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
               <Wallet className="h-5 w-5" />
@@ -81,7 +84,7 @@ export const SchoolFeesCard = ({
     );
   }
 
-  const { perLearner, isNoFee, totalAllocation } = data;
+  const { perLearner, isNoFee, totalAllocation, perLearnerMonthly, totalMonthly } = data;
   const tone = isNoFee ? "emerald" : q === 4 ? "amber" : "rose";
   const toneClasses: Record<string, { bg: string; text: string; chip: string }> = {
     emerald: {
@@ -111,9 +114,10 @@ export const SchoolFeesCard = ({
               <Wallet className="h-3.5 w-3.5" />
               School fees and funding
             </div>
-            <h2 className="mt-1 text-lg font-semibold">Per-learner allocation</h2>
+            <h2 className="mt-1 text-lg font-semibold">{schoolName} Fees</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Set by the Provincial Education Department under the National Norms and
+              This is the money the government allocates for your child at this school each
+              year, set by the Provincial Education Department under the National Norms and
               Standards for School Funding.
             </p>
           </div>
@@ -151,24 +155,28 @@ export const SchoolFeesCard = ({
           <div className="rounded-xl border border-border bg-muted/40 p-4">
             <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               <Banknote className="h-3.5 w-3.5" />
-              Per learner
+              Per learner, per year
             </div>
             <div className="mt-1 text-3xl font-bold tracking-tight leading-none">
               {fmtRand(perLearner)}
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">national target, per year</div>
+            <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <CalendarDays className="h-3 w-3" />
+              {fmtRandRounded(perLearnerMonthly)} per month for your child
+            </div>
           </div>
           <div className="rounded-xl border border-border bg-muted/40 p-4">
             <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               <Users className="h-3.5 w-3.5" />
-              Estimated total allocation
+              Total allocation, per year
             </div>
             <div className="mt-1 text-3xl font-bold tracking-tight leading-none">
               {totalAllocation != null ? fmtRand(totalAllocation) : "—"}
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {typeof learners === "number" && learners > 0
-                ? `${learners.toLocaleString()} learners x ${fmtRand(perLearner)}`
+            <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <CalendarDays className="h-3 w-3" />
+              {totalMonthly != null
+                ? `${fmtRandRounded(totalMonthly)} per month for the school`
                 : "Learner count not on record"}
             </div>
           </div>
@@ -215,6 +223,16 @@ export const SchoolFeesCard = ({
             School Funding. Actual provincial allocations may vary year to year.
           </p>
         </div>
+
+        <a
+          href="https://eelawcentre.org.za/wp-content/uploads/funding-in-public-schools-2024-1.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+        >
+          Read the full guide: Funding in Public Schools (2024)
+          <ExternalLink className="h-3 w-3" />
+        </a>
       </CardContent>
     </Card>
   );
