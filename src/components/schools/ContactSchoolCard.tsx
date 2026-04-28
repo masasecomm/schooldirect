@@ -279,13 +279,12 @@ export const ContactSchoolCard = ({ schoolName, emisId }: Props) => {
           <div className="flex flex-col gap-2 pt-2 sm:flex-row">
             <Button
               type="button"
-              variant="secondary"
               className="flex-1"
               disabled={submitting}
               onClick={handleSubmit(submitToSheet)}
             >
               <FileSpreadsheet className="h-4 w-4" />
-              Submit enquiry
+              {submitting ? "Submitting…" : "Submit enquiry"}
             </Button>
           </div>
         </form>
