@@ -27,6 +27,7 @@ import { SiteFooter } from "@/components/schools/SiteFooter";
 import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
 import { SchoolCalendarCard } from "@/components/schools/SchoolCalendarCard";
 import { SchoolFeesCard } from "@/components/schools/SchoolFeesCard";
+import { SchoolIntro } from "@/components/schools/SchoolIntro";
 import { SchoolSeo } from "@/components/seo/SchoolSeo";
 import { SchoolFaq } from "@/components/seo/SchoolFaq";
 import {
@@ -1640,6 +1641,7 @@ const SchoolDetail = () => {
             {schoolYear && (
               <SimilarSchoolsCard school={school} year={schoolYear} />
             )}
+            <SchoolIntro school={school} matric={matricResults} />
             <ContactSchoolCard
               schoolName={displayName(school)}
               emisId={String(school.id)}
