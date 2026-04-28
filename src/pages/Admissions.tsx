@@ -42,7 +42,7 @@ const Admissions = () => {
       <SiteHeader />
       <main className="container flex-1 py-10">
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-medium uppercase tracking-wider text-primary">2026 Online Admissions</p>
+          <p className="text-sm font-medium uppercase tracking-wider text-primary">2027 GDE Admissions &amp; Application</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
             Decentralised Walk-In Centres
           </h1>
