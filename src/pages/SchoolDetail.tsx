@@ -69,12 +69,20 @@ import {
   telHref,
 } from "@/lib/walk-in-centres";
 
-const APPLICATION_HISTORY: { year: string; opened: string; closed: string }[] = [
+const APPLICATION_HISTORY: {
+  year: string;
+  opened: string;
+  closed: string;
+  predicted?: boolean;
+}[] = [
+  {
+    year: "2027",
+    opened: "Mid-July 2026 (predicted)",
+    closed: "Late August 2026 (predicted)",
+    predicted: true,
+  },
   { year: "2026", opened: "24 July 2025", closed: "29 August 2025" },
   { year: "2025", opened: "11 July 2024", closed: "12 August 2024" },
-  { year: "2024", opened: "15 June 2023", closed: "21 July 2023" },
-  { year: "2023", opened: "22 July 2022", closed: "19 August 2022" },
-  { year: "2022", opened: "10 August 2021", closed: "8 October 2021" },
 ];
 
 const Detail = ({
@@ -1873,7 +1881,7 @@ const WalkInCentreCard = ({
             GDE Online Admissions Timeline
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Historical application opening and closing dates per academic year.
+            The last two application windows, plus our predicted 2027 dates based on recent GDE patterns.
           </p>
           <div className="mt-4 overflow-hidden rounded-xl border border-border">
             <Table>
@@ -1886,8 +1894,15 @@ const WalkInCentreCard = ({
               </TableHeader>
               <TableBody>
                 {APPLICATION_HISTORY.map((row) => (
-                  <TableRow key={row.year}>
-                    <TableCell className="font-medium">{row.year}</TableCell>
+                  <TableRow key={row.year} className={row.predicted ? "bg-primary-soft/40" : undefined}>
+                    <TableCell className="font-medium">
+                      {row.year}
+                      {row.predicted && (
+                        <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                          Predicted
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>{row.opened}</TableCell>
                     <TableCell>{row.closed}</TableCell>
                   </TableRow>
@@ -1895,6 +1910,21 @@ const WalkInCentreCard = ({
               </TableBody>
             </Table>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Apply on the official GDE Online Admissions portal:{" "}
+            <a
+              href="https://www.gdeadmissions.gov.za"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-primary hover:underline"
+            >
+              www.gdeadmissions.gov.za
+            </a>
+            .
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Prefer help from a real person? Visit one of the walk-in centres listed above — staff will assist you to apply in person.
+          </p>
         </div>
       </CardContent>
     </Card>
