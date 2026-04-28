@@ -1753,6 +1753,8 @@ const WalkInCentreCard = ({
   school,
 }: {
   school: {
+    name?: string | null;
+    phase?: string | null;
     suburb?: string | null;
     township?: string | null;
     town?: string | null;
@@ -1789,7 +1791,7 @@ const WalkInCentreCard = ({
               <Building2 className="h-3.5 w-3.5" />
               2027 GDE Admissions
             </div>
-            <h2 className="mt-1 text-lg font-semibold">GDE Online Admissions Timeline</h2>
+            <h2 className="mt-1 text-lg font-semibold">{displayName(school)} 2027 Application</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               Recent application windows and our predicted 2027 dates.
             </p>
