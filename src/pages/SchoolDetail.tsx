@@ -317,6 +317,92 @@ const LearnerEnrolmentCard = ({
             </div>
           )}
         </div>
+
+        {/* Parent-friendly outlook + next-year prediction */}
+        {(() => {
+          if (numeric.length < 2 || !latest) return null;
+
+          // Linear regression over the available years to project next year.
+          const xs = numeric.map((s) => Number(s.year));
+          const ys = numeric.map((s) => s.value);
+          const n = xs.length;
+          const meanX = xs.reduce((a, b) => a + b, 0) / n;
+          const meanY = ys.reduce((a, b) => a + b, 0) / n;
+          let num = 0;
+          let den = 0;
+          for (let i = 0; i < n; i++) {
+            num += (xs[i] - meanX) * (ys[i] - meanY);
+            den += (xs[i] - meanX) ** 2;
+          }
+          const slope = den === 0 ? 0 : num / den;
+          const intercept = meanY - slope * meanX;
+          const nextYear = Number(latest.year) + 1;
+          const projectedRaw = slope * nextYear + intercept;
+          const projected = Math.max(0, Math.round(projectedRaw));
+          const projectedDelta = projected - latest.value;
+          const projectedPct =
+            latest.value > 0 ? (projectedDelta / latest.value) * 100 : 0;
+
+          // Overall direction over the period covered.
+          const totalDelta = latest.value - earliest!.value;
+          const totalPct =
+            earliest!.value > 0 ? (totalDelta / earliest!.value) * 100 : 0;
+
+          let outlookHeadline = "";
+          let outlookBody = "";
+          if (totalPct >= 10) {
+            outlookHeadline = "Growing school";
+            outlookBody = `Enrolment grew by about ${Math.abs(totalPct).toFixed(
+              0,
+            )}% from ${earliest!.year} to ${latest.year}. A growing school usually means parents in the area trust it. It can also mean larger classes, so ask about class sizes when you visit.`;
+          } else if (totalPct <= -10) {
+            outlookHeadline = "Shrinking school";
+            outlookBody = `Enrolment dropped by about ${Math.abs(totalPct).toFixed(
+              0,
+            )}% from ${earliest!.year} to ${latest.year}. A drop can mean families are moving away, or that parents are choosing other schools. Ask the principal what is driving the change.`;
+          } else {
+            outlookHeadline = "Stable school";
+            outlookBody = `Enrolment has stayed close to the same from ${earliest!.year} to ${latest.year} (change of about ${totalPct >= 0 ? "+" : ""}${totalPct.toFixed(
+              0,
+            )}%). A stable school often means steady demand and predictable class sizes.`;
+          }
+
+          let predictionLine = "";
+          if (Math.abs(projectedPct) < 2) {
+            predictionLine = `Based on the last ${n} years, enrolment for ${nextYear} is likely to stay close to ${projected.toLocaleString()} learners.`;
+          } else if (projectedPct > 0) {
+            predictionLine = `Based on the trend, ${nextYear} enrolment is projected at about ${projected.toLocaleString()} learners (around ${projectedPct.toFixed(
+              0,
+            )}% higher than ${latest.year}).`;
+          } else {
+            predictionLine = `Based on the trend, ${nextYear} enrolment is projected at about ${projected.toLocaleString()} learners (around ${Math.abs(
+              projectedPct,
+            ).toFixed(0)}% lower than ${latest.year}).`;
+          }
+
+          return (
+            <div className="mt-5 rounded-xl border border-border bg-primary-soft/30 p-4">
+              <div className="text-xs font-semibold uppercase tracking-wide text-primary">
+                What this means for parents
+              </div>
+              <div className="mt-1 text-sm font-semibold text-foreground">
+                {outlookHeadline}
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {outlookBody}
+              </p>
+              <div className="mt-3 rounded-lg border border-dashed border-primary/40 bg-background/60 p-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+                  {nextYear} forecast
+                </div>
+                <p className="mt-1 text-sm text-foreground">{predictionLine}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  This is a simple trend estimate from {n} years of data. Real numbers can change.
+                </p>
+              </div>
+            </div>
+          );
+        })()}
       </CardContent>
     </Card>
   );
