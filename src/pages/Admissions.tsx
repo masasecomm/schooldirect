@@ -166,6 +166,37 @@ const Admissions = () => {
             </section>
           ))}
         </div>
+
+        <section className="mx-auto mt-16 max-w-3xl">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              GDE Online Admissions Timeline
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Historical application opening and closing dates per academic year.
+            </p>
+          </div>
+          <Card className="mt-6 overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">Academic Year</TableHead>
+                  <TableHead className="font-semibold text-foreground">Applications Opened</TableHead>
+                  <TableHead className="font-semibold text-foreground">Applications Closed</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {APPLICATION_HISTORY.map((row) => (
+                  <TableRow key={row.year}>
+                    <TableCell className="font-medium">{row.year}</TableCell>
+                    <TableCell>{row.opened}</TableCell>
+                    <TableCell>{row.closed}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </section>
       </main>
       <SiteFooter />
     </div>
