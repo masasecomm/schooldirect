@@ -1648,7 +1648,29 @@ const FeederZoneCard = ({
             No neighbouring areas found within {FEEDER_RADIUS_KM} km.
           </div>
         ) : (
-          <ol className="mt-5 max-h-80 space-y-2 overflow-y-auto pr-1">
+          <>
+            {(() => {
+              const top = areas.slice(0, 5);
+              const remaining = areas.length - top.length;
+              const names = top.map((a) => a.name);
+              const namesText =
+                names.length <= 1
+                  ? names.join("")
+                  : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+              const tail =
+                remaining > 0
+                  ? ` Children also travel in from ${remaining} other nearby ${remaining === 1 ? "area" : "areas"} – see the full list below.`
+                  : "";
+              return (
+                <div className="mt-5 rounded-xl border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
+                  <p>
+                    <span className="font-semibold text-foreground">What this means. </span>
+                    A feeder zone is the area a school draws its learners from. This school mainly serves children who live in {namesText}, all within {FEEDER_RADIUS_KM} km of the gate.{tail}
+                  </p>
+                </div>
+              );
+            })()}
+            <ol className="mt-4 max-h-80 space-y-2 overflow-y-auto pr-1">
             {areas.map((a) => (
               <li
                 key={`${a.kind}-${a.name}`}
@@ -1681,7 +1703,8 @@ const FeederZoneCard = ({
                 </div>
               </li>
             ))}
-          </ol>
+            </ol>
+          </>
         )}
       </CardContent>
     </Card>
