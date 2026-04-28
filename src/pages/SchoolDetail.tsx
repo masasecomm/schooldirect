@@ -1763,7 +1763,7 @@ const WalkInCentreCard = ({
           <div>
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <Building2 className="h-3.5 w-3.5" />
-              2026 Admissions
+              2027 GDE Admissions
             </div>
             <h2 className="mt-1 text-lg font-semibold">Walk-In Centre</h2>
             <p className="mt-1 text-xs text-muted-foreground">
