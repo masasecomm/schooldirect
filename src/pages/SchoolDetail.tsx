@@ -52,6 +52,7 @@ import {
   type DataYear,
   getMatricResults,
   type MatricResults,
+  findPrincipalAtOtherSchools,
 } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
 import {
