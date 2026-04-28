@@ -1814,7 +1814,12 @@ const SchoolDetail = () => {
           </Card>
 
           <div className="lg:col-span-3 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            <LearnerEnrolmentCard values={learnersByYear} />
+            <LearnerEnrolmentCard
+              values={learnersByYear}
+              educators={educatorsByYear}
+              matric={matricResults}
+              school={{ noFee: school.noFee, quintile: school.quintile, phase: school.phase }}
+            />
             <NumericHistoryCard
               icon={GraduationCap}
               subtitle="Teaching staff"
