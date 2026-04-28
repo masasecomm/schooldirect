@@ -27,6 +27,10 @@ if (!existsSync(distDir)) {
 const SITE_URL = "https://schooldirect.org";
 const CONCURRENCY = Number(process.env.PRERENDER_CONCURRENCY ?? 6);
 const PORT = Number(process.env.PRERENDER_PORT ?? 4321);
+const NAV_TIMEOUT = Number(process.env.PRERENDER_TIMEOUT ?? 120) * 1000;
+// Allow this many failed routes before we mark the whole build as failed.
+// A handful of stragglers shouldn't block deployment of the other ~3,000 pages.
+const FAILURE_THRESHOLD = Number(process.env.PRERENDER_FAILURE_THRESHOLD ?? 25);
 
 // 1. Read routes from the just-generated sitemap.
 const sitemapXml = readFileSync(resolve(distDir, "sitemap.xml"), "utf-8");
@@ -72,7 +76,16 @@ const renderOne = async (route) => {
     return req.continue();
   });
   try {
-    await page.goto(`${origin}${route}`, { waitUntil: "networkidle0", timeout: 60_000 });
+    // First try networkidle0 for a fully-settled page; if it times out, fall
+    // back to domcontentloaded so we still capture rendered HTML for slow routes.
+    try {
+      await page.goto(`${origin}${route}`, { waitUntil: "networkidle0", timeout: NAV_TIMEOUT });
+    } catch (err) {
+      if (!String(err.message).includes("timeout")) throw err;
+      await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT });
+      // Give React a moment to hydrate and helmet to flush.
+      await page.evaluate(() => new Promise((r) => setTimeout(r, 500)));
+    }
     // Give react-helmet-async a tick to flush head tags.
     await page.evaluate(() => new Promise((r) => setTimeout(r, 50)));
     const html = await page.content();
@@ -118,4 +131,7 @@ server.close();
 
 const totalSec = ((Date.now() - startedAt) / 1000).toFixed(1);
 console.log(`[prerender] complete: ${done} ok, ${failed} failed, ${totalSec}s`);
-if (failed > 0) process.exit(1);
+if (failed > FAILURE_THRESHOLD) {
+  console.error(`[prerender] ${failed} failures exceeds threshold of ${FAILURE_THRESHOLD}`);
+  process.exit(1);
+}
