@@ -759,6 +759,141 @@ const NumericHistoryCard = ({
 };
 
 /**
+ * Parent-friendly explanation block for the "Educators over time" card.
+ * Cross-references educator headcount with learner enrolment and (where the
+ * school writes matric) the matric pass-rate trend, so a parent can read
+ * the staffing story in plain language.
+ */
+const EducatorsNarrative = ({
+  educators,
+  learners,
+  matric,
+  phase,
+}: {
+  educators: Record<DataYear, number | null>;
+  learners: Record<DataYear, number | null>;
+  matric: MatricResults | null;
+  phase: string | null | undefined;
+}) => {
+  const eSeries = HISTORY_YEARS.map((y) => ({ year: y, value: educators[y] }))
+    .filter((s): s is { year: DataYear; value: number } => typeof s.value === "number");
+  if (eSeries.length < 1) return null;
+
+  const eLast = eSeries[eSeries.length - 1];
+  const eFirst = eSeries[0];
+  const eDiff = eSeries.length >= 2 ? eLast.value - eFirst.value : 0;
+  const ePct = eSeries.length >= 2 && eFirst.value > 0 ? (eDiff / eFirst.value) * 100 : 0;
+
+  // Staffing headline.
+  let staffHeadline = "Stable teaching staff";
+  let staffBody = "";
+  if (eSeries.length < 2) {
+    staffHeadline = "Current teaching staff";
+    staffBody = `${eLast.value} educators are recorded in ${eLast.year}.`;
+  } else if (ePct >= 10) {
+    staffHeadline = "Growing teaching staff";
+    staffBody = `Educators went from ${eFirst.value} in ${eFirst.year} to ${eLast.value} in ${eLast.year}, a rise of about ${ePct.toFixed(0)}%.`;
+  } else if (ePct <= -10) {
+    staffHeadline = "Shrinking teaching staff";
+    staffBody = `Educators dropped from ${eFirst.value} in ${eFirst.year} to ${eLast.value} in ${eLast.year}, a fall of about ${Math.abs(ePct).toFixed(0)}%.`;
+  } else {
+    staffHeadline = "Stable teaching staff";
+    staffBody = `Educators stayed close to the same (${eFirst.value} in ${eFirst.year}, ${eLast.value} in ${eLast.year}).`;
+  }
+
+  // Cross-reference with learners: ratio + whether staffing tracks enrolment.
+  const lSeries = HISTORY_YEARS.map((y) => ({ year: y, value: learners[y] }))
+    .filter((s): s is { year: DataYear; value: number } => typeof s.value === "number");
+  const lLast = lSeries[lSeries.length - 1];
+  const lFirst = lSeries[0];
+  const lPct =
+    lSeries.length >= 2 && lFirst.value > 0
+      ? ((lLast.value - lFirst.value) / lFirst.value) * 100
+      : null;
+
+  const ratioLatest =
+    lLast && eLast.value > 0 ? Math.round(lLast.value / eLast.value) : null;
+  const ratioFirst =
+    lFirst && eFirst.value > 0 ? Math.round(lFirst.value / eFirst.value) : null;
+
+  let ratioLine = "";
+  if (ratioLatest != null) {
+    if (ratioLatest >= 40) {
+      ratioLine = `In ${eLast.year} there are about ${ratioLatest} learners per educator. That is high and can mean larger classes.`;
+    } else if (ratioLatest <= 25) {
+      ratioLine = `In ${eLast.year} there are about ${ratioLatest} learners per educator, which is favourable for learner attention.`;
+    } else {
+      ratioLine = `In ${eLast.year} there are about ${ratioLatest} learners per educator, which is typical for SA public schools.`;
+    }
+    if (ratioFirst != null && eSeries.length >= 2 && lSeries.length >= 2) {
+      const ratioDiff = ratioLatest - ratioFirst;
+      if (ratioDiff >= 5) {
+        ratioLine += ` Class loads have grown (was about ${ratioFirst}:1 in ${lFirst.year}).`;
+      } else if (ratioDiff <= -5) {
+        ratioLine += ` Class loads have eased (was about ${ratioFirst}:1 in ${lFirst.year}).`;
+      } else {
+        ratioLine += ` Class loads are roughly the same as in ${lFirst.year}.`;
+      }
+    }
+  }
+
+  // Cross-reference: does staffing track enrolment?
+  let alignmentLine = "";
+  if (lPct != null && eSeries.length >= 2) {
+    if (lPct >= 10 && ePct < 5) {
+      alignmentLine = `Learner numbers grew faster than the teaching staff, so educators are likely under more pressure than before.`;
+    } else if (lPct <= -10 && ePct > -5) {
+      alignmentLine = `Learner numbers fell but the staff did not shrink as much, so classes may now be smaller.`;
+    } else if (lPct >= 5 && ePct >= 5) {
+      alignmentLine = `Staffing has grown alongside enrolment, which is a healthy sign that the school is keeping up with demand.`;
+    } else if (lPct <= -5 && ePct <= -5) {
+      alignmentLine = `Both learners and staff are dropping together, which often follows a shrinking catchment area.`;
+    } else {
+      alignmentLine = `Staffing levels match learner numbers reasonably well.`;
+    }
+  }
+
+  // Optional matric link (only meaningful for secondary/combined schools).
+  let matricLine = "";
+  const phaseUp = (phase || "").toUpperCase();
+  const isSecondary = phaseUp.includes("SECONDARY") || phaseUp.includes("COMBINED");
+  if (isSecondary && matric?.y2024?.pct != null && matric?.y2025?.pct != null) {
+    const mDiff = matric.y2025.pct - matric.y2024.pct;
+    if (mDiff >= 5 && ePct >= 0) {
+      matricLine = `Matric pass rate also improved (${matric.y2024.pct.toFixed(1)}% → ${matric.y2025.pct.toFixed(1)}%), suggesting the staff team is delivering results.`;
+    } else if (mDiff <= -5 && ePct <= 0) {
+      matricLine = `Matric pass rate dropped at the same time (${matric.y2024.pct.toFixed(1)}% → ${matric.y2025.pct.toFixed(1)}%). Reduced or unstable staffing can be one reason behind weaker results.`;
+    } else if (Math.abs(mDiff) < 5) {
+      matricLine = `Despite staff changes, matric results stayed close to the same (${matric.y2024.pct.toFixed(1)}% → ${matric.y2025.pct.toFixed(1)}%).`;
+    } else {
+      matricLine = `Matric pass rate moved from ${matric.y2024.pct.toFixed(1)}% to ${matric.y2025.pct.toFixed(1)}%, which is worth weighing alongside the staffing trend.`;
+    }
+  }
+
+  const bullets = [ratioLine, alignmentLine, matricLine].filter(Boolean);
+
+  return (
+    <div className="rounded-xl border border-border bg-accent/10 p-4">
+      <div className="text-xs font-semibold uppercase tracking-wide text-accent">
+        What this means for parents
+      </div>
+      <div className="mt-1 text-sm font-semibold text-foreground">{staffHeadline}</div>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{staffBody}</p>
+      {bullets.length > 0 && (
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          {bullets.map((b, i) => (
+            <li key={i}>{b}</li>
+          ))}
+        </ul>
+      )}
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Built from this school's own learner, educator{isSecondary ? ", and matric" : ""} numbers.
+      </p>
+    </div>
+  );
+};
+
+/**
  * Leadership timeline card. Visualises principal across years and highlights changes.
  */
 const LeadershipCard = ({
