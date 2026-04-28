@@ -13,4 +13,6 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://schooldirect.org/sitemap.xml
+Sitemap: https://schooldirect.org/sitemap-index.xml
+Sitemap: https://schooldirect.org/sitemap-static.xml
+Sitemap: https://schooldirect.org/sitemap-schools.xml
