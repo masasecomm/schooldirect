@@ -148,8 +148,14 @@ const HumanFigure = ({ active }: { active: boolean }) => (
  */
 const LearnerEnrolmentCard = ({
   values,
+  educators,
+  matric,
+  school,
 }: {
   values: Record<DataYear, number | null>;
+  educators?: Record<DataYear, number | null>;
+  matric?: MatricResults | null;
+  school?: { noFee?: string | null; quintile?: string | null; phase?: string | null };
 }) => {
   const FIGURE_COUNT = 10;
   const series = HISTORY_YEARS.map((y) => ({ year: y, value: values[y] }));
