@@ -263,29 +263,35 @@ export interface OtherPrincipalAppearance {
  * the current school by EMIS id. Returns a deduplicated list per school,
  * keeping the most recent year an appearance was recorded.
  */
+/**
+ * Normalise a principal name for EXACT matching across schools:
+ * lowercase, strip titles (Mr/Mrs/Dr/...), drop punctuation and single-letter
+ * initials, then sort the remaining tokens. Two records match only when
+ * this normalised form is byte-identical.
+ */
+const normalisePrincipalName = (name: string): string => {
+  const tokens = name
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length >= 2 && !PRINCIPAL_TITLES.has(t));
+  return tokens.sort().join(" ");
+};
+
 export const findPrincipalAtOtherSchools = (
   principalName: string,
   excludeSchoolId: string,
 ): OtherPrincipalAppearance[] => {
-  const targetTokens = principalTokens(principalName);
-  if (targetTokens.size === 0) return [];
+  const target = normalisePrincipalName(principalName);
+  if (!target) return [];
 
   const byKey = new Map<string, OtherPrincipalAppearance>();
   for (const year of AVAILABLE_YEARS) {
     for (const s of datasets[year]) {
       if (s.id === excludeSchoolId) continue;
       if (!s.principal) continue;
-      const tokens = principalTokens(s.principal);
-      if (tokens.size === 0) continue;
-      let shared = 0;
-      for (const t of targetTokens) if (tokens.has(t)) shared++;
-      // Require at least one shared meaningful token AND at least one of them
-      // to be longer than 3 chars to avoid weak matches like "ann".
-      if (shared < 1) continue;
-      const strong = Array.from(targetTokens).some(
-        (t) => t.length >= 4 && tokens.has(t),
-      );
-      if (!strong) continue;
+      const candidate = normalisePrincipalName(s.principal);
+      if (!candidate || candidate !== target) continue;
 
       const existing = byKey.get(s.id);
       if (!existing || AVAILABLE_YEARS.indexOf(year) < AVAILABLE_YEARS.indexOf(existing.year)) {
