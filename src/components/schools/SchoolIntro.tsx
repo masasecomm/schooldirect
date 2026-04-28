@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { Clock, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   displayName,
@@ -17,6 +17,12 @@ type Props = {
  * Built only from the school's own data so it stays factual and unique.
  * Voice: South African second-language English. Short sentences. No hedging.
  */
+const LAST_UPDATED = new Date().toLocaleDateString("en-ZA", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
 export const SchoolIntro = ({ school, matric }: Props) => {
   const sentences = buildIntroSentences(school, matric);
   if (sentences.length === 0) return null;
@@ -35,6 +41,10 @@ export const SchoolIntro = ({ school, matric }: Props) => {
             <h2 className="mt-1 text-lg font-semibold">
               What makes {displayName(school)} stand out
             </h2>
+            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              <span>Last updated: {LAST_UPDATED}</span>
+            </div>
           </div>
         </div>
         <p className="mt-4 text-sm leading-relaxed text-foreground">
