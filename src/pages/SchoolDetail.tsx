@@ -26,6 +26,7 @@ import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
 import { SchoolCalendarCard } from "@/components/schools/SchoolCalendarCard";
+import { SchoolFeesCard } from "@/components/schools/SchoolFeesCard";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -1624,6 +1625,14 @@ const SchoolDetail = () => {
             )}
             {school.sector?.toUpperCase() === "PUBLIC" && (
               <SchoolCalendarCard schoolName={displayName(school)} />
+            )}
+            {school.sector?.toUpperCase() === "PUBLIC" && (
+              <SchoolFeesCard
+                schoolName={displayName(school)}
+                quintile={school.quintile}
+                learners={school.learners}
+                noFee={school.noFee}
+              />
             )}
             {schoolYear && (
               <SimilarSchoolsCard school={school} year={schoolYear} />
