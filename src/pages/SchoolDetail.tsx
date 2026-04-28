@@ -336,7 +336,10 @@ const LearnerEnrolmentCard = ({
           }
           const slope = den === 0 ? 0 : num / den;
           const intercept = meanY - slope * meanX;
-          const nextYear = Number(latest.year) + 1;
+          // Forecast two years past the latest data point. With data ending in
+          // 2025 this surfaces a 2027 outlook, which is what parents planning
+          // ahead actually want to see.
+          const nextYear = Number(latest.year) + 2;
           const projectedRaw = slope * nextYear + intercept;
           const projected = Math.max(0, Math.round(projectedRaw));
           const projectedDelta = projected - latest.value;
@@ -367,6 +370,31 @@ const LearnerEnrolmentCard = ({
             )}%). A stable school often means steady demand and predictable class sizes.`;
           }
 
+          // Plain-English candidate causes tied to the trend direction.
+          // We list them as possibilities, not facts, because we only have
+          // enrolment numbers in this card — not staff or principal records.
+          const possibleCauses: string[] =
+            totalPct >= 10
+              ? [
+                  "A new principal or strong school management has rebuilt parent confidence.",
+                  "Better matric results in recent years are attracting more families.",
+                  "Stable, experienced teachers staying year after year.",
+                  "New housing or population growth in the surrounding suburb.",
+                ]
+              : totalPct <= -10
+              ? [
+                  "A change of principal or weak school leadership.",
+                  "High teacher turnover or unfilled teaching posts.",
+                  "Weaker matric results pushing parents to nearby schools.",
+                  "Families moving out of the area or choosing private schools.",
+                ]
+              : [
+                  "Steady leadership with no recent change of principal.",
+                  "Consistent teaching staff from year to year.",
+                  "Matric results in line with the area's average.",
+                  "A stable community with little movement in or out.",
+                ];
+
           let predictionLine = "";
           if (Math.abs(projectedPct) < 2) {
             predictionLine = `Based on the last ${n} years, enrolment for ${nextYear} is likely to stay close to ${projected.toLocaleString()} learners.`;
@@ -391,6 +419,19 @@ const LearnerEnrolmentCard = ({
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {outlookBody}
               </p>
+              <div className="mt-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Possible causes of this trend
+                </div>
+                <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                  {possibleCauses.map((c, i) => (
+                    <li key={i}>{c}</li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  These are common reasons across SA schools, not confirmed facts about this one. Ask the school directly.
+                </p>
+              </div>
               <div className="mt-3 rounded-lg border border-dashed border-primary/40 bg-background/60 p-3">
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">
                   {nextYear} forecast
