@@ -1867,6 +1867,35 @@ const WalkInCentreCard = ({
             )}
           </ul>
         )}
+
+        <div className="mt-6 border-t border-border pt-6">
+          <h3 className="text-sm font-semibold text-foreground">
+            GDE Online Admissions Timeline
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Historical application opening and closing dates per academic year.
+          </p>
+          <div className="mt-4 overflow-hidden rounded-xl border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">Academic Year</TableHead>
+                  <TableHead className="font-semibold text-foreground">Applications Opened</TableHead>
+                  <TableHead className="font-semibold text-foreground">Applications Closed</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {APPLICATION_HISTORY.map((row) => (
+                  <TableRow key={row.year}>
+                    <TableCell className="font-medium">{row.year}</TableCell>
+                    <TableCell>{row.opened}</TableCell>
+                    <TableCell>{row.closed}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
