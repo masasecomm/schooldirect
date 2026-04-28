@@ -1789,9 +1789,9 @@ const WalkInCentreCard = ({
               <Building2 className="h-3.5 w-3.5" />
               2027 GDE Admissions
             </div>
-            <h2 className="mt-1 text-lg font-semibold">Walk-In Centre</h2>
+            <h2 className="mt-1 text-lg font-semibold">GDE Online Admissions Timeline</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              For Grade 1 &amp; Grade 8 application support
+              Recent application windows and our predicted 2027 dates.
             </p>
           </div>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
@@ -1799,6 +1799,57 @@ const WalkInCentreCard = ({
           </div>
         </div>
 
+        <div className="mt-5">
+          <div className="overflow-hidden rounded-xl border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">Academic Year</TableHead>
+                  <TableHead className="font-semibold text-foreground">Applications Opened</TableHead>
+                  <TableHead className="font-semibold text-foreground">Applications Closed</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {APPLICATION_HISTORY.map((row) => (
+                  <TableRow key={row.year} className={row.predicted ? "bg-primary-soft/40" : undefined}>
+                    <TableCell className="font-medium">
+                      {row.year}
+                      {row.predicted && (
+                        <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                          Predicted
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>{row.opened}</TableCell>
+                    <TableCell>{row.closed}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Apply on the official GDE Online Admissions portal:{" "}
+            <a
+              href="https://www.gdeadmissions.gov.za"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-primary hover:underline"
+            >
+              www.gdeadmissions.gov.za
+            </a>
+            .
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Prefer help from a real person? Visit one of the walk-in centres below — staff will assist you to apply in person.
+          </p>
+        </div>
+
+        <div className="mt-6 border-t border-border pt-6">
+          <h3 className="text-sm font-semibold text-foreground">Walk-In Centre</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            For Grade 1 &amp; Grade 8 application support
+          </p>
+          <div className="mt-4">
         {uniqueMatches.length === 0 ? (
           <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
             No matching walk-in centre found for this area.{" "}
@@ -1875,56 +1926,7 @@ const WalkInCentreCard = ({
             )}
           </ul>
         )}
-
-        <div className="mt-6 border-t border-border pt-6">
-          <h3 className="text-sm font-semibold text-foreground">
-            GDE Online Admissions Timeline
-          </h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            The last two application windows, plus our predicted 2027 dates based on recent GDE patterns.
-          </p>
-          <div className="mt-4 overflow-hidden rounded-xl border border-border">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold text-foreground">Academic Year</TableHead>
-                  <TableHead className="font-semibold text-foreground">Applications Opened</TableHead>
-                  <TableHead className="font-semibold text-foreground">Applications Closed</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {APPLICATION_HISTORY.map((row) => (
-                  <TableRow key={row.year} className={row.predicted ? "bg-primary-soft/40" : undefined}>
-                    <TableCell className="font-medium">
-                      {row.year}
-                      {row.predicted && (
-                        <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-                          Predicted
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>{row.opened}</TableCell>
-                    <TableCell>{row.closed}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Apply on the official GDE Online Admissions portal:{" "}
-            <a
-              href="https://www.gdeadmissions.gov.za"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-primary hover:underline"
-            >
-              www.gdeadmissions.gov.za
-            </a>
-            .
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Prefer help from a real person? Visit one of the walk-in centres listed above — staff will assist you to apply in person.
-          </p>
         </div>
       </CardContent>
     </Card>
