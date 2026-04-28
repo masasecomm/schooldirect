@@ -194,3 +194,54 @@ export const buildSchoolJsonLd = (
 };
 
 export const schoolPageUrl = (school: School): string => absoluteUrl(schoolHref(school));
+
+/**
+ * Build the canonical FAQ list for a school.
+ * Used both for the visible accordion on the page and for FAQPage JSON-LD,
+ * so users and Google see exactly the same Q&A.
+ */
+export const buildSchoolFaqs = (
+  school: School,
+  matric: MatricResults | null,
+): Array<{ q: string; a: string }> => {
+  const name = displayName(school);
+  const faqs: Array<{ q: string; a: string }> = [];
+
+  if (school.streetAddress || school.suburb || school.town) {
+    const where = [school.streetAddress, school.suburb, school.town]
+      .filter(Boolean)
+      .map((p) => titleCase(p as string))
+      .join(", ");
+    faqs.push({
+      q: `Where is ${name}?`,
+      a: `${name} is located at ${where}, Gauteng, South Africa.`,
+    });
+  }
+  if (school.telephone || school.email) {
+    const bits: string[] = [];
+    if (school.telephone) bits.push(`phone ${school.telephone}`);
+    if (school.email) bits.push(`email ${school.email}`);
+    faqs.push({
+      q: `How do I contact ${name}?`,
+      a: `You can contact ${name} on ${bits.join(" or ")}.`,
+    });
+  }
+  if (matric?.y2025?.pct != null) {
+    faqs.push({
+      q: `What is ${name}'s 2025 matric pass rate?`,
+      a: `${name} achieved a ${matric.y2025.pct.toFixed(1)}% matric pass rate in 2025, with ${matric.y2025.achieved} of ${matric.y2025.wrote} learners passing.`,
+    });
+  }
+  faqs.push({
+    q: `Is ${name} a no-fee school?`,
+    a:
+      school.noFee === "YES"
+        ? `Yes — ${name} is a no-fee public school${school.quintile ? ` (quintile ${school.quintile})` : ""}.`
+        : `${name} is a fee-paying school${school.quintile ? ` (quintile ${school.quintile})` : ""}.`,
+  });
+  faqs.push({
+    q: `What is the EMIS number for ${name}?`,
+    a: `The EMIS number for ${name} is ${school.emis}.`,
+  });
+  return faqs;
+};
