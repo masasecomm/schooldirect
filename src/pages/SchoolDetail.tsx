@@ -1908,6 +1908,9 @@ const SimilarSchoolsCard = ({
   if (!school?.phase) return null;
 
   const phaseLabel = titleCase(school.phase);
+  // Phase descriptor without trailing "School(s)" so we can safely append
+  // " school" / " schools" without producing "primary school schools".
+  const phaseWord = phaseLabel.replace(/\s*schools?$/i, "").trim() || phaseLabel;
   const fieldStyles: Record<"Township" | "Suburb" | "Town", string> = {
     Township: "bg-accent/15 text-accent",
     Suburb: "bg-primary-soft text-primary",
@@ -1927,7 +1930,6 @@ const SimilarSchoolsCard = ({
               {(() => {
                 // Phase label without trailing "School(s)" so we don't say
                 // "Primary School schools".
-                const phaseWord = phaseLabel.replace(/\s*schools?$/i, "").trim() || phaseLabel;
                 // Dedupe location values case-insensitively (suburb may equal town).
                 const seen = new Set<string>();
                 const parts: { label: string; value: string }[] = [];
@@ -1962,7 +1964,7 @@ const SimilarSchoolsCard = ({
               })()}
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Other {phaseLabel.toLowerCase().replace(/\s*schools?$/i, "")} schools in the same area
+              Other {phaseWord.toLowerCase()} schools in the same area
             </p>
           </div>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
@@ -1978,7 +1980,7 @@ const SimilarSchoolsCard = ({
             <div className="text-4xl font-bold tracking-tight leading-none">
               {similar.length}
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">{phaseLabel.toLowerCase()} school{similar.length === 1 ? "" : "s"}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{phaseWord.toLowerCase()} school{similar.length === 1 ? "" : "s"}</div>
           </div>
         </div>
 
