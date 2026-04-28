@@ -920,6 +920,61 @@ const LeadershipCard = ({
   const TITLES = new Set([
     "mr", "mrs", "ms", "miss", "dr", "prof", "mnr", "mev", "rev",
   ]);
+  // Best-effort honorific from a raw principal string. We:
+  //  1. Honour an explicit title already in the source ("Mr Smith", "Mrs J Dlamini").
+  //  2. Otherwise look up the first non-initial first name against a small
+  //     dictionary of common SA male/female names. If we cannot tell, return "".
+  // Names not in the dictionary intentionally get NO honorific so we never guess wrong.
+  const MALE_FIRST_NAMES = new Set([
+    // English / Afrikaans
+    "john","james","peter","paul","david","michael","andrew","mark","stephen","richard","robert","william","george","henry","thomas","charles","edward","kevin","brian","gary","barry","wayne","craig","shaun","ryan","jason","gavin","trevor","clive","grant","neil","nigel","derek","kobus","pieter","johan","jaco","francois","wynand","hennie","gerhard","christo","willem","stefan","stephan","hermann","rudolph","hendrik","koos","sarel",
+    // African (Nguni / Sotho / Tsonga / Venda) – common male names
+    "sipho","thabo","themba","mandla","bongani","sibusiso","sandile","mxolisi","sifiso","lungelo","lwazi","musa","nkosi","mzwandile","vusi","vusumuzi","zwelibanzi","mthunzi","mlungisi","mfundo","menzi","khanyiso","lindokuhle","sabelo","siyabonga","siyanda","siphesihle","luyanda","kagiso","tshepo","kabelo","karabo","lebogang","lehlohonolo","letlhogonolo","mpho","tumelo","tebogo","tlotliso","reabetswe","refilwe","oratile","oarabile","mogau","mogale","molefi","tshepiso","tshegofatso","keletso","keabetswe","onkemetse","khotso","emmanuel","nkosinathi","nkululeko","mxolisi","sibongiseni","mhlonipheni","amukelani","hlamulo","rhulani","tinyiko","mukondi","mulalo","mukondeleli","ndivhuwo","tshilidzi","khathutshelo","rendani","ronewa","aluwani","azwianewi","mashudu","selaelo","mohale","kgosi","letlama","ofentse","obakeng","keabetswe","kabello",
+  ]);
+  const FEMALE_FIRST_NAMES = new Set([
+    // English / Afrikaans
+    "mary","jane","susan","sarah","sara","linda","patricia","jennifer","elizabeth","margaret","barbara","helen","karen","nancy","betty","ruth","julie","gloria","cheryl","carol","janet","wendy","marie","yvonne","marlene","annette","cynthia","rosemary","heather","lynn","melanie","sharon","theresa","beverley","colleen","tracey","charmaine","tanya","jacqueline","michelle","nicole","leigh","candice","amanda","cindy","melinda","jessica","megan","kayleigh","tasneem","fatima","aisha","ayesha","zainab","raeesah","zubeida","naadia","aaliyah","retha","martie","marietjie","annelize","annemarie","susanna","susarah","magdalena","christina","cornelia","engela","engeline","henriette","jeanette","johanna","katrien","lize","liezel","mariska","minnette","ronel","theunsina","wilna","yolande",
+    // African female names
+    "nomvula","nomsa","nokuthula","nonhlanhla","nokulunga","nkosazana","nontsikelelo","ntombizodwa","ntombi","thandi","thandiwe","thando","thembi","thembeka","zanele","zandile","zinhle","zoleka","zola","zinzi","zelda","busisiwe","buhle","busi","bukiwe","bongiwe","gugu","gugulethu","khanyisile","kholeka","khethiwe","khulisile","lerato","lesedi","lebohang","lebogang","lindiwe","lerato","lillian","lulama","lungile","makhosi","mavis","matshidiso","mathapelo","mathabo","matumelo","matlhogonolo","mosa","mpho","mpumi","mpumelelo","ntando","nelisiwe","nondumiso","palesa","pinky","portia","precious","puleng","refilwe","rethabile","rorisang","sibongile","silindile","sindiswa","siphokazi","siphosethu","siyabonga","tebogo","tendai","thabisile","thabang","tshepiso","tholiwe","tumi","unathi","violet","winnie","xoliswa","yandiswa","yonela","azwifaneli","mbavhalelo","muofhe","ndivhuwo","ndaedzo","tshifhiwa","tshilidzi","vhonani","amukelani","khanyisa","rhulani","saraphina","khensani","tinyiko","makhosini","mhlanguli","sasha","sashni","sashia","yashika","kavitha","priya","reshma","shanti","ramona","vanessa","valencia","verna","vivian","wendy","winnifred","yolisa","zama","zameka","zandile",
+  ]);
+  const inferHonorific = (raw: string | null): string | null => {
+    if (!raw) return null;
+    const cleaned = raw.replace(/\./g, " ").replace(/\s+/g, " ").trim();
+    const tokens = cleaned.split(/\s+/);
+    // 1. Explicit title anywhere in the string
+    for (const t of tokens) {
+      const lc = t.toLowerCase();
+      if (lc === "mr" || lc === "mnr") return "Mr";
+      if (lc === "mrs" || lc === "mev") return "Mrs";
+      if (lc === "ms" || lc === "miss") return "Ms";
+      if (lc === "dr") return "Dr";
+      if (lc === "prof") return "Prof";
+    }
+    // 2. First non-initial token vs name dictionary
+    for (const t of tokens) {
+      const lc = t.toLowerCase().replace(/[^a-z]/g, "");
+      if (lc.length < 3) continue;
+      if (MALE_FIRST_NAMES.has(lc)) return "Mr";
+      if (FEMALE_FIRST_NAMES.has(lc)) return "Mrs";
+      // Stop after the first usable token; do not scan further tokens
+      // (those are likely surnames and would mislead).
+      break;
+    }
+    return null;
+  };
+  // Strip leading title tokens from a raw name before re-applying our chosen honorific.
+  const stripLeadingTitle = (raw: string): string => {
+    return raw
+      .replace(/^\s*(mr|mrs|ms|miss|dr|prof|mnr|mev|rev)\.?\s+/i, "")
+      .trim();
+  };
+  // Format a name for display: "<Honorific> <Name>" when we are confident, else just the name.
+  const formatPrincipalDisplay = (raw: string | null): string => {
+    if (!raw) return "—";
+    const honorific = inferHonorific(raw);
+    const base = stripLeadingTitle(raw);
+    return honorific ? `${honorific} ${base}` : base;
+  };
   const tokenise = (n: string): Set<string> => {
     const tokens = n
       .toLowerCase()
@@ -961,10 +1016,12 @@ const LeadershipCard = ({
   const entries = HISTORY_YEARS.map((y) => {
     const key = yearToGroupKey.get(y) ?? "";
     const group = key ? groups.find((g) => g.key === key) : undefined;
+    const rawName = group?.canonical ?? null;
     return {
       year: y,
       key,
-      name: group?.canonical ?? null,
+      name: rawName ? formatPrincipalDisplay(rawName) : null,
+      rawName,
     };
   });
   const known = entries.filter((e) => e.name);
@@ -1075,8 +1132,11 @@ const LeadershipCard = ({
           // For each distinct principal: list of years they held the post on record.
           const cvs = uniqueKeys.map((key) => {
             const yearsForKey = entries.filter((e) => e.key === key).map((e) => e.year);
-            const name =
-              entries.find((e) => e.key === key)?.name ?? key;
+            const entryForKey = entries.find((e) => e.key === key);
+            const name = entryForKey?.name ?? key;
+            // Use the raw (un-prefixed) name for cross-school matching so the
+            // honorific we added doesn't pollute the token search.
+            const rawNameForLookup = entryForKey?.rawName ?? key;
             const tenureStart = yearsForKey[0];
             const tenureEnd = yearsForKey[yearsForKey.length - 1];
 
@@ -1086,30 +1146,32 @@ const LeadershipCard = ({
               return idx > 0 ? HISTORY_YEARS[idx - 1] : tenureStart;
             })();
 
-            const fmtChange = (
-              from: number | null | undefined,
-              to: number | null | undefined,
-              unit: string,
+            // Compute raw deltas so we can write a fluent paragraph.
+            const learnFrom = learners?.[yearBefore] ?? null;
+            const learnTo = learners?.[tenureEnd] ?? null;
+            const eduFrom = educators?.[yearBefore] ?? null;
+            const eduTo = educators?.[tenureEnd] ?? null;
+
+            const describeChange = (
+              from: number | null,
+              to: number | null,
+              singular: string,
             ): string | null => {
               if (from == null || to == null || from <= 0) return null;
               const diff = to - from;
               const pct = (diff / from) * 100;
               if (Math.abs(pct) < 1) {
-                return `${unit} stayed close to ${to.toLocaleString()}`;
+                return `${singular} numbers held steady at about ${to.toLocaleString()}`;
               }
-              const dir = diff > 0 ? "rose" : "fell";
-              return `${unit} ${dir} from ${from.toLocaleString()} to ${to.toLocaleString()} (${diff > 0 ? "+" : ""}${pct.toFixed(0)}%)`;
+              const verb = diff > 0 ? "grew" : "dropped";
+              return `${singular} numbers ${verb} from ${from.toLocaleString()} to ${to.toLocaleString()} (${diff > 0 ? "+" : ""}${pct.toFixed(0)}%)`;
             };
 
-            const learnerLine = learners
-              ? fmtChange(learners[yearBefore], learners[tenureEnd], "Learners")
-              : null;
-            const educatorLine = educators
-              ? fmtChange(educators[yearBefore], educators[tenureEnd], "Educators")
-              : null;
+            const learnerPhrase = describeChange(learnFrom, learnTo, "Learner");
+            const educatorPhrase = describeChange(eduFrom, eduTo, "Educator");
 
-            // Matric: only meaningful if covers tenure end year.
-            let matricLine: string | null = null;
+            // Matric narrative – only when secondary/combined and we have data.
+            let matricPhrase: string | null = null;
             if (isSecondary && matric) {
               const yKey = `y${tenureEnd}` as "y2023" | "y2024" | "y2025";
               const yKeyBefore = `y${yearBefore}` as "y2023" | "y2024" | "y2025";
@@ -1117,16 +1179,40 @@ const LeadershipCard = ({
               const beforeStats = matric[yKeyBefore];
               if (endStats?.pct != null && beforeStats?.pct != null && yearBefore !== tenureEnd) {
                 const diff = endStats.pct - beforeStats.pct;
-                const dir = diff >= 0 ? "+" : "";
-                matricLine = `Matric pass rate moved from ${beforeStats.pct.toFixed(1)}% (${yearBefore}) to ${endStats.pct.toFixed(1)}% (${tenureEnd}), ${dir}${diff.toFixed(1)} points`;
+                const dir = diff >= 0 ? "improved" : "slipped";
+                matricPhrase = `the matric pass rate ${dir} from ${beforeStats.pct.toFixed(1)}% to ${endStats.pct.toFixed(1)}% (${diff >= 0 ? "+" : ""}${diff.toFixed(1)} points)`;
               } else if (endStats?.pct != null) {
-                matricLine = `Matric pass rate in ${tenureEnd} was ${endStats.pct.toFixed(1)}%`;
+                matricPhrase = `the matric pass rate stood at ${endStats.pct.toFixed(1)}% in ${tenureEnd}`;
               }
             }
 
             const previousPosts = currentSchoolId
-              ? findPrincipalAtOtherSchools(name, currentSchoolId)
+              ? findPrincipalAtOtherSchools(rawNameForLookup, currentSchoolId)
               : [];
+
+            // Build the impact paragraph in plain language.
+            const tenureClause =
+              tenureStart === tenureEnd
+                ? `In ${tenureStart}, while ${name} was on record as principal,`
+                : `Between ${yearBefore === tenureStart ? tenureStart : `${yearBefore} and ${tenureEnd}`}, while ${name} was on record as principal,`;
+            const impactParts: string[] = [];
+            if (learnerPhrase) impactParts.push(learnerPhrase.toLowerCase());
+            if (educatorPhrase) impactParts.push(educatorPhrase.toLowerCase());
+            if (matricPhrase) impactParts.push(matricPhrase);
+            const impactSentence =
+              impactParts.length > 0
+                ? `${tenureClause} ${impactParts.join("; ")}.`
+                : `On record as principal in ${tenureStart === tenureEnd ? tenureStart : `${tenureStart}-${tenureEnd}`}. We do not have enough comparable data to describe the change during this period.`;
+
+            // Build the career-history sentence.
+            let historySentence: string;
+            if (previousPosts.length === 0) {
+              historySentence = `Our directory of every Gauteng school shows no other postings for ${name} between 2023 and 2025, so this appears to be the only school where ${name} has been recorded as principal in our dataset.`;
+            } else {
+              const list = previousPosts.slice(0, 4).map((p) => p.schoolName).join(", ");
+              const more = previousPosts.length > 4 ? `, plus ${previousPosts.length - 4} more` : "";
+              historySentence = `The same name also appears as principal at ${previousPosts.length} other school${previousPosts.length === 1 ? "" : "s"} in our Gauteng directory: ${list}${more}. This suggests prior leadership experience elsewhere in the province.`;
+            }
 
             return {
               key,
@@ -1134,9 +1220,8 @@ const LeadershipCard = ({
               tenureStart,
               tenureEnd,
               years: yearsForKey,
-              learnerLine,
-              educatorLine,
-              matricLine,
+              impactSentence,
+              historySentence,
               previousPosts,
             };
           });
@@ -1144,7 +1229,7 @@ const LeadershipCard = ({
           return (
             <div className="mt-5">
               <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Principal profiles
+                Principal CV
               </div>
               <div className="mt-2 space-y-3">
                 {cvs.map((cv) => {
@@ -1152,9 +1237,6 @@ const LeadershipCard = ({
                     cv.tenureStart === cv.tenureEnd
                       ? `On record in ${cv.tenureStart}`
                       : `On record ${cv.tenureStart} – ${cv.tenureEnd}`;
-                  const bullets = [cv.learnerLine, cv.educatorLine, cv.matricLine].filter(
-                    (b): b is string => Boolean(b),
-                  );
                   return (
                     <div
                       key={cv.key}
@@ -1169,29 +1251,17 @@ const LeadershipCard = ({
                         </Badge>
                       </div>
 
-                      {bullets.length > 0 && (
-                        <div className="mt-3">
-                          <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                            What changed during their tenure
-                          </div>
-                          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                            {bullets.map((b, i) => (
-                              <li key={i}>{b}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      <div className="mt-3">
-                        <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                          Previous or other postings
-                        </div>
-                        {cv.previousPosts.length === 0 ? (
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            No record of {cv.name} appearing as principal at another school in our dataset.
-                          </p>
-                        ) : (
-                          <ul className="mt-1.5 space-y-1 text-sm">
+                      <div className="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
+                        <p>
+                          <span className="font-semibold text-foreground">Impact at this school. </span>
+                          {cv.impactSentence}
+                        </p>
+                        <p>
+                          <span className="font-semibold text-foreground">Career history. </span>
+                          {cv.historySentence}
+                        </p>
+                        {cv.previousPosts.length > 0 && (
+                          <ul className="mt-1.5 space-y-1 pl-1 text-sm">
                             {cv.previousPosts.slice(0, 5).map((p) => (
                               <li key={p.schoolId}>
                                 <Link
@@ -1205,11 +1275,6 @@ const LeadershipCard = ({
                                 </span>
                               </li>
                             ))}
-                            {cv.previousPosts.length > 5 && (
-                              <li className="text-xs text-muted-foreground">
-                                +{cv.previousPosts.length - 5} more
-                              </li>
-                            )}
                           </ul>
                         )}
                       </div>
