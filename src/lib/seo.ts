@@ -145,20 +145,56 @@ export const buildSchoolJsonLd = (
     breadcrumb: breadcrumbs,
   };
 
-  // FAQ generated from real data
+  // FAQ generated from real data — shared with the visible on-page accordion.
+  const faqs = buildSchoolFaqs(school, matric);
+
+  const faqPage = {
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [schoolNode, webPage, breadcrumbs, faqPage],
+  };
+};
+
+export const schoolPageUrl = (school: School): string => absoluteUrl(schoolHref(school));
+
+/**
+ * Build the canonical FAQ list for a school.
+ * Used both for the visible accordion on the page and for FAQPage JSON-LD,
+ * so users and Google see exactly the same Q&A.
+ */
+export const buildSchoolFaqs = (
+  school: School,
+  matric: MatricResults | null,
+): Array<{ q: string; a: string }> => {
+  const name = displayName(school);
   const faqs: Array<{ q: string; a: string }> = [];
+
   if (school.streetAddress || school.suburb || school.town) {
     const where = [school.streetAddress, school.suburb, school.town]
       .filter(Boolean)
       .map((p) => titleCase(p as string))
       .join(", ");
-    faqs.push({ q: `Where is ${name}?`, a: `${name} is located at ${where}, Gauteng, South Africa.` });
+    faqs.push({
+      q: `Where is ${name}?`,
+      a: `${name} is located at ${where}, Gauteng, South Africa.`,
+    });
   }
   if (school.telephone || school.email) {
     const bits: string[] = [];
     if (school.telephone) bits.push(`phone ${school.telephone}`);
     if (school.email) bits.push(`email ${school.email}`);
-    faqs.push({ q: `How do I contact ${name}?`, a: `You can contact ${name} on ${bits.join(" or ")}.` });
+    faqs.push({
+      q: `How do I contact ${name}?`,
+      a: `You can contact ${name} on ${bits.join(" or ")}.`,
+    });
   }
   if (matric?.y2025?.pct != null) {
     faqs.push({
@@ -177,20 +213,5 @@ export const buildSchoolJsonLd = (
     q: `What is the EMIS number for ${name}?`,
     a: `The EMIS number for ${name} is ${school.emis}.`,
   });
-
-  const faqPage = {
-    "@type": "FAQPage",
-    mainEntity: faqs.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
-
-  return {
-    "@context": "https://schema.org",
-    "@graph": [schoolNode, webPage, breadcrumbs, faqPage],
-  };
+  return faqs;
 };
-
-export const schoolPageUrl = (school: School): string => absoluteUrl(schoolHref(school));
