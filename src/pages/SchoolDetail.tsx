@@ -1512,6 +1512,10 @@ const SchoolDetail = () => {
           <p className="mt-1 text-muted-foreground">{titleCase(school.district)} District</p>
         )}
 
+        <div className="mt-6">
+          <SchoolIntro school={school} matric={matricResults} />
+        </div>
+
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2 shadow-[var(--shadow-card)]">
             <CardContent className="p-6">
@@ -1641,7 +1645,6 @@ const SchoolDetail = () => {
             {schoolYear && (
               <SimilarSchoolsCard school={school} year={schoolYear} />
             )}
-            <SchoolIntro school={school} matric={matricResults} />
             <ContactSchoolCard
               schoolName={displayName(school)}
               emisId={String(school.id)}
