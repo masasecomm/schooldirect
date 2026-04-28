@@ -148,8 +148,14 @@ const HumanFigure = ({ active }: { active: boolean }) => (
  */
 const LearnerEnrolmentCard = ({
   values,
+  educators,
+  matric,
+  school,
 }: {
   values: Record<DataYear, number | null>;
+  educators?: Record<DataYear, number | null>;
+  matric?: MatricResults | null;
+  school?: { noFee?: string | null; quintile?: string | null; phase?: string | null };
 }) => {
   const FIGURE_COUNT = 10;
   const series = HISTORY_YEARS.map((y) => ({ year: y, value: values[y] }));
@@ -370,30 +376,100 @@ const LearnerEnrolmentCard = ({
             )}%). A stable school often means steady demand and predictable class sizes.`;
           }
 
-          // Plain-English candidate causes tied to the trend direction.
-          // We list them as possibilities, not facts, because we only have
-          // enrolment numbers in this card — not staff or principal records.
-          const possibleCauses: string[] =
-            totalPct >= 10
-              ? [
-                  "A new principal or strong school management has rebuilt parent confidence.",
-                  "Better matric results in recent years are attracting more families.",
-                  "Stable, experienced teachers staying year after year.",
-                  "New housing or population growth in the surrounding suburb.",
-                ]
-              : totalPct <= -10
-              ? [
-                  "A change of principal or weak school leadership.",
-                  "High teacher turnover or unfilled teaching posts.",
-                  "Weaker matric results pushing parents to nearby schools.",
-                  "Families moving out of the area or choosing private schools.",
-                ]
-              : [
-                  "Steady leadership with no recent change of principal.",
-                  "Consistent teaching staff from year to year.",
-                  "Matric results in line with the area's average.",
-                  "A stable community with little movement in or out.",
-                ];
+          // Data-driven causes. Each item is only added when the school's
+          // own numbers actually support it. No generic filler.
+          const possibleCauses: string[] = [];
+          const direction: "up" | "down" | "flat" =
+            totalPct >= 10 ? "up" : totalPct <= -10 ? "down" : "flat";
+
+          // 1. Matric results trend (only meaningful for secondary/combined schools).
+          const phaseUp = (school?.phase || "").toUpperCase();
+          const isSecondary = phaseUp.includes("SECONDARY") || phaseUp.includes("COMBINED");
+          if (isSecondary && matric?.y2024?.pct != null && matric?.y2025?.pct != null) {
+            const diff = matric.y2025.pct - matric.y2024.pct;
+            if (diff >= 5 && direction !== "down") {
+              possibleCauses.push(
+                `Matric pass rate improved from ${matric.y2024.pct.toFixed(1)}% in 2024 to ${matric.y2025.pct.toFixed(1)}% in 2025, which attracts new families.`,
+              );
+            } else if (diff <= -5 && direction !== "up") {
+              possibleCauses.push(
+                `Matric pass rate dropped from ${matric.y2024.pct.toFixed(1)}% in 2024 to ${matric.y2025.pct.toFixed(1)}% in 2025, which can push parents to other schools.`,
+              );
+            } else if (Math.abs(diff) < 5) {
+              possibleCauses.push(
+                `Matric pass rate stayed close to the same (${matric.y2024.pct.toFixed(1)}% in 2024, ${matric.y2025.pct.toFixed(1)}% in 2025), so academic results are not driving change.`,
+              );
+            }
+          }
+
+          // 2. Teacher headcount trend — proxy for staff stability.
+          if (educators) {
+            const eSeries = HISTORY_YEARS.map((y) => ({ year: y, value: educators[y] }))
+              .filter((s): s is { year: DataYear; value: number } => typeof s.value === "number");
+            if (eSeries.length >= 2) {
+              const eFirst = eSeries[0].value;
+              const eLast = eSeries[eSeries.length - 1].value;
+              const eDiff = eLast - eFirst;
+              const ePct = eFirst > 0 ? (eDiff / eFirst) * 100 : 0;
+              if (ePct >= 10) {
+                possibleCauses.push(
+                  `The teaching staff grew from ${eFirst} to ${eLast} educators between ${eSeries[0].year} and ${eSeries[eSeries.length - 1].year}, which usually follows rising enrolment.`,
+                );
+              } else if (ePct <= -10) {
+                possibleCauses.push(
+                  `The teaching staff shrank from ${eFirst} to ${eLast} educators between ${eSeries[0].year} and ${eSeries[eSeries.length - 1].year}, which can mean staff turnover or unfilled posts.`,
+                );
+              } else {
+                possibleCauses.push(
+                  `Teacher headcount has stayed close to the same (${eFirst} → ${eLast} educators), suggesting steady staffing.`,
+                );
+              }
+
+              // Learner-to-educator ratio at latest year.
+              if (latest && eLast > 0) {
+                const ratio = Math.round(latest.value / eLast);
+                if (ratio >= 40) {
+                  possibleCauses.push(
+                    `The learner-to-educator ratio is high at about ${ratio}:1 in ${latest.year}, which can strain classroom capacity.`,
+                  );
+                } else if (ratio <= 25) {
+                  possibleCauses.push(
+                    `The learner-to-educator ratio is favourable at about ${ratio}:1 in ${latest.year}, which supports more learner attention.`,
+                  );
+                }
+              }
+            }
+          }
+
+          // 3. Fee status / quintile — affordability is a real demand driver.
+          if (school?.noFee === "YES") {
+            possibleCauses.push(
+              `As a no-fee school${school.quintile ? ` (quintile ${school.quintile})` : ""}, demand from local families tends to stay strong.`,
+            );
+          } else if (school?.quintile) {
+            possibleCauses.push(
+              `As a fee-paying quintile ${school.quintile} school, enrolment can move with how affordable parents find the fees.`,
+            );
+          }
+
+          // 4. Year-on-year enrolment swing — biggest single-year change.
+          if (numeric.length >= 2) {
+            let biggest: { from: DataYear; to: DataYear; pct: number; from_v: number; to_v: number } | null = null;
+            for (let i = 1; i < numeric.length; i++) {
+              const a = numeric[i - 1];
+              const b = numeric[i];
+              if (a.value <= 0) continue;
+              const pct = ((b.value - a.value) / a.value) * 100;
+              if (!biggest || Math.abs(pct) > Math.abs(biggest.pct)) {
+                biggest = { from: a.year, to: b.year, pct, from_v: a.value, to_v: b.value };
+              }
+            }
+            if (biggest && Math.abs(biggest.pct) >= 8) {
+              possibleCauses.push(
+                `The biggest single-year change was ${biggest.from} → ${biggest.to} (${biggest.from_v.toLocaleString()} → ${biggest.to_v.toLocaleString()} learners, ${biggest.pct >= 0 ? "+" : ""}${biggest.pct.toFixed(0)}%). A jump like this often follows a new principal, a major facilities change, or shifting catchment demand.`,
+              );
+            }
+          }
 
           let predictionLine = "";
           if (Math.abs(projectedPct) < 2) {
@@ -419,19 +495,21 @@ const LearnerEnrolmentCard = ({
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {outlookBody}
               </p>
-              <div className="mt-3">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Possible causes of this trend
+              {possibleCauses.length > 0 && (
+                <div className="mt-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Possible causes (from this school's data)
+                  </div>
+                  <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    {possibleCauses.map((c, i) => (
+                      <li key={i}>{c}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    Drawn from this school's own enrolment, staffing, fee status, and matric numbers. Always confirm with the school.
+                  </p>
                 </div>
-                <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                  {possibleCauses.map((c, i) => (
-                    <li key={i}>{c}</li>
-                  ))}
-                </ul>
-                <p className="mt-1.5 text-[11px] text-muted-foreground">
-                  These are common reasons across SA schools, not confirmed facts about this one. Ask the school directly.
-                </p>
-              </div>
+              )}
               <div className="mt-3 rounded-lg border border-dashed border-primary/40 bg-background/60 p-3">
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">
                   {nextYear} forecast
@@ -1736,7 +1814,12 @@ const SchoolDetail = () => {
           </Card>
 
           <div className="lg:col-span-3 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            <LearnerEnrolmentCard values={learnersByYear} />
+            <LearnerEnrolmentCard
+              values={learnersByYear}
+              educators={educatorsByYear}
+              matric={matricResults}
+              school={{ noFee: school.noFee, quintile: school.quintile, phase: school.phase }}
+            />
             <NumericHistoryCard
               icon={GraduationCap}
               subtitle="Teaching staff"
