@@ -1,4 +1,4 @@
-import { titleCase, displayName, schoolHref, type School, type MatricResults } from "@/lib/schools";
+import { titleCase, displayName, schoolHref, getSchools, type School, type MatricResults } from "@/lib/schools";
 
 export const SITE_URL = "https://schooldirect.org";
 export const SITE_NAME = "School Direct";
