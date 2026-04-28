@@ -1,5 +1,12 @@
 import { titleCase, displayName, schoolHref, getSchools, type School, type MatricResults } from "@/lib/schools";
 
+// Build-time constant: when this build was produced. Used as dateModified
+// so search engines can show a stable "Last updated" in the SERP rather
+// than today's date refreshing on every render.
+const BUILD_DATE: string =
+  (typeof import.meta !== "undefined" && (import.meta as { env?: { VITE_BUILD_DATE?: string } }).env?.VITE_BUILD_DATE) ||
+  new Date().toISOString().slice(0, 10);
+
 export const SITE_URL = "https://schooldirect.org";
 export const SITE_NAME = "School Direct";
 
@@ -91,7 +98,7 @@ export const buildSchoolJsonLd = (
   else if (school.town) address.addressLocality = titleCase(school.town);
 
   const schoolNode: Record<string, unknown> = {
-    "@type": ["School", "EducationalOrganization"],
+    "@type": ["School", "EducationalOrganization", "LocalBusiness"],
     "@id": `${pageUrl}#school`,
     name,
     url: pageUrl,
@@ -99,11 +106,24 @@ export const buildSchoolJsonLd = (
     identifier: identifiers,
     areaServed: place,
     sameAs: [pageUrl],
+    image: `${SITE_URL}/favicon.png`,
+    priceRange: school.noFee === "YES" ? "Free" : "R",
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "07:30",
+        closes: "14:30",
+      },
+    ],
   };
   if (school.telephone) schoolNode.telephone = school.telephone;
   if (school.email) schoolNode.email = school.email;
   if (typeof school.learners === "number" && school.learners > 0) {
     schoolNode.numberOfStudents = school.learners;
+  }
+  if (typeof school.educators === "number" && school.educators > 0) {
+    schoolNode.numberOfEmployees = school.educators;
   }
   if (school.latitude != null && school.longitude != null) {
     schoolNode.geo = {
@@ -143,6 +163,8 @@ export const buildSchoolJsonLd = (
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
     about: { "@id": `${pageUrl}#school` },
     breadcrumb: breadcrumbs,
+    datePublished: BUILD_DATE,
+    dateModified: BUILD_DATE,
   };
 
   // FAQ generated from real data — shared with the visible on-page accordion.
@@ -157,9 +179,73 @@ export const buildSchoolJsonLd = (
     })),
   };
 
+  // Article describing the school profile — gives Google a "Last updated" signal.
+  const article = {
+    "@type": "Article",
+    "@id": `${pageUrl}#article`,
+    headline: buildTitle(school),
+    description: buildDescription(school, matric),
+    mainEntityOfPage: { "@id": pageUrl },
+    about: { "@id": `${pageUrl}#school` },
+    datePublished: BUILD_DATE,
+    dateModified: BUILD_DATE,
+    inLanguage: "en-ZA",
+    image: `${SITE_URL}/favicon.png`,
+    author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/favicon.png` },
+    },
+  };
+
+  const graph: Array<Record<string, unknown>> = [schoolNode, webPage, breadcrumbs, faqPage, article];
+
+  // Person node for the principal, linked to the school as employee.
+  if (school.principal) {
+    const principalName = titleCase(school.principal);
+    const personNode = {
+      "@type": "Person",
+      "@id": `${pageUrl}#principal`,
+      name: principalName,
+      jobTitle: "Principal",
+      worksFor: { "@id": `${pageUrl}#school` },
+    };
+    schoolNode.employee = { "@id": `${pageUrl}#principal` };
+    graph.push(personNode);
+  }
+
+  // ItemList of nearby same-phase schools (matches the visible "Nearby schools" block).
+  if (school.phase && (school.suburb || school.town)) {
+    const phaseKey = school.phase.toUpperCase();
+    const areaKey = (school.suburb || school.town || "").toUpperCase();
+    const nearby = getSchools("2025")
+      .filter((s) => {
+        if (s.id === school.id) return false;
+        if ((s.phase || "").toUpperCase() !== phaseKey) return false;
+        const sArea = (s.suburb || s.town || "").toUpperCase();
+        return sArea === areaKey;
+      })
+      .slice(0, 10);
+    if (nearby.length > 0) {
+      graph.push({
+        "@type": "ItemList",
+        "@id": `${pageUrl}#nearby`,
+        name: `Nearby ${titleCase(school.phase).toLowerCase()} schools`,
+        itemListElement: nearby.map((s, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: absoluteUrl(schoolHref(s)),
+          name: displayName(s),
+        })),
+      });
+    }
+  }
+
   return {
     "@context": "https://schema.org",
-    "@graph": [schoolNode, webPage, breadcrumbs, faqPage],
+    "@graph": graph,
   };
 };
 
