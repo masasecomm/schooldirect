@@ -1923,9 +1923,33 @@ const SimilarSchoolsCard = ({
               <SchoolIcon className="h-3.5 w-3.5" />
               Nearby same-phase
             </div>
-            <h2 className="mt-1 text-lg font-semibold">Similar Schools</h2>
+            <h2 className="mt-1 text-lg font-semibold leading-snug">
+              {(() => {
+                const parts: { label: string; value: string }[] = [];
+                if (school.suburb) parts.push({ label: "Suburb", value: titleCase(school.suburb) });
+                if (school.township) parts.push({ label: "Township", value: titleCase(school.township) });
+                if (school.town) parts.push({ label: "Town", value: titleCase(school.town) });
+                if (parts.length === 0) return "Similar Schools";
+                return (
+                  <>
+                    {phaseLabel} schools in{" "}
+                    {parts.map((p, i) => (
+                      <span key={p.label}>
+                        <Link
+                          to={`/?q=${encodeURIComponent(p.value)}`}
+                          className="text-primary hover:underline"
+                        >
+                          {p.value}
+                        </Link>
+                        {i < parts.length - 2 ? ", " : i === parts.length - 2 ? " or " : ""}
+                      </span>
+                    ))}
+                  </>
+                );
+              })()}
+            </h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              {phaseLabel} schools in the same township, suburb, or town
+              Other {phaseLabel.toLowerCase()} schools in the same area
             </p>
           </div>
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
