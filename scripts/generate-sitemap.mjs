@@ -5,7 +5,7 @@
  * containing one <url> per unique school (latest year wins) plus the static
  * top-level routes.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, statSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,18 +26,23 @@ const slugify = (name, id) => {
 
 const loadYear = (year) => {
   const path = resolve(root, `src/data/schools-${year}.json`);
-  return JSON.parse(readFileSync(path, "utf-8"));
+  return { schools: JSON.parse(readFileSync(path, "utf-8")), mtime: statSync(path).mtime };
 };
 
 const years = ["2025", "2024", "2023"];
-const merged = new Map(); // id -> school (latest year wins)
+const merged = new Map(); // id -> { school, lastmod }
+let latestDataMtime = new Date(0);
 for (const y of years) {
-  for (const s of loadYear(y)) {
-    if (!merged.has(s.id)) merged.set(s.id, s);
+  const { schools, mtime } = loadYear(y);
+  if (mtime > latestDataMtime) latestDataMtime = mtime;
+  const lastmod = mtime.toISOString().slice(0, 10);
+  for (const s of schools) {
+    if (!merged.has(s.id)) merged.set(s.id, { school: s, lastmod });
   }
 }
 
 const today = new Date().toISOString().slice(0, 10);
+const dataDate = latestDataMtime.toISOString().slice(0, 10);
 
 const escape = (s) =>
   String(s).replace(/[&<>"']/g, (c) => ({
@@ -56,32 +61,53 @@ const staticUrls = [
   { loc: "/admissions", priority: "0.6", changefreq: "monthly" },
 ];
 
-const urls = [
-  ...staticUrls.map((u) => ({
-    loc: `${SITE_URL}${u.loc}`,
-    lastmod: today,
-    changefreq: u.changefreq,
-    priority: u.priority,
-  })),
-  ...Array.from(merged.values()).map((s) => ({
-    loc: `${SITE_URL}/south-africa/gauteng/${slugify(s.name, s.id)}`,
-    lastmod: today,
-    changefreq: "monthly",
-    priority: "0.8",
-  })),
-];
+const buildUrlset = (entries) =>
+  [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...entries.map(
+      (u) =>
+        `  <url><loc>${escape(u.loc)}</loc><lastmod>${u.lastmod}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`,
+    ),
+    "</urlset>",
+    "",
+  ].join("\n");
 
-const xml = [
+const staticEntries = staticUrls.map((u) => ({
+  loc: `${SITE_URL}${u.loc}`,
+  lastmod: today,
+  changefreq: u.changefreq,
+  priority: u.priority,
+}));
+
+const schoolEntries = Array.from(merged.values()).map(({ school, lastmod }) => ({
+  loc: `${SITE_URL}/south-africa/gauteng/${slugify(school.name, school.id)}`,
+  lastmod,
+  changefreq: "monthly",
+  priority: "0.8",
+}));
+
+writeFileSync(resolve(root, "public/sitemap-static.xml"), buildUrlset(staticEntries), "utf-8");
+writeFileSync(resolve(root, "public/sitemap-schools.xml"), buildUrlset(schoolEntries), "utf-8");
+
+// Combined sitemap kept for backwards-compatibility with anything already
+// pointing at /sitemap.xml.
+writeFileSync(
+  resolve(root, "public/sitemap.xml"),
+  buildUrlset([...staticEntries, ...schoolEntries]),
+  "utf-8",
+);
+
+const sitemapIndex = [
   '<?xml version="1.0" encoding="UTF-8"?>',
-  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-  ...urls.map(
-    (u) =>
-      `  <url><loc>${escape(u.loc)}</loc><lastmod>${u.lastmod}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`,
-  ),
-  "</urlset>",
+  '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+  `  <sitemap><loc>${SITE_URL}/sitemap-static.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${SITE_URL}/sitemap-schools.xml</loc><lastmod>${dataDate}</lastmod></sitemap>`,
+  "</sitemapindex>",
   "",
 ].join("\n");
+writeFileSync(resolve(root, "public/sitemap-index.xml"), sitemapIndex, "utf-8");
 
-const out = resolve(root, "public/sitemap.xml");
-writeFileSync(out, xml, "utf-8");
-console.log(`[sitemap] wrote ${urls.length} urls to ${out}`);
+console.log(
+  `[sitemap] wrote ${staticEntries.length} static + ${schoolEntries.length} school urls (data lastmod ${dataDate})`,
+);
