@@ -52,6 +52,7 @@ import {
   type DataYear,
   getMatricResults,
   type MatricResults,
+  findPrincipalAtOtherSchools,
 } from "@/lib/schools";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -898,8 +899,18 @@ const EducatorsNarrative = ({
  */
 const LeadershipCard = ({
   values,
+  learners,
+  educators,
+  matric,
+  phase,
+  currentSchoolId,
 }: {
   values: Record<DataYear, string | null>;
+  learners?: Record<DataYear, number | null>;
+  educators?: Record<DataYear, number | null>;
+  matric?: MatricResults | null;
+  phase?: string | null;
+  currentSchoolId?: string;
 }) => {
   // Tokenise a name into meaningful parts: lowercase, strip punctuation,
   // and drop common titles / single-letter initials so we can fuzzy-match
@@ -1053,6 +1064,165 @@ const LeadershipCard = ({
             <div className="text-lg font-bold">{changes}</div>
           </div>
         </div>
+
+        {/* Per-principal CV: tenure, what changed during their time, other schools they appear at */}
+        {(() => {
+          if (uniqueKeys.length === 0) return null;
+
+          const phaseUp = (phase || "").toUpperCase();
+          const isSecondary = phaseUp.includes("SECONDARY") || phaseUp.includes("COMBINED");
+
+          // For each distinct principal: list of years they held the post on record.
+          const cvs = uniqueKeys.map((key) => {
+            const yearsForKey = entries.filter((e) => e.key === key).map((e) => e.year);
+            const name =
+              entries.find((e) => e.key === key)?.name ?? key;
+            const tenureStart = yearsForKey[0];
+            const tenureEnd = yearsForKey[yearsForKey.length - 1];
+
+            // Compare metrics from the year BEFORE tenure start (if available) to tenure end.
+            const yearBefore = (() => {
+              const idx = HISTORY_YEARS.indexOf(tenureStart);
+              return idx > 0 ? HISTORY_YEARS[idx - 1] : tenureStart;
+            })();
+
+            const fmtChange = (
+              from: number | null | undefined,
+              to: number | null | undefined,
+              unit: string,
+            ): string | null => {
+              if (from == null || to == null || from <= 0) return null;
+              const diff = to - from;
+              const pct = (diff / from) * 100;
+              if (Math.abs(pct) < 1) {
+                return `${unit} stayed close to ${to.toLocaleString()}`;
+              }
+              const dir = diff > 0 ? "rose" : "fell";
+              return `${unit} ${dir} from ${from.toLocaleString()} to ${to.toLocaleString()} (${diff > 0 ? "+" : ""}${pct.toFixed(0)}%)`;
+            };
+
+            const learnerLine = learners
+              ? fmtChange(learners[yearBefore], learners[tenureEnd], "Learners")
+              : null;
+            const educatorLine = educators
+              ? fmtChange(educators[yearBefore], educators[tenureEnd], "Educators")
+              : null;
+
+            // Matric: only meaningful if covers tenure end year.
+            let matricLine: string | null = null;
+            if (isSecondary && matric) {
+              const yKey = `y${tenureEnd}` as "y2023" | "y2024" | "y2025";
+              const yKeyBefore = `y${yearBefore}` as "y2023" | "y2024" | "y2025";
+              const endStats = matric[yKey];
+              const beforeStats = matric[yKeyBefore];
+              if (endStats?.pct != null && beforeStats?.pct != null && yearBefore !== tenureEnd) {
+                const diff = endStats.pct - beforeStats.pct;
+                const dir = diff >= 0 ? "+" : "";
+                matricLine = `Matric pass rate moved from ${beforeStats.pct.toFixed(1)}% (${yearBefore}) to ${endStats.pct.toFixed(1)}% (${tenureEnd}), ${dir}${diff.toFixed(1)} points`;
+              } else if (endStats?.pct != null) {
+                matricLine = `Matric pass rate in ${tenureEnd} was ${endStats.pct.toFixed(1)}%`;
+              }
+            }
+
+            const previousPosts = currentSchoolId
+              ? findPrincipalAtOtherSchools(name, currentSchoolId)
+              : [];
+
+            return {
+              key,
+              name,
+              tenureStart,
+              tenureEnd,
+              years: yearsForKey,
+              learnerLine,
+              educatorLine,
+              matricLine,
+              previousPosts,
+            };
+          });
+
+          return (
+            <div className="mt-5">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Principal profiles
+              </div>
+              <div className="mt-2 space-y-3">
+                {cvs.map((cv) => {
+                  const tenureLabel =
+                    cv.tenureStart === cv.tenureEnd
+                      ? `On record in ${cv.tenureStart}`
+                      : `On record ${cv.tenureStart} – ${cv.tenureEnd}`;
+                  const bullets = [cv.learnerLine, cv.educatorLine, cv.matricLine].filter(
+                    (b): b is string => Boolean(b),
+                  );
+                  return (
+                    <div
+                      key={cv.key}
+                      className="rounded-xl border border-border bg-muted/30 p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="text-sm font-semibold text-foreground">
+                          {cv.name}
+                        </div>
+                        <Badge variant="outline" className="text-[11px]">
+                          {tenureLabel}
+                        </Badge>
+                      </div>
+
+                      {bullets.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                            What changed during their tenure
+                          </div>
+                          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                            {bullets.map((b, i) => (
+                              <li key={i}>{b}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="mt-3">
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Previous or other postings
+                        </div>
+                        {cv.previousPosts.length === 0 ? (
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            No record of {cv.name} appearing as principal at another school in our dataset.
+                          </p>
+                        ) : (
+                          <ul className="mt-1.5 space-y-1 text-sm">
+                            {cv.previousPosts.slice(0, 5).map((p) => (
+                              <li key={p.schoolId}>
+                                <Link
+                                  to={schoolHref({ name: p.schoolName, id: p.schoolId })}
+                                  className="text-primary hover:underline"
+                                >
+                                  {p.schoolName}
+                                </Link>
+                                <span className="text-muted-foreground">
+                                  {p.district ? ` · ${p.district}` : ""} · listed {p.year}
+                                </span>
+                              </li>
+                            ))}
+                            {cv.previousPosts.length > 5 && (
+                              <li className="text-xs text-muted-foreground">
+                                +{cv.previousPosts.length - 5} more
+                              </li>
+                            )}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Built from this school's principal records and matched against our directory of every Gauteng school.
+              </p>
+            </div>
+          );
+        })()}
       </CardContent>
     </Card>
   );
@@ -1974,7 +2144,14 @@ const SchoolDetail = () => {
                 />
               }
             />
-            <LeadershipCard values={principalByYear} />
+            <LeadershipCard
+              values={principalByYear}
+              learners={learnersByYear}
+              educators={educatorsByYear}
+              matric={matricResults}
+              phase={school.phase}
+              currentSchoolId={school.id}
+            />
             {matricResults && <MatricResultsCard results={matricResults} />}
             {school.latitude != null && school.longitude != null && schoolYear && (
               <FeederZoneCard

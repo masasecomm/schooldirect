@@ -228,3 +228,79 @@ export const getLearnerTrend = (
   else if (percent <= -1) direction = "down";
   return { direction, current, previous, delta, percent, previousYear: prevYear };
 };
+
+/**
+ * Strip common SA titles + short tokens from a principal name and return the
+ * set of meaningful tokens. Used to fuzzy-match the same person captured
+ * with different spellings or initials across years and schools.
+ */
+const PRINCIPAL_TITLES = new Set([
+  "mr", "mrs", "ms", "miss", "dr", "prof", "mnr", "mev", "rev",
+]);
+
+export const principalTokens = (name: string): Set<string> => {
+  return new Set(
+    name
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, " ")
+      .split(/\s+/)
+      .filter((t) => t.length >= 3 && !PRINCIPAL_TITLES.has(t)),
+  );
+};
+
+export interface OtherPrincipalAppearance {
+  schoolId: string;
+  schoolName: string;
+  emis: string;
+  district: string | null;
+  year: DataYear;
+  principalName: string;
+}
+
+/**
+ * Find every other school (across all dataset years) where the same person
+ * appears as principal. Match is on shared meaningful name tokens. Excludes
+ * the current school by EMIS id. Returns a deduplicated list per school,
+ * keeping the most recent year an appearance was recorded.
+ */
+export const findPrincipalAtOtherSchools = (
+  principalName: string,
+  excludeSchoolId: string,
+): OtherPrincipalAppearance[] => {
+  const targetTokens = principalTokens(principalName);
+  if (targetTokens.size === 0) return [];
+
+  const byKey = new Map<string, OtherPrincipalAppearance>();
+  for (const year of AVAILABLE_YEARS) {
+    for (const s of datasets[year]) {
+      if (s.id === excludeSchoolId) continue;
+      if (!s.principal) continue;
+      const tokens = principalTokens(s.principal);
+      if (tokens.size === 0) continue;
+      let shared = 0;
+      for (const t of targetTokens) if (tokens.has(t)) shared++;
+      // Require at least one shared meaningful token AND at least one of them
+      // to be longer than 3 chars to avoid weak matches like "ann".
+      if (shared < 1) continue;
+      const strong = Array.from(targetTokens).some(
+        (t) => t.length >= 4 && tokens.has(t),
+      );
+      if (!strong) continue;
+
+      const existing = byKey.get(s.id);
+      if (!existing || AVAILABLE_YEARS.indexOf(year) < AVAILABLE_YEARS.indexOf(existing.year)) {
+        byKey.set(s.id, {
+          schoolId: s.id,
+          schoolName: titleCase(s.name),
+          emis: s.emis,
+          district: s.district ? titleCase(s.district) : null,
+          year,
+          principalName: titleCase(s.principal),
+        });
+      }
+    }
+  }
+  return Array.from(byKey.values()).sort((a, b) =>
+    a.schoolName.localeCompare(b.schoolName),
+  );
+};
