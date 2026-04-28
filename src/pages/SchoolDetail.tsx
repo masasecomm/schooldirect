@@ -920,6 +920,61 @@ const LeadershipCard = ({
   const TITLES = new Set([
     "mr", "mrs", "ms", "miss", "dr", "prof", "mnr", "mev", "rev",
   ]);
+  // Best-effort honorific from a raw principal string. We:
+  //  1. Honour an explicit title already in the source ("Mr Smith", "Mrs J Dlamini").
+  //  2. Otherwise look up the first non-initial first name against a small
+  //     dictionary of common SA male/female names. If we cannot tell, return "".
+  // Names not in the dictionary intentionally get NO honorific so we never guess wrong.
+  const MALE_FIRST_NAMES = new Set([
+    // English / Afrikaans
+    "john","james","peter","paul","david","michael","andrew","mark","stephen","richard","robert","william","george","henry","thomas","charles","edward","kevin","brian","gary","barry","wayne","craig","shaun","ryan","jason","gavin","trevor","clive","grant","neil","nigel","derek","kobus","pieter","johan","jaco","francois","wynand","hennie","gerhard","christo","willem","stefan","stephan","hermann","rudolph","hendrik","koos","sarel",
+    // African (Nguni / Sotho / Tsonga / Venda) – common male names
+    "sipho","thabo","themba","mandla","bongani","sibusiso","sandile","mxolisi","sifiso","lungelo","lwazi","musa","nkosi","mzwandile","vusi","vusumuzi","zwelibanzi","mthunzi","mlungisi","mfundo","menzi","khanyiso","lindokuhle","sabelo","siyabonga","siyanda","siphesihle","luyanda","kagiso","tshepo","kabelo","karabo","lebogang","lehlohonolo","letlhogonolo","mpho","tumelo","tebogo","tlotliso","reabetswe","refilwe","oratile","oarabile","mogau","mogale","molefi","tshepiso","tshegofatso","keletso","keabetswe","onkemetse","khotso","emmanuel","nkosinathi","nkululeko","mxolisi","sibongiseni","mhlonipheni","amukelani","hlamulo","rhulani","tinyiko","mukondi","mulalo","mukondeleli","ndivhuwo","tshilidzi","khathutshelo","rendani","ronewa","aluwani","azwianewi","mashudu","selaelo","mohale","kgosi","letlama","ofentse","obakeng","keabetswe","kabello",
+  ]);
+  const FEMALE_FIRST_NAMES = new Set([
+    // English / Afrikaans
+    "mary","jane","susan","sarah","sara","linda","patricia","jennifer","elizabeth","margaret","barbara","helen","karen","nancy","betty","ruth","julie","gloria","cheryl","carol","janet","wendy","marie","yvonne","marlene","annette","cynthia","rosemary","heather","lynn","melanie","sharon","theresa","beverley","colleen","tracey","charmaine","tanya","jacqueline","michelle","nicole","leigh","candice","amanda","cindy","melinda","jessica","megan","kayleigh","tasneem","fatima","aisha","ayesha","zainab","raeesah","zubeida","naadia","aaliyah","retha","martie","marietjie","annelize","annemarie","susanna","susarah","magdalena","christina","cornelia","engela","engeline","henriette","jeanette","johanna","katrien","lize","liezel","mariska","minnette","ronel","theunsina","wilna","yolande",
+    // African female names
+    "nomvula","nomsa","nokuthula","nonhlanhla","nokulunga","nkosazana","nontsikelelo","ntombizodwa","ntombi","thandi","thandiwe","thando","thembi","thembeka","zanele","zandile","zinhle","zoleka","zola","zinzi","zelda","busisiwe","buhle","busi","bukiwe","bongiwe","gugu","gugulethu","khanyisile","kholeka","khethiwe","khulisile","lerato","lesedi","lebohang","lebogang","lindiwe","lerato","lillian","lulama","lungile","makhosi","mavis","matshidiso","mathapelo","mathabo","matumelo","matlhogonolo","mosa","mpho","mpumi","mpumelelo","ntando","nelisiwe","nondumiso","palesa","pinky","portia","precious","puleng","refilwe","rethabile","rorisang","sibongile","silindile","sindiswa","siphokazi","siphosethu","siyabonga","tebogo","tendai","thabisile","thabang","tshepiso","tholiwe","tumi","unathi","violet","winnie","xoliswa","yandiswa","yonela","azwifaneli","mbavhalelo","muofhe","ndivhuwo","ndaedzo","tshifhiwa","tshilidzi","vhonani","amukelani","khanyisa","rhulani","saraphina","khensani","tinyiko","makhosini","mhlanguli","sasha","sashni","sashia","yashika","kavitha","priya","reshma","shanti","ramona","vanessa","valencia","verna","vivian","wendy","winnifred","yolisa","zama","zameka","zandile",
+  ]);
+  const inferHonorific = (raw: string | null): string | null => {
+    if (!raw) return null;
+    const cleaned = raw.replace(/\./g, " ").replace(/\s+/g, " ").trim();
+    const tokens = cleaned.split(/\s+/);
+    // 1. Explicit title anywhere in the string
+    for (const t of tokens) {
+      const lc = t.toLowerCase();
+      if (lc === "mr" || lc === "mnr") return "Mr";
+      if (lc === "mrs" || lc === "mev") return "Mrs";
+      if (lc === "ms" || lc === "miss") return "Ms";
+      if (lc === "dr") return "Dr";
+      if (lc === "prof") return "Prof";
+    }
+    // 2. First non-initial token vs name dictionary
+    for (const t of tokens) {
+      const lc = t.toLowerCase().replace(/[^a-z]/g, "");
+      if (lc.length < 3) continue;
+      if (MALE_FIRST_NAMES.has(lc)) return "Mr";
+      if (FEMALE_FIRST_NAMES.has(lc)) return "Mrs";
+      // Stop after the first usable token; do not scan further tokens
+      // (those are likely surnames and would mislead).
+      break;
+    }
+    return null;
+  };
+  // Strip leading title tokens from a raw name before re-applying our chosen honorific.
+  const stripLeadingTitle = (raw: string): string => {
+    return raw
+      .replace(/^\s*(mr|mrs|ms|miss|dr|prof|mnr|mev|rev)\.?\s+/i, "")
+      .trim();
+  };
+  // Format a name for display: "<Honorific> <Name>" when we are confident, else just the name.
+  const formatPrincipalDisplay = (raw: string | null): string => {
+    if (!raw) return "—";
+    const honorific = inferHonorific(raw);
+    const base = stripLeadingTitle(raw);
+    return honorific ? `${honorific} ${base}` : base;
+  };
   const tokenise = (n: string): Set<string> => {
     const tokens = n
       .toLowerCase()
@@ -961,10 +1016,12 @@ const LeadershipCard = ({
   const entries = HISTORY_YEARS.map((y) => {
     const key = yearToGroupKey.get(y) ?? "";
     const group = key ? groups.find((g) => g.key === key) : undefined;
+    const rawName = group?.canonical ?? null;
     return {
       year: y,
       key,
-      name: group?.canonical ?? null,
+      name: rawName ? formatPrincipalDisplay(rawName) : null,
+      rawName,
     };
   });
   const known = entries.filter((e) => e.name);
