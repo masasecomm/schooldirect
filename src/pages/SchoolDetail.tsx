@@ -1664,8 +1664,7 @@ const FeederZoneCard = ({
               return (
                 <div className="mt-5 rounded-xl border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
                   <p>
-                    <span className="font-semibold text-foreground">What this means. </span>
-                    A feeder zone is the area a school draws its learners from. This school mainly serves children who live in {namesText}, all within {FEEDER_RADIUS_KM} km of the gate.{tail}
+                    This school mainly serves children who live in {namesText}, all within {FEEDER_RADIUS_KM} km of the gate.{tail}
                   </p>
                 </div>
               );
