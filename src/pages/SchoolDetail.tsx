@@ -25,6 +25,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
+import { SchoolCalendarCard } from "@/components/schools/SchoolCalendarCard";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -1620,6 +1621,9 @@ const SchoolDetail = () => {
             )}
             {school.sector?.toUpperCase() === "PUBLIC" && (
               <WalkInCentreCard school={school} />
+            )}
+            {school.sector?.toUpperCase() === "PUBLIC" && (
+              <SchoolCalendarCard schoolName={displayName(school)} />
             )}
             {schoolYear && (
               <SimilarSchoolsCard school={school} year={schoolYear} />
