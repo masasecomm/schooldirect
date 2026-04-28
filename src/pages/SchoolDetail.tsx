@@ -2259,12 +2259,12 @@ const SchoolDetail = () => {
           <p className="mt-1 text-muted-foreground">{titleCase(school.district)} District</p>
         )}
 
-        <div className="mt-6">
+        <div className="mx-auto mt-6 w-full max-w-3xl">
           <SchoolIntro school={school} matric={matricResults} />
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2 shadow-[var(--shadow-card)]">
+        <div className="mx-auto mt-8 flex w-full max-w-3xl flex-col gap-6">
+          <Card className="shadow-[var(--shadow-card)]">
             <CardContent className="p-6">
               <h2 className="text-lg font-semibold">Contact information</h2>
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
@@ -2355,7 +2355,7 @@ const SchoolDetail = () => {
             </CardContent>
           </Card>
 
-          <div className="lg:col-span-3 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="flex flex-col gap-6">
             <LearnerEnrolmentCard
               values={learnersByYear}
               educators={educatorsByYear}
