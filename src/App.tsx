@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
@@ -6,10 +7,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { YearProvider } from "@/lib/year-context";
 import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import SchoolDetail from "./pages/SchoolDetail.tsx";
-import About from "./pages/About.tsx";
-import Admissions from "./pages/Admissions.tsx";
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const SchoolDetail = lazy(() => import("./pages/SchoolDetail.tsx"));
+const About = lazy(() => import("./pages/About.tsx"));
+const Admissions = lazy(() => import("./pages/Admissions.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Index />} />
           {/* Geographic breadcrumb levels resolve to the directory for now */}
@@ -34,6 +36,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </YearProvider>
     </TooltipProvider>

@@ -41,6 +41,9 @@ export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
             <img
               src={logoImg}
               alt="School Direct logo"
+              width={64}
+              height={64}
+              decoding="async"
               className="h-full w-full object-cover"
             />
           </span>
