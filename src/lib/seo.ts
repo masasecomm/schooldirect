@@ -1,4 +1,4 @@
-import { titleCase, displayName, schoolHref, type School, type MatricResults } from "@/lib/schools";
+import { titleCase, displayName, schoolHref, getSchools, type School, type MatricResults } from "@/lib/schools";
 
 export const SITE_URL = "https://schooldirect.org";
 export const SITE_NAME = "School Direct";
@@ -176,6 +176,48 @@ export const buildSchoolFaqs = (
 ): Array<{ q: string; a: string }> => {
   const name = displayName(school);
   const faqs: Array<{ q: string; a: string }> = [];
+
+  if (school.principal) {
+    faqs.push({
+      q: `Who is the principal of ${name}?`,
+      a: `${titleCase(school.principal)} is the principal of ${name}.`,
+    });
+  }
+  if (typeof school.learners === "number" && school.learners > 0) {
+    faqs.push({
+      q: `How many learners does ${name} have?`,
+      a: `${name} has ${school.learners.toLocaleString()} learners enrolled.`,
+    });
+  }
+  if (typeof school.educators === "number" && school.educators > 0) {
+    const ratio =
+      typeof school.learners === "number" && school.learners > 0
+        ? ` That works out to roughly ${Math.round(school.learners / school.educators)} learners per teacher.`
+        : "";
+    faqs.push({
+      q: `How many teachers work at ${name}?`,
+      a: `${name} has ${school.educators.toLocaleString()} educators on staff.${ratio}`,
+    });
+  }
+  if (school.phase && (school.suburb || school.town)) {
+    const phaseLabel = titleCase(school.phase);
+    const area = titleCase(school.suburb || school.town || "");
+    const areaKey = (school.suburb || school.town || "").toUpperCase();
+    const phaseKey = school.phase.toUpperCase();
+    const all = getSchools("2025");
+    const nearby = all.filter((s) => {
+      if (s.id === school.id) return false;
+      if ((s.phase || "").toUpperCase() !== phaseKey) return false;
+      const sArea = (s.suburb || s.town || "").toUpperCase();
+      return sArea === areaKey;
+    });
+    if (nearby.length > 0) {
+      faqs.push({
+        q: `How many ${phaseLabel.toLowerCase()} schools are near ${name}?`,
+        a: `There are ${nearby.length} other ${phaseLabel.toLowerCase()} school${nearby.length === 1 ? "" : "s"} in ${area} listed in the latest Gauteng dataset.`,
+      });
+    }
+  }
 
   if (school.streetAddress || school.suburb || school.town) {
     const where = [school.streetAddress, school.suburb, school.town]
