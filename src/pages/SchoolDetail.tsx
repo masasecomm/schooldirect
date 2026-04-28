@@ -2144,7 +2144,14 @@ const SchoolDetail = () => {
                 />
               }
             />
-            <LeadershipCard values={principalByYear} />
+            <LeadershipCard
+              values={principalByYear}
+              learners={learnersByYear}
+              educators={educatorsByYear}
+              matric={matricResults}
+              phase={school.phase}
+              currentSchoolId={school.id}
+            />
             {matricResults && <MatricResultsCard results={matricResults} />}
             {school.latitude != null && school.longitude != null && schoolYear && (
               <FeederZoneCard
