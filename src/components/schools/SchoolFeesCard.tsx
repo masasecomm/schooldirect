@@ -168,15 +168,15 @@ export const SchoolFeesCard = ({
           <div className="rounded-xl border border-border bg-muted/40 p-4">
             <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               <Users className="h-3.5 w-3.5" />
-              Total allocation, per year
+              Total allocation, per month
             </div>
             <div className="mt-1 text-3xl font-bold tracking-tight leading-none">
-              {totalAllocation != null ? fmtRand(totalAllocation) : "—"}
+              {totalMonthly != null ? fmtRandRounded(totalMonthly) : "—"}
             </div>
             <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
               <CalendarDays className="h-3 w-3" />
-              {totalMonthly != null
-                ? `${fmtRandRounded(totalMonthly)} per month for the school`
+              {totalAllocation != null
+                ? `${fmtRand(totalAllocation)} per year for the school`
                 : "Learner count not on record"}
             </div>
           </div>
