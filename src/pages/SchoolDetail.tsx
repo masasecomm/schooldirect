@@ -899,8 +899,18 @@ const EducatorsNarrative = ({
  */
 const LeadershipCard = ({
   values,
+  learners,
+  educators,
+  matric,
+  phase,
+  currentSchoolId,
 }: {
   values: Record<DataYear, string | null>;
+  learners?: Record<DataYear, number | null>;
+  educators?: Record<DataYear, number | null>;
+  matric?: MatricResults | null;
+  phase?: string | null;
+  currentSchoolId?: string;
 }) => {
   // Tokenise a name into meaningful parts: lowercase, strip punctuation,
   // and drop common titles / single-letter initials so we can fuzzy-match
