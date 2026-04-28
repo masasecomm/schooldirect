@@ -7,14 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   REGIONS,
   groupBySubRegion,
   mapsHref,
@@ -23,14 +15,6 @@ import {
   type Region,
 } from "@/lib/walk-in-centres";
 import { cn } from "@/lib/utils";
-
-const APPLICATION_HISTORY: { year: string; opened: string; closed: string }[] = [
-  { year: "2026", opened: "24 July 2025", closed: "29 August 2025" },
-  { year: "2025", opened: "11 July 2024", closed: "12 August 2024" },
-  { year: "2024", opened: "15 June 2023", closed: "21 July 2023" },
-  { year: "2023", opened: "22 July 2022", closed: "19 August 2022" },
-  { year: "2022", opened: "10 August 2021", closed: "8 October 2021" },
-];
 
 const Admissions = () => {
   const [query, setQuery] = useState("");
@@ -167,36 +151,6 @@ const Admissions = () => {
           ))}
         </div>
 
-        <section className="mx-auto mt-16 max-w-3xl">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              GDE Online Admissions Timeline
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Historical application opening and closing dates per academic year.
-            </p>
-          </div>
-          <Card className="mt-6 overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold text-foreground">Academic Year</TableHead>
-                  <TableHead className="font-semibold text-foreground">Applications Opened</TableHead>
-                  <TableHead className="font-semibold text-foreground">Applications Closed</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {APPLICATION_HISTORY.map((row) => (
-                  <TableRow key={row.year}>
-                    <TableCell className="font-medium">{row.year}</TableCell>
-                    <TableCell>{row.opened}</TableCell>
-                    <TableCell>{row.closed}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
-        </section>
       </main>
       <SiteFooter />
     </div>
