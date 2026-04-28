@@ -495,19 +495,21 @@ const LearnerEnrolmentCard = ({
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {outlookBody}
               </p>
-              <div className="mt-3">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Possible causes of this trend
+              {possibleCauses.length > 0 && (
+                <div className="mt-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Possible causes (from this school's data)
+                  </div>
+                  <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    {possibleCauses.map((c, i) => (
+                      <li key={i}>{c}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    Drawn from this school's own enrolment, staffing, fee status, and matric numbers. Always confirm with the school.
+                  </p>
                 </div>
-                <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                  {possibleCauses.map((c, i) => (
-                    <li key={i}>{c}</li>
-                  ))}
-                </ul>
-                <p className="mt-1.5 text-[11px] text-muted-foreground">
-                  These are common reasons across SA schools, not confirmed facts about this one. Ask the school directly.
-                </p>
-              </div>
+              )}
               <div className="mt-3 rounded-lg border border-dashed border-primary/40 bg-background/60 p-3">
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">
                   {nextYear} forecast
