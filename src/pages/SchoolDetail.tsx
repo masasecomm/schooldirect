@@ -1650,8 +1650,17 @@ const FeederZoneCard = ({
         ) : (
           <>
             {(() => {
-              const top = areas.slice(0, 5);
-              const remaining = areas.length - top.length;
+              // Dedupe area names case-insensitively before picking the top 5
+              // so the same town doesn't appear twice in the summary sentence.
+              const seen = new Set<string>();
+              const uniqueAreas = areas.filter((a) => {
+                const key = a.name.trim().toLowerCase();
+                if (!key || seen.has(key)) return false;
+                seen.add(key);
+                return true;
+              });
+              const top = uniqueAreas.slice(0, 5);
+              const remaining = uniqueAreas.length - top.length;
               const names = top.map((a) => a.name);
               const namesText =
                 names.length <= 1
