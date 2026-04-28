@@ -27,6 +27,7 @@ import { SiteFooter } from "@/components/schools/SiteFooter";
 import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
 import { SchoolCalendarCard } from "@/components/schools/SchoolCalendarCard";
 import { SchoolFeesCard } from "@/components/schools/SchoolFeesCard";
+import { SchoolSeo } from "@/components/seo/SchoolSeo";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -1456,6 +1457,7 @@ const SchoolDetail = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <SchoolSeo school={school} matric={matricResults} />
       <SiteHeader />
 
       <main className="container flex-1 py-8">
