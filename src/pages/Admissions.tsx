@@ -7,6 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   REGIONS,
   groupBySubRegion,
   mapsHref,
@@ -15,6 +23,14 @@ import {
   type Region,
 } from "@/lib/walk-in-centres";
 import { cn } from "@/lib/utils";
+
+const APPLICATION_HISTORY: { year: string; opened: string; closed: string }[] = [
+  { year: "2026", opened: "24 July 2025", closed: "29 August 2025" },
+  { year: "2025", opened: "11 July 2024", closed: "12 August 2024" },
+  { year: "2024", opened: "15 June 2023", closed: "21 July 2023" },
+  { year: "2023", opened: "22 July 2022", closed: "19 August 2022" },
+  { year: "2022", opened: "10 August 2021", closed: "8 October 2021" },
+];
 
 const Admissions = () => {
   const [query, setQuery] = useState("");
