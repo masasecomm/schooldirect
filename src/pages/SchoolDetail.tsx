@@ -538,6 +538,7 @@ const NumericHistoryCard = ({
   unit,
   values,
   accent = "primary",
+  narrative,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
@@ -545,6 +546,7 @@ const NumericHistoryCard = ({
   unit: string;
   values: Record<DataYear, number | null>;
   accent?: "primary" | "accent";
+  narrative?: React.ReactNode;
 }) => {
   const series = HISTORY_YEARS.map((y) => ({ year: y, value: values[y] }));
   const numeric = series.filter((s): s is { year: DataYear; value: number } => typeof s.value === "number");
@@ -750,6 +752,7 @@ const NumericHistoryCard = ({
             </span>
           </div>
         )}
+        {narrative && <div className="mt-5">{narrative}</div>}
       </CardContent>
     </Card>
   );
