@@ -58,20 +58,20 @@ export const buildDescription = (school: School, matric?: MatricResults | null):
 
 export const buildKeywords = (school: School, matric?: MatricResults | null): string => {
   const name = displayName(school);
-  const place = placeOf(school);
-  const out = new Set<string>();
-  out.add(name);
-  out.add(`${name} ${place}`);
-  out.add(`${name} contact details`);
-  out.add(`${name} matric results`);
-  out.add(`${name} fees`);
-  out.add(`schools in ${place}`);
-  if (school.district) out.add(`${titleCase(school.district)} schools`);
-  if (school.phase) out.add(`${titleCase(school.phase)} school in ${place}`);
-  out.add(`EMIS ${school.emis}`);
-  if (matric?.centreNo) out.add(`Centre number ${matric.centreNo}`);
-  out.add("Gauteng schools directory");
-  return Array.from(out).join(", ");
+  const suburb = titleCase(school.suburb || school.town || school.district || "Gauteng");
+  const phase = school.phase ? titleCase(school.phase) : "";
+  const principal = school.principal ? titleCase(school.principal) : "";
+
+  const out: string[] = [];
+  out.push(name);
+  out.push(`${name} principal`);
+  out.push(`${name} fees`);
+  if (phase && suburb) out.push(`${phase} in ${suburb}`);
+  if (principal) out.push(principal);
+  if (matric) out.push(`${name} matric results`);
+
+  // Dedupe while preserving order.
+  return Array.from(new Set(out)).join(", ");
 };
 
 export const buildSchoolJsonLd = (
