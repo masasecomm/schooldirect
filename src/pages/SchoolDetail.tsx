@@ -1965,6 +1965,14 @@ const SchoolDetail = () => {
               unit="educators"
               values={educatorsByYear}
               accent="accent"
+              narrative={
+                <EducatorsNarrative
+                  educators={educatorsByYear}
+                  learners={learnersByYear}
+                  matric={matricResults}
+                  phase={school.phase}
+                />
+              }
             />
             <LeadershipCard values={principalByYear} />
             {matricResults && <MatricResultsCard results={matricResults} />}
