@@ -28,6 +28,7 @@ import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
 import { SchoolCalendarCard } from "@/components/schools/SchoolCalendarCard";
 import { SchoolFeesCard } from "@/components/schools/SchoolFeesCard";
 import { SchoolSeo } from "@/components/seo/SchoolSeo";
+import { SchoolFaq } from "@/components/seo/SchoolFaq";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -1645,6 +1646,7 @@ const SchoolDetail = () => {
             />
           </div>
         </div>
+        <SchoolFaq school={school} matric={matricResults} />
       </main>
 
       <SiteFooter />
