@@ -1,33 +1,59 @@
 ## Goal
 
-On the school detail page (e.g. `/south-africa/gauteng/kanana-primary-school-...`), display every block in a single vertical column. Nothing on the side. On desktop the column is centered with comfortable max width.
+Give the school detail page (e.g. `/south-africa/gauteng/...`) the same visual header as the home page: a full-width blue gradient hero with the `SiteHeader` floating on top in light colors, and the school's title block centered inside it. Below the hero, the existing centered single-column content stays as-is.
 
-## Current layout
+## Current state
 
-In `src/pages/SchoolDetail.tsx` (around lines 2266 and 2358), the page uses:
+In `src/pages/SchoolDetail.tsx` (around lines 2230–2260):
 
-- An outer `grid lg:grid-cols-3` that puts "Contact information" (col-span-2) and "School details" side-by-side on desktop.
-- An inner `grid md:grid-cols-2 xl:grid-cols-3` for all the data cards (Learners, Educators, Leadership, Matric, Feeder Zone, Walk-in, Calendar, Fees, Similar, Contact form).
+- `<SiteHeader />` is rendered on a plain white background (no `overHero`).
+- Below it, inside `<main className="container py-8">`, sits the breadcrumb, "Back to directory" link, badge row, `<h1>` school name, district line, and then the `SchoolIntro` card.
+- All of these are left-aligned at desktop widths; only `SchoolIntro` and the cards below are centered with `max-w-3xl mx-auto`.
 
-This creates 2–3 columns on tablet/desktop.
+The home page (`src/pages/Index.tsx`) wraps the header in:
+
+```tsx
+<section className="relative border-b border-border/60" style={{ background: "var(--hero-gradient)" }}>
+  <SiteHeader overHero />
+  <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
+    <div className="mx-auto max-w-3xl text-center text-primary-foreground">...</div>
+  </div>
+</section>
+```
+
+We will mirror that pattern on the school page.
 
 ## Change
 
-Replace both grids with a single centered column:
+In `src/pages/SchoolDetail.tsx`:
 
-1. Outer wrapper: remove `grid lg:grid-cols-3`. Use `flex flex-col gap-6 max-w-3xl mx-auto`.
-2. Drop `lg:col-span-2` from "Contact information" Card and `lg:col-span-3` from the inner cards wrapper.
-3. Inner cards wrapper: replace `grid gap-6 md:grid-cols-2 xl:grid-cols-3` with `flex flex-col gap-6` (or just unwrap and let cards live directly in the outer flex column).
-4. Apply the same `max-w-3xl mx-auto` constraint to the `SchoolIntro` wrapper above so the whole page reads as one centered column.
-5. Optionally also center the breadcrumb / title block with the same max width for visual consistency (confirm with user — see Question).
+1. Replace the bare `<SiteHeader />` with a hero `<section>` that uses `style={{ background: "var(--hero-gradient)" }}` and renders `<SiteHeader overHero />` inside it.
 
-Result on every breakpoint: one card per row, full width of the column, centered on desktop, edge-to-edge on mobile (within container padding).
+2. Move the following blocks from the top of `<main>` into that hero section, centered (`mx-auto max-w-3xl text-center text-primary-foreground`):
+   - Breadcrumb (light variant — use `text-primary-foreground/80` and `hover:text-primary-foreground`)
+   - "Back to directory" link (light variant)
+   - Badge row (keep current badge variants; they read fine on the gradient — verify Quintile/Outline badges, may need `border-white/40 text-primary-foreground` override)
+   - `<h1>` school name (already large; will inherit white text from parent)
+   - District subtitle (use `text-primary-foreground/80`)
 
-## Files to edit
+3. Use the same vertical rhythm as Home: `pb-16 pt-28 md:pb-24 md:pt-36` on the inner container.
 
-- `src/pages/SchoolDetail.tsx` — only layout class changes around lines ~2262 and ~2266–2419. No card internals change.
+4. Keep `<main className="container flex-1 py-8">` for everything below (SchoolIntro, contact card, data cards) — they already render as a single centered column from the previous change.
+
+5. Remove the now-duplicated breadcrumb / back link / badges / h1 / district from the old position inside `<main>`.
+
+## Result
+
+- Top of every school page: blue gradient hero, white nav, centered school title and metadata.
+- Visual parity with Home, About, Admissions style.
+- No layout change to the cards below; mobile and desktop both stay one centered column.
+
+## File to edit
+
+- `src/pages/SchoolDetail.tsx` — header section restructure only (~lines 2230–2270). No other files change.
 
 ## Out of scope
 
-- Card internal layouts (charts, pictograms, tables) stay as-is.
-- Header, footer, breadcrumbs, FAQ section behaviour unchanged (only optional centering).
+- `SiteHeader` internals (already supports `overHero`).
+- Card content, FAQ, footer.
+- Breadcrumb component itself — only utility classes are adjusted at the call site.
