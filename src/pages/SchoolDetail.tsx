@@ -2207,59 +2207,83 @@ const SchoolDetail = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SchoolSeo school={school} matric={matricResults} />
-      <SiteHeader />
+      <section
+        className="relative border-b border-border/60"
+        style={{ background: "var(--hero-gradient)" }}
+      >
+        <SiteHeader overHero />
+        <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
+          <div className="mx-auto max-w-3xl text-center text-primary-foreground">
+            <Breadcrumb className="mb-4 flex justify-center">
+              <BreadcrumbList className="text-primary-foreground/80">
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/south-africa" className="hover:text-primary-foreground">South Africa</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="text-primary-foreground/60" />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/south-africa/gauteng" className="hover:text-primary-foreground">Gauteng</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="text-primary-foreground/60" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="break-all text-primary-foreground">{schoolSlug(school)}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary-foreground/80 transition-colors hover:text-primary-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to directory
+            </Link>
+
+            <div className="mt-6 flex flex-wrap justify-center gap-1.5">
+              {school.sector && (
+                <Badge className="bg-white/15 text-primary-foreground hover:bg-white/25 border-transparent">
+                  {titleCase(school.sector)}
+                </Badge>
+              )}
+              {school.phase && (
+                <Badge className="bg-white text-primary hover:bg-white/90 border-transparent">
+                  {titleCase(school.phase)}
+                </Badge>
+              )}
+              {school.type && (
+                <Badge variant="outline" className="border-white/40 text-primary-foreground">
+                  {titleCase(school.type)}
+                </Badge>
+              )}
+              {school.quintile && (
+                <Badge variant="outline" className="border-white/40 text-primary-foreground">
+                  {school.quintile}
+                </Badge>
+              )}
+              {school.noFee === "YES" && (
+                <Badge className="bg-accent text-accent-foreground hover:bg-accent/90 border-transparent">
+                  No-fee school
+                </Badge>
+              )}
+            </div>
+
+            <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl">
+              {displayName(school)}
+            </h1>
+            {school.district && (
+              <p className="mt-2 text-base text-primary-foreground/85 md:text-lg">
+                {titleCase(school.district)} District
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
 
       <main className="container flex-1 py-8">
-        <Breadcrumb className="mb-4">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/south-africa">South Africa</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/south-africa/gauteng">Gauteng</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="break-all">{schoolSlug(school)}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to directory
-        </Link>
-
-        <div className="mt-6 flex flex-wrap gap-1.5">
-          {school.sector && <Badge variant="secondary">{titleCase(school.sector)}</Badge>}
-          {school.phase && (
-            <Badge className="bg-primary-soft text-primary hover:bg-primary-soft/80">
-              {titleCase(school.phase)}
-            </Badge>
-          )}
-          {school.type && <Badge variant="outline">{titleCase(school.type)}</Badge>}
-          {school.quintile && <Badge variant="outline">{school.quintile}</Badge>}
-          {school.noFee === "YES" && (
-            <Badge className="bg-accent text-accent-foreground hover:bg-accent/90">No-fee school</Badge>
-          )}
-        </div>
-
-        <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-          {displayName(school)}
-        </h1>
-        {school.district && (
-          <p className="mt-1 text-muted-foreground">{titleCase(school.district)} District</p>
-        )}
-
-        <div className="mx-auto mt-6 w-full max-w-3xl">
+        <div className="mx-auto w-full max-w-3xl">
           <SchoolIntro school={school} matric={matricResults} />
         </div>
 
