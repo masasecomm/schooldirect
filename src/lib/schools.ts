@@ -34,6 +34,35 @@ import nc2023 from "@/data/northern-cape/schools-2023.json";
 import nc2024 from "@/data/northern-cape/schools-2024.json";
 import nc2025 from "@/data/northern-cape/schools-2025.json";
 import ncMatric from "@/data/northern-cape/matric-results.json";
+// Special needs education centres (per province, per year). These are merged
+// into the main school datasets and additionally exposed via getSpecialSchools.
+import gpSne2023 from "@/data/gauteng/special-schools-2023.json";
+import gpSne2024 from "@/data/gauteng/special-schools-2024.json";
+import gpSne2025 from "@/data/gauteng/special-schools-2025.json";
+import wcSne2023 from "@/data/western-cape/special-schools-2023.json";
+import wcSne2024 from "@/data/western-cape/special-schools-2024.json";
+import wcSne2025 from "@/data/western-cape/special-schools-2025.json";
+import kznSne2023 from "@/data/kwazulu-natal/special-schools-2023.json";
+import kznSne2024 from "@/data/kwazulu-natal/special-schools-2024.json";
+import kznSne2025 from "@/data/kwazulu-natal/special-schools-2025.json";
+import lpSne2023 from "@/data/limpopo/special-schools-2023.json";
+import lpSne2024 from "@/data/limpopo/special-schools-2024.json";
+import lpSne2025 from "@/data/limpopo/special-schools-2025.json";
+import mpSne2023 from "@/data/mpumalanga/special-schools-2023.json";
+import mpSne2024 from "@/data/mpumalanga/special-schools-2024.json";
+import mpSne2025 from "@/data/mpumalanga/special-schools-2025.json";
+import ecSne2023 from "@/data/eastern-cape/special-schools-2023.json";
+import ecSne2024 from "@/data/eastern-cape/special-schools-2024.json";
+import ecSne2025 from "@/data/eastern-cape/special-schools-2025.json";
+import fsSne2023 from "@/data/free-state/special-schools-2023.json";
+import fsSne2024 from "@/data/free-state/special-schools-2024.json";
+import fsSne2025 from "@/data/free-state/special-schools-2025.json";
+import nwSne2023 from "@/data/north-west/special-schools-2023.json";
+import nwSne2024 from "@/data/north-west/special-schools-2024.json";
+import nwSne2025 from "@/data/north-west/special-schools-2025.json";
+import ncSne2023 from "@/data/northern-cape/special-schools-2023.json";
+import ncSne2024 from "@/data/northern-cape/special-schools-2024.json";
+import ncSne2025 from "@/data/northern-cape/special-schools-2025.json";
 import { PROVINCES, getProvince, type ProvinceSlug } from "@/lib/provinces";
 
 export interface School {
@@ -66,60 +95,141 @@ export interface School {
   latitude: number | null;
   /** Province this school belongs to. Set automatically from data folder. */
   provinceSlug: ProvinceSlug;
+  /** True when the record comes from the Special Needs Education Centres dataset. */
+  isSpecialNeeds?: boolean;
 }
 
 export type DataYear = "2023" | "2024" | "2025";
 
 export const AVAILABLE_YEARS: DataYear[] = ["2025", "2024", "2023"];
 
-const tag = (rows: unknown, slug: ProvinceSlug): School[] =>
-  (rows as Omit<School, "provinceSlug">[]).map((s) => ({ ...s, provinceSlug: slug }));
+const tag = (
+  rows: unknown,
+  slug: ProvinceSlug,
+  opts?: { specialNeeds?: boolean },
+): School[] =>
+  (rows as Omit<School, "provinceSlug">[]).map((s) => ({
+    ...s,
+    provinceSlug: slug,
+    ...(opts?.specialNeeds ? { isSpecialNeeds: true } : {}),
+  }));
+
+/** Special-needs centres only, by province + year. */
+const specialByProvince: Record<ProvinceSlug, Record<DataYear, School[]>> = {
+  "gauteng": {
+    "2023": tag(gpSne2023, "gauteng", { specialNeeds: true }),
+    "2024": tag(gpSne2024, "gauteng", { specialNeeds: true }),
+    "2025": tag(gpSne2025, "gauteng", { specialNeeds: true }),
+  },
+  "western-cape": {
+    "2023": tag(wcSne2023, "western-cape", { specialNeeds: true }),
+    "2024": tag(wcSne2024, "western-cape", { specialNeeds: true }),
+    "2025": tag(wcSne2025, "western-cape", { specialNeeds: true }),
+  },
+  "kwazulu-natal": {
+    "2023": tag(kznSne2023, "kwazulu-natal", { specialNeeds: true }),
+    "2024": tag(kznSne2024, "kwazulu-natal", { specialNeeds: true }),
+    "2025": tag(kznSne2025, "kwazulu-natal", { specialNeeds: true }),
+  },
+  "limpopo": {
+    "2023": tag(lpSne2023, "limpopo", { specialNeeds: true }),
+    "2024": tag(lpSne2024, "limpopo", { specialNeeds: true }),
+    "2025": tag(lpSne2025, "limpopo", { specialNeeds: true }),
+  },
+  "mpumalanga": {
+    "2023": tag(mpSne2023, "mpumalanga", { specialNeeds: true }),
+    "2024": tag(mpSne2024, "mpumalanga", { specialNeeds: true }),
+    "2025": tag(mpSne2025, "mpumalanga", { specialNeeds: true }),
+  },
+  "eastern-cape": {
+    "2023": tag(ecSne2023, "eastern-cape", { specialNeeds: true }),
+    "2024": tag(ecSne2024, "eastern-cape", { specialNeeds: true }),
+    "2025": tag(ecSne2025, "eastern-cape", { specialNeeds: true }),
+  },
+  "free-state": {
+    "2023": tag(fsSne2023, "free-state", { specialNeeds: true }),
+    "2024": tag(fsSne2024, "free-state", { specialNeeds: true }),
+    "2025": tag(fsSne2025, "free-state", { specialNeeds: true }),
+  },
+  "north-west": {
+    "2023": tag(nwSne2023, "north-west", { specialNeeds: true }),
+    "2024": tag(nwSne2024, "north-west", { specialNeeds: true }),
+    "2025": tag(nwSne2025, "north-west", { specialNeeds: true }),
+  },
+  "northern-cape": {
+    "2023": tag(ncSne2023, "northern-cape", { specialNeeds: true }),
+    "2024": tag(ncSne2024, "northern-cape", { specialNeeds: true }),
+    "2025": tag(ncSne2025, "northern-cape", { specialNeeds: true }),
+  },
+};
+
+/**
+ * Merge ordinary + special-needs schools per province/year, deduplicating by
+ * EMIS id (an ordinary record wins if both exist for the same EMIS, but the
+ * isSpecialNeeds flag is preserved so consumers can still classify it).
+ */
+const mergeWithSpecial = (
+  ordinary: School[],
+  special: School[],
+): School[] => {
+  const byId = new Map<string, School>();
+  for (const s of ordinary) byId.set(s.id, s);
+  for (const s of special) {
+    const existing = byId.get(s.id);
+    if (existing) {
+      byId.set(s.id, { ...existing, isSpecialNeeds: true });
+    } else {
+      byId.set(s.id, s);
+    }
+  }
+  return Array.from(byId.values());
+};
 
 const rawByProvince: Record<ProvinceSlug, Record<DataYear, School[]>> = {
   "gauteng": {
-    "2023": tag(gp2023, "gauteng"),
-    "2024": tag(gp2024, "gauteng"),
-    "2025": tag(gp2025, "gauteng"),
+    "2023": mergeWithSpecial(tag(gp2023, "gauteng"), specialByProvince["gauteng"]["2023"]),
+    "2024": mergeWithSpecial(tag(gp2024, "gauteng"), specialByProvince["gauteng"]["2024"]),
+    "2025": mergeWithSpecial(tag(gp2025, "gauteng"), specialByProvince["gauteng"]["2025"]),
   },
   "western-cape": {
-    "2023": tag(wc2023, "western-cape"),
-    "2024": tag(wc2024, "western-cape"),
-    "2025": tag(wc2025, "western-cape"),
+    "2023": mergeWithSpecial(tag(wc2023, "western-cape"), specialByProvince["western-cape"]["2023"]),
+    "2024": mergeWithSpecial(tag(wc2024, "western-cape"), specialByProvince["western-cape"]["2024"]),
+    "2025": mergeWithSpecial(tag(wc2025, "western-cape"), specialByProvince["western-cape"]["2025"]),
   },
   "kwazulu-natal": {
-    "2023": tag(kzn2023, "kwazulu-natal"),
-    "2024": tag(kzn2024, "kwazulu-natal"),
-    "2025": tag(kzn2025, "kwazulu-natal"),
+    "2023": mergeWithSpecial(tag(kzn2023, "kwazulu-natal"), specialByProvince["kwazulu-natal"]["2023"]),
+    "2024": mergeWithSpecial(tag(kzn2024, "kwazulu-natal"), specialByProvince["kwazulu-natal"]["2024"]),
+    "2025": mergeWithSpecial(tag(kzn2025, "kwazulu-natal"), specialByProvince["kwazulu-natal"]["2025"]),
   },
   "limpopo": {
-    "2023": tag(lp2023, "limpopo"),
-    "2024": tag(lp2024, "limpopo"),
-    "2025": tag(lp2025, "limpopo"),
+    "2023": mergeWithSpecial(tag(lp2023, "limpopo"), specialByProvince["limpopo"]["2023"]),
+    "2024": mergeWithSpecial(tag(lp2024, "limpopo"), specialByProvince["limpopo"]["2024"]),
+    "2025": mergeWithSpecial(tag(lp2025, "limpopo"), specialByProvince["limpopo"]["2025"]),
   },
   "mpumalanga": {
-    "2023": tag(mp2023, "mpumalanga"),
-    "2024": tag(mp2024, "mpumalanga"),
-    "2025": tag(mp2025, "mpumalanga"),
+    "2023": mergeWithSpecial(tag(mp2023, "mpumalanga"), specialByProvince["mpumalanga"]["2023"]),
+    "2024": mergeWithSpecial(tag(mp2024, "mpumalanga"), specialByProvince["mpumalanga"]["2024"]),
+    "2025": mergeWithSpecial(tag(mp2025, "mpumalanga"), specialByProvince["mpumalanga"]["2025"]),
   },
   "eastern-cape": {
-    "2023": tag(ec2023, "eastern-cape"),
-    "2024": tag(ec2024, "eastern-cape"),
-    "2025": tag(ec2025, "eastern-cape"),
+    "2023": mergeWithSpecial(tag(ec2023, "eastern-cape"), specialByProvince["eastern-cape"]["2023"]),
+    "2024": mergeWithSpecial(tag(ec2024, "eastern-cape"), specialByProvince["eastern-cape"]["2024"]),
+    "2025": mergeWithSpecial(tag(ec2025, "eastern-cape"), specialByProvince["eastern-cape"]["2025"]),
   },
   "free-state": {
-    "2023": tag(fs2023, "free-state"),
-    "2024": tag(fs2024, "free-state"),
-    "2025": tag(fs2025, "free-state"),
+    "2023": mergeWithSpecial(tag(fs2023, "free-state"), specialByProvince["free-state"]["2023"]),
+    "2024": mergeWithSpecial(tag(fs2024, "free-state"), specialByProvince["free-state"]["2024"]),
+    "2025": mergeWithSpecial(tag(fs2025, "free-state"), specialByProvince["free-state"]["2025"]),
   },
   "north-west": {
-    "2023": tag(nw2023, "north-west"),
-    "2024": tag(nw2024, "north-west"),
-    "2025": tag(nw2025, "north-west"),
+    "2023": mergeWithSpecial(tag(nw2023, "north-west"), specialByProvince["north-west"]["2023"]),
+    "2024": mergeWithSpecial(tag(nw2024, "north-west"), specialByProvince["north-west"]["2024"]),
+    "2025": mergeWithSpecial(tag(nw2025, "north-west"), specialByProvince["north-west"]["2025"]),
   },
   "northern-cape": {
-    "2023": tag(nc2023, "northern-cape"),
-    "2024": tag(nc2024, "northern-cape"),
-    "2025": tag(nc2025, "northern-cape"),
+    "2023": mergeWithSpecial(tag(nc2023, "northern-cape"), specialByProvince["northern-cape"]["2023"]),
+    "2024": mergeWithSpecial(tag(nc2024, "northern-cape"), specialByProvince["northern-cape"]["2024"]),
+    "2025": mergeWithSpecial(tag(nc2025, "northern-cape"), specialByProvince["northern-cape"]["2025"]),
   },
 };
 
@@ -131,6 +241,18 @@ const datasets: Record<DataYear, School[]> = {
 
 export const getSchools = (year: DataYear, provinceSlug?: ProvinceSlug): School[] =>
   provinceSlug ? rawByProvince[provinceSlug][year] : datasets[year];
+
+/**
+ * Special-needs education centres only. When provinceSlug is omitted, returns
+ * centres from every province for the given year.
+ */
+export const getSpecialSchools = (
+  year: DataYear,
+  provinceSlug?: ProvinceSlug,
+): School[] =>
+  provinceSlug
+    ? specialByProvince[provinceSlug][year]
+    : PROVINCES.flatMap((p) => specialByProvince[p.slug][year]);
 
 export interface MatricYearStats {
   progressed: number;
