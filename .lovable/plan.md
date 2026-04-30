@@ -1,59 +1,127 @@
 ## Goal
 
-Give the school detail page (e.g. `/south-africa/gauteng/...`) the same visual header as the home page: a full-width blue gradient hero with the `SiteHeader` floating on top in light colors, and the school's title block centered inside it. Below the hero, the existing centered single-column content stays as-is.
+Add **Western Cape** as a second province alongside Gauteng so every page, SEO signal, sitemap, JSON-LD, FAQ, breadcrumbs and geo tag works the same way it does for Gauteng today — and make adding any future province a JSON drop-in.
 
-## Current state
+## Province registry (single source of truth)
 
-In `src/pages/SchoolDetail.tsx` (around lines 2230–2260):
+Create `src/lib/provinces.ts`:
 
-- `<SiteHeader />` is rendered on a plain white background (no `overHero`).
-- Below it, inside `<main className="container py-8">`, sits the breadcrumb, "Back to directory" link, badge row, `<h1>` school name, district line, and then the `SchoolIntro` card.
-- All of these are left-aligned at desktop widths; only `SchoolIntro` and the cards below are centered with `max-w-3xl mx-auto`.
+```ts
+export type ProvinceSlug = "gauteng" | "western-cape";
 
-The home page (`src/pages/Index.tsx`) wraps the header in:
+export interface ProvinceConfig {
+  slug: ProvinceSlug;
+  name: string;          // "Western Cape"
+  shortName: string;     // "WC"
+  geoRegion: string;     // "ZA-WC"
+  dataDir: string;       // "western-cape" — folder under src/data/
+  dept: string;          // "Western Cape Education Department"
+}
 
-```tsx
-<section className="relative border-b border-border/60" style={{ background: "var(--hero-gradient)" }}>
-  <SiteHeader overHero />
-  <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
-    <div className="mx-auto max-w-3xl text-center text-primary-foreground">...</div>
-  </div>
-</section>
+export const PROVINCES: ProvinceConfig[] = [ /* gauteng + western-cape */ ];
+export const getProvince = (slug: string) => ...;
+export const getProvinceForSchool = (school) => ...; // looks up by school.provinceSlug
 ```
 
-We will mirror that pattern on the school page.
+Every Gauteng-specific string in the codebase becomes a lookup against this registry.
 
-## Change
+## Data layout
 
-In `src/pages/SchoolDetail.tsx`:
+```text
+src/data/
+  gauteng/
+    schools-2023.json
+    schools-2024.json
+    schools-2025.json
+    matric-results.json
+  western-cape/
+    schools-2023.json
+    schools-2024.json
+    schools-2025.json
+    matric-results.json
+```
 
-1. Replace the bare `<SiteHeader />` with a hero `<section>` that uses `style={{ background: "var(--hero-gradient)" }}` and renders `<SiteHeader overHero />` inside it.
+- Move existing `src/data/schools-*.json` and `matric-results.json` into `src/data/gauteng/`.
+- Add a `provinceSlug: ProvinceSlug` field to the `School` interface (set per dataset on load — file/folder is the source of truth, no manual tagging needed).
+- `getSchools(year)` returns **all provinces merged**; add `getSchools(year, provinceSlug?)` to filter.
+- For Western Cape, ship empty-but-valid arrays (`[]`) until the user supplies real data, so the build never breaks.
 
-2. Move the following blocks from the top of `<main>` into that hero section, centered (`mx-auto max-w-3xl text-center text-primary-foreground`):
-   - Breadcrumb (light variant — use `text-primary-foreground/80` and `hover:text-primary-foreground`)
-   - "Back to directory" link (light variant)
-   - Badge row (keep current badge variants; they read fine on the gradient — verify Quintile/Outline badges, may need `border-white/40 text-primary-foreground` override)
-   - `<h1>` school name (already large; will inherit white text from parent)
-   - District subtitle (use `text-primary-foreground/80`)
+## Routing
 
-3. Use the same vertical rhythm as Home: `pb-16 pt-28 md:pb-24 md:pt-36` on the inner container.
+`src/App.tsx`:
 
-4. Keep `<main className="container flex-1 py-8">` for everything below (SchoolIntro, contact card, data cards) — they already render as a single centered column from the previous change.
+```text
+/                                                → Index (all provinces)
+/south-africa                                    → Index
+/south-africa/:province                          → Index (filtered to province)
+/south-africa/:province/:slug                    → SchoolDetail
+/schools/:slug                                   → SchoolDetail (legacy redirect)
+```
 
-5. Remove the now-duplicated breadcrumb / back link / badges / h1 / district from the old position inside `<main>`.
+`schoolHref(school)` becomes `/south-africa/${province.slug}/${schoolSlug(school)}` using `getProvinceForSchool(school)`.
 
-## Result
+## SEO refactor (`src/lib/seo.ts` + `src/components/seo/SchoolSeo.tsx`)
 
-- Top of every school page: blue gradient hero, white nav, centered school title and metadata.
-- Visual parity with Home, About, Admissions style.
-- No layout change to the cards below; mobile and desktop both stay one centered column.
+Replace every hardcoded `"Gauteng"` / `"ZA-GP"` with values from the school's province:
 
-## File to edit
+- `buildTitle` → `… — ${place}, ${province.name} | Fees, Contact, Matric Results`
+- `buildDescription` → `… in ${place}, ${province.name}.`
+- `buildKeywords` → fallback uses `province.name` instead of `"Gauteng"`
+- `buildSchoolJsonLd` →
+  - `address.addressRegion = province.name`
+  - Breadcrumb position 3 → `{ name: province.name, item: ${SITE_URL}/south-africa/${province.slug} }`
+  - District breadcrumb → links to `/south-africa/${province.slug}` not the hardcoded gauteng path
+- `placeOf` fallback → `province.name`
+- `buildSchoolFaqs` → "in the latest ${province.name} dataset", "${where}, ${province.name}, South Africa"
+- `SchoolSeo`:
+  - `<meta name="geo.region" content={province.geoRegion} />`
+  - `geo.placename` fallback → `province.name`
 
-- `src/pages/SchoolDetail.tsx` — header section restructure only (~lines 2230–2270). No other files change.
+## Page-level changes
 
-## Out of scope
+**`src/pages/SchoolDetail.tsx`**
+- Hero breadcrumb shows the school's actual province (`<Link to={"/south-africa/" + province.slug}>{province.name}</Link>`), not always "Gauteng".
+- Canonical path uses `schoolHref(school)`.
+- Principal-history sentences ("our Gauteng directory", "no other postings…") become `our ${province.name} directory` / `… in ${province.name}`.
 
-- `SiteHeader` internals (already supports `overHero`).
-- Card content, FAQ, footer.
-- Breadcrumb component itself — only utility classes are adjusted at the call site.
+**`src/pages/Index.tsx`**
+- Read `:province` route param. If present, filter schools/facets to that province and adjust hero copy ("Every school in Western Cape…"); otherwise keep the all-South-Africa view.
+- Pass province context into `SchoolCard` links through the existing `schoolHref`.
+
+**`src/components/schools/SchoolIntro.tsx`** — same Gauteng→province substitution as `seo.ts`.
+
+**`src/components/schools/SiteFooter.tsx`** — replace the static "Data source: Gauteng Department of Education, 2023" with a list built from provinces actually present in the data, e.g. *"Data sources: Gauteng DoE, Western Cape Education Department"*.
+
+**`src/lib/year-context.tsx`** — rename `STORAGE_KEY` from `"gauteng-schools-year"` to `"sa-schools-year"` (purely cosmetic).
+
+**`src/lib/walk-in-centres.ts`** — gate `findWalkInCentresForSchool` on `province.slug === "gauteng"`. Western Cape returns `[]` and the section silently hides on the school page (per your choice).
+
+**`index.html`** — generic copy: "Every school in South Africa", drop province from `<title>` / OG / Twitter, update the SearchAction `target` to `/south-africa?q=...`.
+
+## Sitemap (`scripts/generate-sitemap.mjs`)
+
+- Walk every province in the registry, load each year's JSON from `src/data/<dataDir>/`.
+- Static URL list becomes:
+  - `/`, `/south-africa`, `/about`, `/admissions`
+  - One entry per province: `/south-africa/<slug>`
+- School URLs use the province-aware path.
+- Continue emitting `sitemap-static.xml`, `sitemap-schools.xml`, `sitemap.xml`, `sitemap-index.xml`. Optionally split schools by province later — not needed now.
+
+## Migration & safety net
+
+- Keep the old `/schools/:slug` route (already present) and add a one-liner client redirect on `SchoolDetail` mount: if URL is `/schools/...` or `/south-africa/gauteng/...` for a school whose actual province is different, `navigate(schoolHref(school), { replace: true })`. This protects any old indexed URLs.
+
+## Verification checklist
+
+- `/south-africa/western-cape` renders the directory filtered to WC (currently empty placeholder).
+- `/south-africa/gauteng/<existing-slug>` still renders exactly as today (same title, JSON-LD, breadcrumbs).
+- `npm run build` followed by sitemap generation produces both province URL sets.
+- View-source on a Gauteng school page shows `addressRegion: "Gauteng"` / `geo.region: ZA-GP`; on a future WC school it shows `Western Cape` / `ZA-WC`.
+
+## Adding province #3 later
+
+Once this lands, adding e.g. KwaZulu-Natal is just:
+1. Append a row to `PROVINCES` in `src/lib/provinces.ts`.
+2. Drop `src/data/kwazulu-natal/schools-{2023,2024,2025}.json` + `matric-results.json`.
+
+Everything else (routes, SEO, breadcrumbs, FAQ, sitemap, geo tags) is already generic.
