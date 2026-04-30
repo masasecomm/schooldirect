@@ -2203,6 +2203,7 @@ const SchoolDetail = () => {
     {} as Record<DataYear, string | null>,
   );
   const matricResults = getMatricResults(school.emis);
+  const province = getProvinceForSchool(school);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -2224,7 +2225,7 @@ const SchoolDetail = () => {
                 <BreadcrumbSeparator className="text-primary-foreground/60" />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/south-africa/gauteng" className="hover:text-primary-foreground">Gauteng</Link>
+                    <Link to={`/south-africa/${province.slug}`} className="hover:text-primary-foreground">{province.name}</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="text-primary-foreground/60" />
