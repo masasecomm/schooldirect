@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { YearProvider } from "@/lib/year-context";
 import Index from "./pages/Index.tsx";
+import Landing from "./pages/Landing.tsx";
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const SchoolDetail = lazy(() => import("./pages/SchoolDetail.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
@@ -24,7 +25,7 @@ const App = () => (
       <BrowserRouter>
         <Suspense fallback={null}>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Landing />} />
           {/* Geographic breadcrumb levels resolve to the directory */}
           <Route path="/south-africa" element={<Index />} />
           <Route path="/south-africa/:province" element={<Index />} />

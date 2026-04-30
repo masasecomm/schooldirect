@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,8 @@ const Index = () => {
   const { year } = useYear();
   const { province: provinceParam } = useParams<{ province?: string }>();
   const province = isProvinceSlug(provinceParam) ? getProvince(provinceParam) : null;
-  const [query, setQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [sort, setSort] = useState<"learners" | "name" | "district">("learners");
   const [visible, setVisible] = useState(PAGE_SIZE);
