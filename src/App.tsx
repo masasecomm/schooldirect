@@ -12,6 +12,7 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const SchoolDetail = lazy(() => import("./pages/SchoolDetail.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Admissions = lazy(() => import("./pages/Admissions.tsx"));
+const SpecialNeedsSchools = lazy(() => import("./pages/SpecialNeedsSchools.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -28,7 +29,9 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           {/* Geographic breadcrumb levels resolve to the directory */}
           <Route path="/south-africa" element={<Index />} />
+          <Route path="/south-africa/special-needs" element={<SpecialNeedsSchools />} />
           <Route path="/south-africa/:province" element={<Index />} />
+          <Route path="/south-africa/:province/special-needs" element={<SpecialNeedsSchools />} />
           <Route path="/south-africa/:province/:slug" element={<SchoolDetail />} />
           {/* Backwards-compat: old /schools/:slug links still resolve */}
           <Route path="/schools/:slug" element={<SchoolDetail />} />

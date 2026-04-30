@@ -28,6 +28,11 @@ export const SchoolCard = ({ school }: { school: School }) => {
               {school.quintile}
             </Badge>
           )}
+          {school.isSpecialNeeds && (
+            <Badge className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium">
+              Special needs
+            </Badge>
+          )}
         </div>
 
         <h3 className="text-base font-semibold leading-snug tracking-tight">

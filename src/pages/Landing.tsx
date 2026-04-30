@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, MapPin, Search, User, Users } from "lucide-react";
+import { ArrowRight, Heart, MapPin, Search, User, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/schools/SiteFooter";
 import { PROVINCES } from "@/lib/provinces";
 import {
   getSchools,
+  getSpecialSchools,
   schoolHref,
   displayName,
   titleCase,
@@ -104,6 +105,7 @@ const Landing = () => {
   );
 
   const totalSchools = provinceData.reduce((sum, r) => sum + r.total, 0);
+  const totalSpecial = useMemo(() => getSpecialSchools("2025").length, []);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,6 +163,36 @@ const Landing = () => {
       </section>
 
       <main className="container flex-1 py-14">
+        <section aria-labelledby="special-needs-callout" className="mb-12">
+          <Link
+            to="/south-africa/special-needs"
+            className="group flex flex-col items-start gap-4 rounded-2xl border border-border bg-gradient-to-br from-primary-soft/60 via-card to-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-card)] md:flex-row md:items-center md:justify-between md:p-8"
+          >
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-primary/10 p-3 text-primary">
+                <Heart className="h-6 w-6" />
+              </div>
+              <div>
+                <h2
+                  id="special-needs-callout"
+                  className="text-xl font-bold tracking-tight md:text-2xl"
+                >
+                  Special needs education centres
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground md:text-base">
+                  Browse {totalSpecial.toLocaleString()} schools across all 9
+                  provinces serving learners with specific learning, sensory,
+                  physical or developmental needs.
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
+              Explore directory
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </Link>
+        </section>
+
         <div className="mx-auto mb-10 max-w-3xl text-center">
           <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
             Browse by province

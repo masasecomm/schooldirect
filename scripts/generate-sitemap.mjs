@@ -39,9 +39,21 @@ const slugify = (name, id) => {
 };
 
 const loadYear = (provinceDir, year) => {
-  const path = resolve(root, `src/data/${provinceDir}/schools-${year}.json`);
-  if (!existsSync(path)) return { schools: [], mtime: new Date(0) };
-  return { schools: JSON.parse(readFileSync(path, "utf-8")), mtime: statSync(path).mtime };
+  const ordPath = resolve(root, `src/data/${provinceDir}/schools-${year}.json`);
+  const sneePath = resolve(root, `src/data/${provinceDir}/special-schools-${year}.json`);
+  let schools = [];
+  let mtime = new Date(0);
+  if (existsSync(ordPath)) {
+    schools = schools.concat(JSON.parse(readFileSync(ordPath, "utf-8")));
+    const m = statSync(ordPath).mtime;
+    if (m > mtime) mtime = m;
+  }
+  if (existsSync(sneePath)) {
+    schools = schools.concat(JSON.parse(readFileSync(sneePath, "utf-8")));
+    const m = statSync(sneePath).mtime;
+    if (m > mtime) mtime = m;
+  }
+  return { schools, mtime };
 };
 
 const years = ["2025", "2024", "2023"];
@@ -76,10 +88,16 @@ const escape = (s) =>
 const staticUrls = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
   { loc: "/south-africa", priority: "0.5", changefreq: "monthly" },
+  { loc: "/south-africa/special-needs", priority: "0.7", changefreq: "monthly" },
   ...PROVINCES.map((p) => ({
     loc: `/south-africa/${p.slug}`,
     priority: "0.7",
     changefreq: "weekly",
+  })),
+  ...PROVINCES.map((p) => ({
+    loc: `/south-africa/${p.slug}/special-needs`,
+    priority: "0.6",
+    changefreq: "monthly",
   })),
   { loc: "/about", priority: "0.4", changefreq: "yearly" },
   { loc: "/admissions", priority: "0.6", changefreq: "monthly" },
