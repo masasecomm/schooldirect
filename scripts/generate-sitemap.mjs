@@ -24,6 +24,7 @@ const PROVINCES = [
   { slug: "mpumalanga", dataDir: "mpumalanga" },
   { slug: "eastern-cape", dataDir: "eastern-cape" },
   { slug: "free-state", dataDir: "free-state" },
+  { slug: "north-west", dataDir: "north-west" },
 ];
 
 const slugify = (name, id) => {

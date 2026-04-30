@@ -26,6 +26,10 @@ import fs2023 from "@/data/free-state/schools-2023.json";
 import fs2024 from "@/data/free-state/schools-2024.json";
 import fs2025 from "@/data/free-state/schools-2025.json";
 import fsMatric from "@/data/free-state/matric-results.json";
+import nw2023 from "@/data/north-west/schools-2023.json";
+import nw2024 from "@/data/north-west/schools-2024.json";
+import nw2025 from "@/data/north-west/schools-2025.json";
+import nwMatric from "@/data/north-west/matric-results.json";
 import { PROVINCES, getProvince, type ProvinceSlug } from "@/lib/provinces";
 
 export interface School {
@@ -103,6 +107,11 @@ const rawByProvince: Record<ProvinceSlug, Record<DataYear, School[]>> = {
     "2024": tag(fs2024, "free-state"),
     "2025": tag(fs2025, "free-state"),
   },
+  "north-west": {
+    "2023": tag(nw2023, "north-west"),
+    "2024": tag(nw2024, "north-west"),
+    "2025": tag(nw2025, "north-west"),
+  },
 };
 
 const datasets: Record<DataYear, School[]> = {
@@ -138,6 +147,7 @@ const matricByEmis: Record<string, MatricResults> = {
   ...(mpMatric as Record<string, MatricResults>),
   ...(ecMatric as Record<string, MatricResults>),
   ...(fsMatric as Record<string, MatricResults>),
+  ...(nwMatric as Record<string, MatricResults>),
 };
 
 export const getMatricResults = (emis: string): MatricResults | null =>
