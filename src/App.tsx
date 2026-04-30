@@ -25,10 +25,10 @@ const App = () => (
         <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Index />} />
-          {/* Geographic breadcrumb levels resolve to the directory for now */}
+          {/* Geographic breadcrumb levels resolve to the directory */}
           <Route path="/south-africa" element={<Index />} />
-          <Route path="/south-africa/gauteng" element={<Index />} />
-          <Route path="/south-africa/gauteng/:slug" element={<SchoolDetail />} />
+          <Route path="/south-africa/:province" element={<Index />} />
+          <Route path="/south-africa/:province/:slug" element={<SchoolDetail />} />
           {/* Backwards-compat: old /schools/:slug links still resolve */}
           <Route path="/schools/:slug" element={<SchoolDetail />} />
           <Route path="/about" element={<About />} />
