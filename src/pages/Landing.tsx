@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, MapPin, Search, Users } from "lucide-react";
+import { ArrowRight, MapPin, Search, User, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,6 +67,17 @@ const FeaturedSchoolCard = ({ school }: { school: School }) => (
               {school.learners.toLocaleString()}
             </span>{" "}
             learners
+          </span>
+        </div>
+      )}
+      {school.principal && (
+        <div className="flex items-start gap-1.5">
+          <User className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
+          <span className="line-clamp-1">
+            Principal:{" "}
+            <span className="font-medium text-foreground">
+              {titleCase(school.principal)}
+            </span>
           </span>
         </div>
       )}
