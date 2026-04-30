@@ -1140,11 +1140,11 @@ const LeadershipCard = ({
 
     let historySentence: string;
     if (previousPosts.length === 0) {
-      historySentence = `Our directory of every Gauteng school shows no other postings for ${name} between 2023 and 2025, so this appears to be the only school where ${name} has been recorded as principal in our dataset.`;
+      historySentence = `Our directory shows no other postings for ${name} between 2023 and 2025, so this appears to be the only school where ${name} has been recorded as principal in our dataset.`;
     } else {
       const list = previousPosts.slice(0, 4).map((p) => p.schoolName).join(", ");
       const more = previousPosts.length > 4 ? `, plus ${previousPosts.length - 4} more` : "";
-      historySentence = `The same name also appears as principal at ${previousPosts.length} other school${previousPosts.length === 1 ? "" : "s"} in our Gauteng directory: ${list}${more}. This suggests prior leadership experience elsewhere in the province.`;
+      historySentence = `The same name also appears as principal at ${previousPosts.length} other school${previousPosts.length === 1 ? "" : "s"} in our directory: ${list}${more}. This suggests prior leadership experience elsewhere.`;
     }
 
     return {
