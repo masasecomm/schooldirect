@@ -88,10 +88,16 @@ const escape = (s) =>
 const staticUrls = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
   { loc: "/south-africa", priority: "0.5", changefreq: "monthly" },
+  { loc: "/south-africa/special-needs", priority: "0.7", changefreq: "monthly" },
   ...PROVINCES.map((p) => ({
     loc: `/south-africa/${p.slug}`,
     priority: "0.7",
     changefreq: "weekly",
+  })),
+  ...PROVINCES.map((p) => ({
+    loc: `/south-africa/${p.slug}/special-needs`,
+    priority: "0.6",
+    changefreq: "monthly",
   })),
   { loc: "/about", priority: "0.4", changefreq: "yearly" },
   { loc: "/admissions", priority: "0.6", changefreq: "monthly" },
