@@ -4,7 +4,8 @@ export type ProvinceSlug =
   | "kwazulu-natal"
   | "limpopo"
   | "mpumalanga"
-  | "eastern-cape";
+  | "eastern-cape"
+  | "free-state";
 
 export interface ProvinceConfig {
   slug: ProvinceSlug;
@@ -63,6 +64,14 @@ export const PROVINCES: ProvinceConfig[] = [
     geoRegion: "ZA-EC",
     dataDir: "eastern-cape",
     dept: "Eastern Cape Department of Education",
+  },
+  {
+    slug: "free-state",
+    name: "Free State",
+    shortName: "FS",
+    geoRegion: "ZA-FS",
+    dataDir: "free-state",
+    dept: "Free State Department of Education",
   },
 ];
 
