@@ -1,4 +1,10 @@
-export type ProvinceSlug = "gauteng" | "western-cape" | "kwazulu-natal" | "limpopo" | "mpumalanga";
+export type ProvinceSlug =
+  | "gauteng"
+  | "western-cape"
+  | "kwazulu-natal"
+  | "limpopo"
+  | "mpumalanga"
+  | "eastern-cape";
 
 export interface ProvinceConfig {
   slug: ProvinceSlug;
@@ -49,6 +55,14 @@ export const PROVINCES: ProvinceConfig[] = [
     geoRegion: "ZA-MP",
     dataDir: "mpumalanga",
     dept: "Mpumalanga Department of Education",
+  },
+  {
+    slug: "eastern-cape",
+    name: "Eastern Cape",
+    shortName: "EC",
+    geoRegion: "ZA-EC",
+    dataDir: "eastern-cape",
+    dept: "Eastern Cape Department of Education",
   },
 ];
 

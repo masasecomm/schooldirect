@@ -22,6 +22,7 @@ const PROVINCES = [
   { slug: "kwazulu-natal", dataDir: "kwazulu-natal" },
   { slug: "limpopo", dataDir: "limpopo" },
   { slug: "mpumalanga", dataDir: "mpumalanga" },
+  { slug: "eastern-cape", dataDir: "eastern-cape" },
 ];
 
 const slugify = (name, id) => {
