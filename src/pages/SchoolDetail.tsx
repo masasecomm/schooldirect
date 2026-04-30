@@ -1328,7 +1328,7 @@ const LeadershipCard = ({
                 })}
               </div>
               <p className="mt-2 text-[11px] text-muted-foreground">
-                Built from this school's principal records and matched against our directory of every Gauteng school.
+                Built from this school's principal records and matched against our school directory.
               </p>
             </div>
           );
@@ -2137,9 +2137,8 @@ const SchoolDetail = () => {
   // wrong/old slug), redirect to the canonical "<name>-<id>" slug.
   useEffect(() => {
     if (!school || !slug) return;
-    const canonical = schoolSlug(school);
-    const canonicalPath = `/south-africa/gauteng/${canonical}`;
-    if (slug !== canonical || window.location.pathname !== canonicalPath) {
+    const canonicalPath = schoolHref(school);
+    if (window.location.pathname !== canonicalPath) {
       navigate(canonicalPath, { replace: true });
     }
   }, [school, slug, navigate]);
