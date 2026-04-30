@@ -5,7 +5,7 @@
  * containing one <url> per unique school (latest year wins) plus the static
  * top-level routes.
  */
-import { readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,6 +13,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 
 const SITE_URL = "https://schooldirect.org";
+
+// Keep in sync with src/lib/provinces.ts. Plain JS so this runs at build time
+// without a TS toolchain.
+const PROVINCES = [
+  { slug: "gauteng", dataDir: "gauteng" },
+  { slug: "western-cape", dataDir: "western-cape" },
+];
 
 const slugify = (name, id) => {
   const base = String(name ?? "")
@@ -24,20 +31,26 @@ const slugify = (name, id) => {
   return base ? `${base}-${id}` : String(id);
 };
 
-const loadYear = (year) => {
-  const path = resolve(root, `src/data/schools-${year}.json`);
+const loadYear = (provinceDir, year) => {
+  const path = resolve(root, `src/data/${provinceDir}/schools-${year}.json`);
+  if (!existsSync(path)) return { schools: [], mtime: new Date(0) };
   return { schools: JSON.parse(readFileSync(path, "utf-8")), mtime: statSync(path).mtime };
 };
 
 const years = ["2025", "2024", "2023"];
-const merged = new Map(); // id -> { school, lastmod }
+// id -> { school, provinceSlug, lastmod } (latest year wins)
+const merged = new Map();
 let latestDataMtime = new Date(0);
-for (const y of years) {
-  const { schools, mtime } = loadYear(y);
-  if (mtime > latestDataMtime) latestDataMtime = mtime;
-  const lastmod = mtime.toISOString().slice(0, 10);
-  for (const s of schools) {
-    if (!merged.has(s.id)) merged.set(s.id, { school: s, lastmod });
+for (const province of PROVINCES) {
+  for (const y of years) {
+    const { schools, mtime } = loadYear(province.dataDir, y);
+    if (mtime > latestDataMtime) latestDataMtime = mtime;
+    const lastmod = mtime.toISOString().slice(0, 10);
+    for (const s of schools) {
+      if (!merged.has(s.id)) {
+        merged.set(s.id, { school: s, provinceSlug: province.slug, lastmod });
+      }
+    }
   }
 }
 
@@ -56,7 +69,11 @@ const escape = (s) =>
 const staticUrls = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
   { loc: "/south-africa", priority: "0.5", changefreq: "monthly" },
-  { loc: "/south-africa/gauteng", priority: "0.7", changefreq: "weekly" },
+  ...PROVINCES.map((p) => ({
+    loc: `/south-africa/${p.slug}`,
+    priority: "0.7",
+    changefreq: "weekly",
+  })),
   { loc: "/about", priority: "0.4", changefreq: "yearly" },
   { loc: "/admissions", priority: "0.6", changefreq: "monthly" },
 ];
@@ -80,8 +97,8 @@ const staticEntries = staticUrls.map((u) => ({
   priority: u.priority,
 }));
 
-const schoolEntries = Array.from(merged.values()).map(({ school, lastmod }) => ({
-  loc: `${SITE_URL}/south-africa/gauteng/${slugify(school.name, school.id)}`,
+const schoolEntries = Array.from(merged.values()).map(({ school, provinceSlug, lastmod }) => ({
+  loc: `${SITE_URL}/south-africa/${provinceSlug}/${slugify(school.name, school.id)}`,
   lastmod,
   changefreq: "monthly",
   priority: "0.8",
