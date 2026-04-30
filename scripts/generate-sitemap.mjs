@@ -19,6 +19,7 @@ const SITE_URL = "https://schooldirect.org";
 const PROVINCES = [
   { slug: "gauteng", dataDir: "gauteng" },
   { slug: "western-cape", dataDir: "western-cape" },
+  { slug: "kwazulu-natal", dataDir: "kwazulu-natal" },
 ];
 
 const slugify = (name, id) => {
