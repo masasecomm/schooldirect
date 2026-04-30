@@ -18,6 +18,10 @@ import mp2023 from "@/data/mpumalanga/schools-2023.json";
 import mp2024 from "@/data/mpumalanga/schools-2024.json";
 import mp2025 from "@/data/mpumalanga/schools-2025.json";
 import mpMatric from "@/data/mpumalanga/matric-results.json";
+import ec2023 from "@/data/eastern-cape/schools-2023.json";
+import ec2024 from "@/data/eastern-cape/schools-2024.json";
+import ec2025 from "@/data/eastern-cape/schools-2025.json";
+import ecMatric from "@/data/eastern-cape/matric-results.json";
 import { PROVINCES, getProvince, type ProvinceSlug } from "@/lib/provinces";
 
 export interface School {
@@ -85,6 +89,11 @@ const rawByProvince: Record<ProvinceSlug, Record<DataYear, School[]>> = {
     "2024": tag(mp2024, "mpumalanga"),
     "2025": tag(mp2025, "mpumalanga"),
   },
+  "eastern-cape": {
+    "2023": tag(ec2023, "eastern-cape"),
+    "2024": tag(ec2024, "eastern-cape"),
+    "2025": tag(ec2025, "eastern-cape"),
+  },
 };
 
 const datasets: Record<DataYear, School[]> = {
@@ -118,6 +127,7 @@ const matricByEmis: Record<string, MatricResults> = {
   ...(kznMatric as Record<string, MatricResults>),
   ...(lpMatric as Record<string, MatricResults>),
   ...(mpMatric as Record<string, MatricResults>),
+  ...(ecMatric as Record<string, MatricResults>),
 };
 
 export const getMatricResults = (emis: string): MatricResults | null =>
