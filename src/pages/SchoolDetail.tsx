@@ -62,6 +62,7 @@ import {
   type MatricResults,
   findPrincipalAtOtherSchools,
 } from "@/lib/schools";
+import { getProvinceForSchool } from "@/lib/provinces";
 import { toast } from "@/hooks/use-toast";
 import {
   findWalkInCentresForSchool,
