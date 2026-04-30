@@ -62,6 +62,7 @@ import {
   type MatricResults,
   findPrincipalAtOtherSchools,
 } from "@/lib/schools";
+import { getProvinceForSchool } from "@/lib/provinces";
 import { toast } from "@/hooks/use-toast";
 import {
   findWalkInCentresForSchool,
@@ -1139,11 +1140,11 @@ const LeadershipCard = ({
 
     let historySentence: string;
     if (previousPosts.length === 0) {
-      historySentence = `Our directory of every Gauteng school shows no other postings for ${name} between 2023 and 2025, so this appears to be the only school where ${name} has been recorded as principal in our dataset.`;
+      historySentence = `Our directory shows no other postings for ${name} between 2023 and 2025, so this appears to be the only school where ${name} has been recorded as principal in our dataset.`;
     } else {
       const list = previousPosts.slice(0, 4).map((p) => p.schoolName).join(", ");
       const more = previousPosts.length > 4 ? `, plus ${previousPosts.length - 4} more` : "";
-      historySentence = `The same name also appears as principal at ${previousPosts.length} other school${previousPosts.length === 1 ? "" : "s"} in our Gauteng directory: ${list}${more}. This suggests prior leadership experience elsewhere in the province.`;
+      historySentence = `The same name also appears as principal at ${previousPosts.length} other school${previousPosts.length === 1 ? "" : "s"} in our directory: ${list}${more}. This suggests prior leadership experience elsewhere.`;
     }
 
     return {
@@ -1327,7 +1328,7 @@ const LeadershipCard = ({
                 })}
               </div>
               <p className="mt-2 text-[11px] text-muted-foreground">
-                Built from this school's principal records and matched against our directory of every Gauteng school.
+                Built from this school's principal records and matched against our school directory.
               </p>
             </div>
           );
@@ -2136,9 +2137,8 @@ const SchoolDetail = () => {
   // wrong/old slug), redirect to the canonical "<name>-<id>" slug.
   useEffect(() => {
     if (!school || !slug) return;
-    const canonical = schoolSlug(school);
-    const canonicalPath = `/south-africa/gauteng/${canonical}`;
-    if (slug !== canonical || window.location.pathname !== canonicalPath) {
+    const canonicalPath = schoolHref(school);
+    if (window.location.pathname !== canonicalPath) {
       navigate(canonicalPath, { replace: true });
     }
   }, [school, slug, navigate]);
@@ -2203,6 +2203,7 @@ const SchoolDetail = () => {
     {} as Record<DataYear, string | null>,
   );
   const matricResults = getMatricResults(school.emis);
+  const province = getProvinceForSchool(school);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -2224,7 +2225,7 @@ const SchoolDetail = () => {
                 <BreadcrumbSeparator className="text-primary-foreground/60" />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/south-africa/gauteng" className="hover:text-primary-foreground">Gauteng</Link>
+                    <Link to={`/south-africa/${province.slug}`} className="hover:text-primary-foreground">{province.name}</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="text-primary-foreground/60" />

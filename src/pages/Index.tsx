@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { SiteFooter } from "@/components/schools/SiteFooter";
 import { SchoolCard } from "@/components/schools/SchoolCard";
 import { FilterPanel, type Filters } from "@/components/schools/FilterPanel";
 import { getSchools, getFacets, titleCase } from "@/lib/schools";
+import { getProvince, isProvinceSlug } from "@/lib/provinces";
 import { useYear } from "@/lib/year-context";
 
 const PAGE_SIZE = 24;
@@ -18,13 +20,21 @@ const emptyFilters: Filters = { district: "", sector: "", phase: "", quintile: "
 
 const Index = () => {
   const { year } = useYear();
+  const { province: provinceParam } = useParams<{ province?: string }>();
+  const province = isProvinceSlug(provinceParam) ? getProvince(provinceParam) : null;
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [sort, setSort] = useState<"learners" | "name" | "district">("learners");
   const [visible, setVisible] = useState(PAGE_SIZE);
 
-  const schools = useMemo(() => getSchools(year), [year]);
-  const facets = useMemo(() => getFacets(year), [year]);
+  const schools = useMemo(
+    () => getSchools(year, province?.slug),
+    [year, province?.slug],
+  );
+  const facets = useMemo(
+    () => getFacets(year, province?.slug),
+    [year, province?.slug],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -68,7 +78,9 @@ const Index = () => {
         <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
           <div className="mx-auto max-w-3xl text-center text-primary-foreground">
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
-              Every school in South Africa, in one place
+              {province
+                ? `Every school in ${province.name}, in one place`
+                : "Every school in South Africa, in one place"}
             </h1>
             <p className="mt-3 text-base opacity-90 md:text-lg">
               We track {schools.length.toLocaleString()} schools by EMIS number, district, fees,

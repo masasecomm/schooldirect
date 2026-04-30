@@ -1,7 +1,12 @@
-import data2023 from "@/data/schools-2023.json";
-import data2024 from "@/data/schools-2024.json";
-import data2025 from "@/data/schools-2025.json";
-import matricData from "@/data/matric-results.json";
+import gp2023 from "@/data/gauteng/schools-2023.json";
+import gp2024 from "@/data/gauteng/schools-2024.json";
+import gp2025 from "@/data/gauteng/schools-2025.json";
+import gpMatric from "@/data/gauteng/matric-results.json";
+import wc2023 from "@/data/western-cape/schools-2023.json";
+import wc2024 from "@/data/western-cape/schools-2024.json";
+import wc2025 from "@/data/western-cape/schools-2025.json";
+import wcMatric from "@/data/western-cape/matric-results.json";
+import { PROVINCES, getProvince, type ProvinceSlug } from "@/lib/provinces";
 
 export interface School {
   id: string;
@@ -31,19 +36,38 @@ export interface School {
   educators: number | null;
   longitude: number | null;
   latitude: number | null;
+  /** Province this school belongs to. Set automatically from data folder. */
+  provinceSlug: ProvinceSlug;
 }
 
 export type DataYear = "2023" | "2024" | "2025";
 
 export const AVAILABLE_YEARS: DataYear[] = ["2025", "2024", "2023"];
 
-const datasets: Record<DataYear, School[]> = {
-  "2023": data2023 as School[],
-  "2024": data2024 as School[],
-  "2025": data2025 as School[],
+const tag = (rows: unknown, slug: ProvinceSlug): School[] =>
+  (rows as Omit<School, "provinceSlug">[]).map((s) => ({ ...s, provinceSlug: slug }));
+
+const rawByProvince: Record<ProvinceSlug, Record<DataYear, School[]>> = {
+  "gauteng": {
+    "2023": tag(gp2023, "gauteng"),
+    "2024": tag(gp2024, "gauteng"),
+    "2025": tag(gp2025, "gauteng"),
+  },
+  "western-cape": {
+    "2023": tag(wc2023, "western-cape"),
+    "2024": tag(wc2024, "western-cape"),
+    "2025": tag(wc2025, "western-cape"),
+  },
 };
 
-export const getSchools = (year: DataYear): School[] => datasets[year];
+const datasets: Record<DataYear, School[]> = {
+  "2023": PROVINCES.flatMap((p) => rawByProvince[p.slug]["2023"]),
+  "2024": PROVINCES.flatMap((p) => rawByProvince[p.slug]["2024"]),
+  "2025": PROVINCES.flatMap((p) => rawByProvince[p.slug]["2025"]),
+};
+
+export const getSchools = (year: DataYear, provinceSlug?: ProvinceSlug): School[] =>
+  provinceSlug ? rawByProvince[provinceSlug][year] : datasets[year];
 
 export interface MatricYearStats {
   progressed: number;
@@ -61,7 +85,10 @@ export interface MatricResults {
   y2025: MatricYearStats;
 }
 
-const matricByEmis = matricData as Record<string, MatricResults>;
+const matricByEmis: Record<string, MatricResults> = {
+  ...(gpMatric as Record<string, MatricResults>),
+  ...(wcMatric as Record<string, MatricResults>),
+};
 
 export const getMatricResults = (emis: string): MatricResults | null =>
   matricByEmis[emis] ?? null;
@@ -130,8 +157,8 @@ export const uniqueSorted = (values: (string | number | null | undefined)[]) =>
     ),
   ).sort((a, b) => a.localeCompare(b));
 
-export const getFacets = (year: DataYear) => {
-  const schools = getSchools(year);
+export const getFacets = (year: DataYear, provinceSlug?: ProvinceSlug) => {
+  const schools = getSchools(year, provinceSlug);
   return {
     districts: uniqueSorted(schools.map((s) => s.district)),
     sectors: uniqueSorted(schools.map((s) => s.sector)),
@@ -168,8 +195,10 @@ export const idFromSlug = (slug: string): string => {
 };
 
 /** Convenience: build the canonical school detail URL. */
-export const schoolHref = (school: { name?: string | null; id: string }) =>
-  `/south-africa/gauteng/${schoolSlug(school)}`;
+export const schoolHref = (school: { name?: string | null; id: string; provinceSlug?: ProvinceSlug }) => {
+  const province = getProvince(school.provinceSlug ?? null);
+  return `/south-africa/${province.slug}/${schoolSlug(school)}`;
+};
 
 /**
  * Normalise a South African phone number to a 10-digit local format starting with 0.

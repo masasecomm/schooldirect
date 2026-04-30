@@ -7,6 +7,7 @@ import {
   schoolPageUrl,
 } from "@/lib/seo";
 import type { School, MatricResults } from "@/lib/schools";
+import { getProvinceForSchool } from "@/lib/provinces";
 
 type Props = {
   school: School;
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export const SchoolSeo = ({ school, matric }: Props) => {
+  const province = getProvinceForSchool(school);
   const url = schoolPageUrl(school);
   const title = buildTitle(school);
   const description = buildDescription(school, matric);
@@ -38,8 +40,8 @@ export const SchoolSeo = ({ school, matric }: Props) => {
       <link rel="canonical" href={url} />
 
       {/* Local SEO */}
-      <meta name="geo.region" content="ZA-GP" />
-      <meta name="geo.placename" content={school.suburb || school.town || "Gauteng"} />
+      <meta name="geo.region" content={province.geoRegion} />
+      <meta name="geo.placename" content={school.suburb || school.town || province.name} />
       {geoPos && <meta name="geo.position" content={geoPos} />}
       {icbm && <meta name="ICBM" content={icbm} />}
 
