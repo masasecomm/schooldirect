@@ -10,7 +10,7 @@ import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { SchoolCard } from "@/components/schools/SchoolCard";
 import { PROVINCES, getProvince, isProvinceSlug } from "@/lib/provinces";
-import { getSpecialSchools, titleCase, schoolHref } from "@/lib/schools";
+import { getSpecialSchools } from "@/lib/schools";
 import { useYear } from "@/lib/year-context";
 
 const PAGE_SIZE = 24;
