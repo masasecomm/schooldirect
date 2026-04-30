@@ -6,6 +6,7 @@ import {
   type School,
   type MatricResults,
 } from "@/lib/schools";
+import { getProvinceForSchool } from "@/lib/provinces";
 
 type Props = {
   school: School;
@@ -55,8 +56,10 @@ export const SchoolIntro = ({ school, matric }: Props) => {
   );
 };
 
-const placeOf = (s: School) =>
-  titleCase(s.suburb || s.township || s.town || s.district || "Gauteng");
+const placeOf = (s: School) => {
+  const fallback = getProvinceForSchool(s).name;
+  return titleCase(s.suburb || s.township || s.town || s.district || fallback);
+};
 
 const phaseWord = (phase?: string | null): string => {
   if (!phase) return "school";
@@ -78,12 +81,13 @@ export const buildIntroSentences = (
 ): string[] => {
   const name = displayName(school);
   const place = placeOf(school);
+  const province = getProvinceForSchool(school);
   const sector = school.sector ? titleCase(school.sector).toLowerCase() : "public";
   const phase = phaseWord(school.phase);
   const out: string[] = [];
 
   // 1. Identity sentence.
-  out.push(`${name} is a ${sector} ${phase} in ${place}, Gauteng.`);
+  out.push(`${name} is a ${sector} ${phase} in ${place}, ${province.name}.`);
 
   // 2. Size signal (good or bad relative to common SA norms).
   if (typeof school.learners === "number" && school.learners > 0) {
