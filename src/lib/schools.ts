@@ -30,6 +30,10 @@ import nw2023 from "@/data/north-west/schools-2023.json";
 import nw2024 from "@/data/north-west/schools-2024.json";
 import nw2025 from "@/data/north-west/schools-2025.json";
 import nwMatric from "@/data/north-west/matric-results.json";
+import nc2023 from "@/data/northern-cape/schools-2023.json";
+import nc2024 from "@/data/northern-cape/schools-2024.json";
+import nc2025 from "@/data/northern-cape/schools-2025.json";
+import ncMatric from "@/data/northern-cape/matric-results.json";
 import { PROVINCES, getProvince, type ProvinceSlug } from "@/lib/provinces";
 
 export interface School {
@@ -112,6 +116,11 @@ const rawByProvince: Record<ProvinceSlug, Record<DataYear, School[]>> = {
     "2024": tag(nw2024, "north-west"),
     "2025": tag(nw2025, "north-west"),
   },
+  "northern-cape": {
+    "2023": tag(nc2023, "northern-cape"),
+    "2024": tag(nc2024, "northern-cape"),
+    "2025": tag(nc2025, "northern-cape"),
+  },
 };
 
 const datasets: Record<DataYear, School[]> = {
@@ -148,6 +157,7 @@ const matricByEmis: Record<string, MatricResults> = {
   ...(ecMatric as Record<string, MatricResults>),
   ...(fsMatric as Record<string, MatricResults>),
   ...(nwMatric as Record<string, MatricResults>),
+  ...(ncMatric as Record<string, MatricResults>),
 };
 
 export const getMatricResults = (emis: string): MatricResults | null =>

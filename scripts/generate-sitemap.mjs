@@ -25,6 +25,7 @@ const PROVINCES = [
   { slug: "eastern-cape", dataDir: "eastern-cape" },
   { slug: "free-state", dataDir: "free-state" },
   { slug: "north-west", dataDir: "north-west" },
+  { slug: "northern-cape", dataDir: "northern-cape" },
 ];
 
 const slugify = (name, id) => {
