@@ -1,4 +1,4 @@
-export type ProvinceSlug = "gauteng" | "western-cape";
+export type ProvinceSlug = "gauteng" | "western-cape" | "kwazulu-natal";
 
 export interface ProvinceConfig {
   slug: ProvinceSlug;
@@ -25,6 +25,14 @@ export const PROVINCES: ProvinceConfig[] = [
     geoRegion: "ZA-WC",
     dataDir: "western-cape",
     dept: "Western Cape Education Department",
+  },
+  {
+    slug: "kwazulu-natal",
+    name: "KwaZulu-Natal",
+    shortName: "KZN",
+    geoRegion: "ZA-NL",
+    dataDir: "kwazulu-natal",
+    dept: "KwaZulu-Natal Department of Education",
   },
 ];
 
