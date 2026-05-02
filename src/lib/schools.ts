@@ -399,7 +399,14 @@ export const getFacets = (year: DataYear, provinceSlug?: ProvinceSlug) => {
 };
 
 export const findSchool = (year: DataYear, id: string) =>
-  getSchools(year).find((s) => s.id === id);
+  getSchools(year).find((s) => s.id === id) ??
+  namibiaSchools.find((s) => s.id === id);
+
+/** Find a Namibia school by its slug (slug ends with "-namibia"). */
+export const findNamibiaSchoolBySlug = (slug: string): School | undefined => {
+  const stripped = slug.replace(/-namibia$/i, "");
+  return namibiaSchools.find((s) => schoolSlugBase(s) === stripped);
+};
 
 /**
  * Build a URL-safe slug from a school: "<kebab-name>-<EMIS id>".
@@ -418,14 +425,38 @@ export const schoolSlug = (school: { name?: string | null; id: string }): string
   return base ? `${base}-${school.id}` : school.id;
 };
 
-/** Extract the trailing numeric EMIS id from a slug like "name-700261719". */
-export const idFromSlug = (slug: string): string => {
-  const m = slug.match(/(\d+)$/);
-  return m ? m[1] : slug;
+/** Slug from name only (no trailing id). Used for Namibia "<name>-namibia" URLs. */
+const schoolSlugBase = (school: { name?: string | null; id: string }): string => {
+  const base = (school.name ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return base || school.id;
 };
 
-/** Convenience: build the canonical school detail URL. */
-export const schoolHref = (school: { name?: string | null; id: string; provinceSlug?: ProvinceSlug }) => {
+/**
+ * Extract the trailing numeric id from a slug like "name-700261719".
+ * For Namibia slugs ending with "-namibia" (no numeric id), returns null.
+ */
+export const idFromSlug = (slug: string): string => {
+  // Strip a trailing country suffix first.
+  const cleaned = slug.replace(/-(namibia|south-africa)$/i, "");
+  const m = cleaned.match(/(\d+)$/);
+  return m ? m[1] : cleaned;
+};
+
+/** Convenience: build the canonical school detail URL. Country-aware. */
+export const schoolHref = (school: {
+  name?: string | null;
+  id: string;
+  provinceSlug?: ProvinceSlug;
+  countrySlug?: CountrySlug;
+}) => {
+  if (school.countrySlug === "namibia") {
+    return `/namibia/${schoolSlugBase(school)}-namibia`;
+  }
   const province = getProvince(school.provinceSlug ?? null);
   return `/south-africa/${province.slug}/${schoolSlug(school)}`;
 };
