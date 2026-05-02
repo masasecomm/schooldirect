@@ -10,8 +10,9 @@ import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { SchoolCard } from "@/components/schools/SchoolCard";
 import { FilterPanel, type Filters } from "@/components/schools/FilterPanel";
-import { getSchools, getFacets, titleCase } from "@/lib/schools";
+import { getSchools, getFacets, titleCase, getSchoolsByCountry, uniqueSorted } from "@/lib/schools";
 import { getProvince, isProvinceSlug } from "@/lib/provinces";
+import { useLocation } from "react-router-dom";
 import { useYear } from "@/lib/year-context";
 
 const PAGE_SIZE = 24;
@@ -21,6 +22,8 @@ const emptyFilters: Filters = { district: "", sector: "", phase: "", quintile: "
 const Index = () => {
   const { year } = useYear();
   const { province: provinceParam } = useParams<{ province?: string }>();
+  const { pathname } = useLocation();
+  const isNamibia = pathname.startsWith("/namibia");
   const province = isProvinceSlug(provinceParam) ? getProvince(provinceParam) : null;
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
@@ -29,24 +32,42 @@ const Index = () => {
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const schools = useMemo(
-    () => getSchools(year, province?.slug),
-    [year, province?.slug],
+    () =>
+      isNamibia
+        ? getSchoolsByCountry("namibia")
+        : getSchools(year, province?.slug),
+    [year, province?.slug, isNamibia],
   );
-  const facets = useMemo(
-    () => getFacets(year, province?.slug),
-    [year, province?.slug],
-  );
+  const facets = useMemo(() => {
+    if (isNamibia) {
+      // Namibia uses region/town/sector as the filterable axes.
+      return {
+        districts: uniqueSorted(schools.map((s) => s.region)),
+        sectors: uniqueSorted(schools.map((s) => s.sector)),
+        phases: uniqueSorted(schools.map((s) => s.type)),
+        quintiles: [] as string[],
+        towns: uniqueSorted(schools.map((s) => s.town)),
+      };
+    }
+    return getFacets(year, province?.slug);
+  }, [isNamibia, schools, year, province?.slug]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let result = schools.filter((s) => {
-      if (filters.district && s.district !== filters.district) return false;
+      if (filters.district) {
+        const key = isNamibia ? s.region : s.district;
+        if (key !== filters.district) return false;
+      }
       if (filters.sector && s.sector !== filters.sector) return false;
-      if (filters.phase && s.phase !== filters.phase) return false;
+      if (filters.phase) {
+        const key = isNamibia ? s.type : s.phase;
+        if (key !== filters.phase) return false;
+      }
       if (filters.quintile && s.quintile !== filters.quintile) return false;
       if (filters.town && s.town !== filters.town) return false;
       if (q) {
-        const hay = `${s.name} ${s.suburb ?? ""} ${s.town ?? ""} ${s.district ?? ""} ${s.emis}`.toLowerCase();
+        const hay = `${s.name} ${s.suburb ?? ""} ${s.town ?? ""} ${s.district ?? ""} ${s.region ?? ""} ${s.emis}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -58,10 +79,12 @@ const Index = () => {
     else
       result = [...result].sort(
         (a, b) =>
-          (a.district ?? "").localeCompare(b.district ?? "") || a.name.localeCompare(b.name),
+          ((isNamibia ? a.region : a.district) ?? "").localeCompare(
+            (isNamibia ? b.region : b.district) ?? "",
+          ) || a.name.localeCompare(b.name),
       );
     return result;
-  }, [query, filters, sort, schools]);
+  }, [query, filters, sort, schools, isNamibia]);
 
   useEffect(() => setVisible(PAGE_SIZE), [query, filters, sort, year]);
 
@@ -79,9 +102,11 @@ const Index = () => {
         <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
           <div className="mx-auto max-w-3xl text-center text-primary-foreground">
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
-              {province
-                ? `Every school in ${province.name}, in one place`
-                : "Every school in South Africa, in one place"}
+              {isNamibia
+                ? "Every school in Namibia, in one place"
+                : province
+                  ? `Every school in ${province.name}, in one place`
+                  : "Every school in South Africa, in one place"}
             </h1>
             <p className="mt-3 text-base opacity-90 md:text-lg">
               We track {schools.length.toLocaleString()} schools by EMIS number, district, fees,
