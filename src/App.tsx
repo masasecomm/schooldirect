@@ -13,6 +13,7 @@ const SchoolDetail = lazy(() => import("./pages/SchoolDetail.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Admissions = lazy(() => import("./pages/Admissions.tsx"));
 const SpecialNeedsSchools = lazy(() => import("./pages/SpecialNeedsSchools.tsx"));
+const LegacyNamibiaRedirect = lazy(() => import("./pages/LegacyNamibiaRedirect.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -41,7 +42,8 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/admissions" element={<Admissions />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          {/* Legacy Namibia URLs (single root-level slug) — try to redirect, else 404 */}
+          <Route path="*" element={<LegacyNamibiaRedirect fallback={<NotFound />} />} />
         </Routes>
         </Suspense>
       </BrowserRouter>
