@@ -408,6 +408,50 @@ export const findNamibiaSchoolBySlug = (slug: string): School | undefined => {
   return namibiaSchools.find((s) => schoolSlugBase(s) === stripped);
 };
 
+/** Slugify a free-form string the same way schoolSlugBase does. */
+const slugifyPart = (s?: string | null): string =>
+  String(s ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+/**
+ * Legacy Namibia URL suffix that used to be appended to every school page,
+ * e.g. `/a-a-denk-memorial-school-kalkrand-fees-registration-forms-contact-details-website-facebook-principal-code-results-telephone`.
+ * Used to 301 those URLs onto the canonical `/namibia/<name>-namibia` slug.
+ */
+export const LEGACY_NAMIBIA_SUFFIX =
+  "-fees-registration-forms-contact-details-website-facebook-principal-code-results-telephone";
+
+/**
+ * Try to resolve a legacy Namibia URL slug like
+ * "a-a-denk-memorial-school-kalkrand-fees-registration-forms-..." to a Namibia school.
+ * The legacy slug = slugify(name) + "-" + slugify(town) + LEGACY_NAMIBIA_SUFFIX.
+ * Falls back to matching by name-prefix when the town can't be matched exactly.
+ */
+export const findNamibiaSchoolByLegacySlug = (slug: string): School | undefined => {
+  if (!slug) return undefined;
+  const lower = slug.toLowerCase().replace(/\/+$/, "");
+  if (!lower.endsWith(LEGACY_NAMIBIA_SUFFIX)) return undefined;
+  const head = lower.slice(0, -LEGACY_NAMIBIA_SUFFIX.length);
+  // Exact match: <name>-<town>
+  const exact = namibiaSchools.find((s) => {
+    const namePart = slugifyPart(s.name);
+    const townPart = slugifyPart(s.town);
+    if (!namePart) return false;
+    const expected = townPart ? `${namePart}-${townPart}` : namePart;
+    return expected === head;
+  });
+  if (exact) return exact;
+  // Fallback: match by name prefix (in case town slug differs).
+  return namibiaSchools.find((s) => {
+    const namePart = slugifyPart(s.name);
+    return !!namePart && head.startsWith(`${namePart}-`);
+  });
+};
+
 /**
  * Build a URL-safe slug from a school: "<kebab-name>-<EMIS id>".
  * Example: { name: "Eqinisweni Secondary School", id: "700261719" }
