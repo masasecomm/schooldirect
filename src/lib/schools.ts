@@ -571,8 +571,6 @@ export const findSouthAfricanSchoolByLegacySlug = (
   // 4) Peel tokens off the right end until something matches.
   for (let i = head.length - 1; i >= 1; i--) {
     const candidate = head.slice(0, i).join("-");
-    const nt = saSchoolsByNameTownSlug!.get(head.join("-").slice(0)); // no-op safety
-    if (nt) return nt;
     const hit = saSchoolsByNameSlug!.get(candidate);
     if (hit) return hit;
   }
