@@ -249,8 +249,36 @@ const datasets: Record<DataYear, School[]> = {
   "2025": PROVINCES.flatMap((p) => rawByProvince[p.slug]["2025"]),
 };
 
+/**
+ * Namibia dataset — single snapshot (no year split). Tagged as country
+ * "namibia" with no provinceSlug so country-aware helpers can branch on it.
+ */
+const namibiaSchools: School[] = (
+  naSchools as Omit<School, "countrySlug">[]
+).map((s) => ({
+  ...s,
+  countrySlug: "namibia" as CountrySlug,
+}));
+
+/** Schools for a given country across all years (deduped by id). */
+export const getSchoolsByCountry = (countrySlug: CountrySlug): School[] => {
+  if (countrySlug === "namibia") return namibiaSchools;
+  // South Africa: latest year wins
+  const map = new Map<string, School>();
+  for (const y of AVAILABLE_YEARS) {
+    for (const s of datasets[y]) if (!map.has(s.id)) map.set(s.id, s);
+  }
+  return Array.from(map.values());
+};
+
 export const getSchools = (year: DataYear, provinceSlug?: ProvinceSlug): School[] =>
   provinceSlug ? rawByProvince[provinceSlug][year] : datasets[year];
+
+/** All schools (every country) for a given year. Namibia is year-agnostic. */
+export const getAllSchools = (year: DataYear): School[] => [
+  ...datasets[year],
+  ...namibiaSchools,
+];
 
 /**
  * Special-needs education centres only. When provinceSlug is omitted, returns
