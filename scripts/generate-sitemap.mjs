@@ -38,6 +38,16 @@ const slugify = (name, id) => {
   return base ? `${base}-${id}` : String(id);
 };
 
+const slugifyNoId = (name) => {
+  const base = String(name ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return base;
+};
+
 const loadYear = (provinceDir, year) => {
   const ordPath = resolve(root, `src/data/${provinceDir}/schools-${year}.json`);
   const sneePath = resolve(root, `src/data/${provinceDir}/special-schools-${year}.json`);
@@ -89,6 +99,7 @@ const staticUrls = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
   { loc: "/south-africa", priority: "0.5", changefreq: "monthly" },
   { loc: "/south-africa/special-needs", priority: "0.7", changefreq: "monthly" },
+  { loc: "/namibia", priority: "0.7", changefreq: "weekly" },
   ...PROVINCES.map((p) => ({
     loc: `/south-africa/${p.slug}`,
     priority: "0.7",
@@ -129,14 +140,37 @@ const schoolEntries = Array.from(merged.values()).map(({ school, provinceSlug, l
   priority: "0.8",
 }));
 
+// Namibia schools — flat /namibia/<name>-namibia permalinks, single snapshot.
+const naPath = resolve(root, "src/data/namibia/schools.json");
+let naEntries = [];
+if (existsSync(naPath)) {
+  const naMtime = statSync(naPath).mtime;
+  if (naMtime > latestDataMtime) latestDataMtime = naMtime;
+  const naLastmod = naMtime.toISOString().slice(0, 10);
+  const naSchools = JSON.parse(readFileSync(naPath, "utf-8"));
+  const seen = new Set();
+  for (const s of naSchools) {
+    const slug = `${slugifyNoId(s.name)}-namibia`;
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    naEntries.push({
+      loc: `${SITE_URL}/namibia/${slug}`,
+      lastmod: naLastmod,
+      changefreq: "monthly",
+      priority: "0.8",
+    });
+  }
+}
+const allSchoolEntries = [...schoolEntries, ...naEntries];
+
 writeFileSync(resolve(root, "public/sitemap-static.xml"), buildUrlset(staticEntries), "utf-8");
-writeFileSync(resolve(root, "public/sitemap-schools.xml"), buildUrlset(schoolEntries), "utf-8");
+writeFileSync(resolve(root, "public/sitemap-schools.xml"), buildUrlset(allSchoolEntries), "utf-8");
 
 // Combined sitemap kept for backwards-compatibility with anything already
 // pointing at /sitemap.xml.
 writeFileSync(
   resolve(root, "public/sitemap.xml"),
-  buildUrlset([...staticEntries, ...schoolEntries]),
+  buildUrlset([...staticEntries, ...allSchoolEntries]),
   "utf-8",
 );
 
@@ -151,5 +185,5 @@ const sitemapIndex = [
 writeFileSync(resolve(root, "public/sitemap-index.xml"), sitemapIndex, "utf-8");
 
 console.log(
-  `[sitemap] wrote ${staticEntries.length} static + ${schoolEntries.length} school urls (data lastmod ${dataDate})`,
+  `[sitemap] wrote ${staticEntries.length} static + ${allSchoolEntries.length} school urls (data lastmod ${dataDate}, namibia ${naEntries.length})`,
 );
