@@ -12,6 +12,7 @@ import { PROVINCES } from "@/lib/provinces";
 import {
   getSchools,
   getSpecialSchools,
+  getSchoolsByCountry,
   schoolHref,
   displayName,
   titleCase,
@@ -106,6 +107,14 @@ const Landing = () => {
 
   const totalSchools = provinceData.reduce((sum, r) => sum + r.total, 0);
   const totalSpecial = useMemo(() => getSpecialSchools("2025").length, []);
+  const namibiaSchools = useMemo(() => getSchoolsByCountry("namibia"), []);
+  const namibiaFeatured = useMemo(
+    () =>
+      [...namibiaSchools]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .slice(0, FEATURED_PER_PROVINCE),
+    [namibiaSchools],
+  );
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,6 +172,54 @@ const Landing = () => {
       </section>
 
       <main className="container flex-1 py-14">
+        {/* Country selector */}
+        <section aria-labelledby="countries" className="mb-12">
+          <div className="mx-auto mb-6 max-w-3xl text-center">
+            <h2 id="countries" className="text-2xl font-bold tracking-tight md:text-3xl">
+              Browse by country
+            </h2>
+            <p className="mt-2 text-base text-muted-foreground">
+              We currently track schools in {1 + (namibiaSchools.length > 0 ? 1 : 0)} countries.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Link
+              to="/south-africa"
+              className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-card)]"
+            >
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                South Africa
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="text-xl font-bold group-hover:text-primary">
+                  {totalSchools.toLocaleString()} schools
+                </div>
+                <ArrowRight className="h-5 w-5 text-primary transition-transform group-hover:translate-x-0.5" />
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {provinceData.length} province{provinceData.length === 1 ? "" : "s"} · public &amp; independent
+              </p>
+            </Link>
+            <Link
+              to="/namibia"
+              className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-card)]"
+            >
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Namibia
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="text-xl font-bold group-hover:text-primary">
+                  {namibiaSchools.length.toLocaleString()} schools
+                </div>
+                <ArrowRight className="h-5 w-5 text-primary transition-transform group-hover:translate-x-0.5" />
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                14 regions · primary, secondary &amp; combined
+              </p>
+            </Link>
+          </div>
+        </section>
+
         <section aria-labelledby="special-needs-callout" className="mb-12">
           <Link
             to="/south-africa/special-needs"
