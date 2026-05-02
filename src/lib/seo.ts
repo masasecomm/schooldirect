@@ -1,5 +1,6 @@
 import { titleCase, displayName, schoolHref, getSchools, type School, type MatricResults } from "@/lib/schools";
 import { getProvinceForSchool } from "@/lib/provinces";
+import { getCountryForSchool } from "@/lib/countries";
 
 // Build-time constant: when this build was produced. Used as dateModified
 // so search engines can show a stable "Last updated" in the SERP rather
@@ -17,8 +18,22 @@ export const absoluteUrl = (path: string): string => {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 };
 
+/** Region label = province for SA, region/country for other countries. */
+const regionOf = (s: School): { name: string; slug: string; href: string } => {
+  const country = getCountryForSchool(s);
+  if (country.hasProvinces) {
+    const p = getProvinceForSchool(s);
+    return { name: p.name, slug: p.slug, href: `${SITE_URL}/south-africa/${p.slug}` };
+  }
+  return {
+    name: s.region || country.name,
+    slug: country.slug,
+    href: `${SITE_URL}/${country.slug}`,
+  };
+};
+
 const placeOf = (s: School): string => {
-  const fallback = getProvinceForSchool(s).name;
+  const fallback = regionOf(s).name;
   return titleCase(s.suburb || s.township || s.town || s.district || fallback) || fallback;
 };
 
@@ -31,14 +46,14 @@ const trim160 = (s: string, max = 160): string => {
 
 export const buildTitle = (school: School): string => {
   const place = placeOf(school);
-  const province = getProvinceForSchool(school);
-  return `${displayName(school)} — ${place}, ${province.name} | Fees, Contact, Matric Results`;
+  const region = regionOf(school);
+  return `${displayName(school)} — ${place}, ${region.name} | Fees, Contact, Matric Results`;
 };
 
 export const buildDescription = (school: School, matric?: MatricResults | null): string => {
   const name = displayName(school);
   const place = placeOf(school);
-  const province = getProvinceForSchool(school);
+  const region = regionOf(school);
   const phase = school.phase ? titleCase(school.phase).toLowerCase() : "school";
   const sector = school.sector ? titleCase(school.sector).toLowerCase() : "public";
   const learners =
@@ -51,7 +66,7 @@ export const buildDescription = (school: School, matric?: MatricResults | null):
     : null;
 
   const parts = [
-    `${name} is a ${sector} ${phase} in ${place}, ${province.name}.`,
+    `${name} is a ${sector} ${phase} in ${place}, ${region.name}.`,
     learners,
     fee ? `${fee} school` : null,
     pass,
@@ -63,8 +78,8 @@ export const buildDescription = (school: School, matric?: MatricResults | null):
 
 export const buildKeywords = (school: School, matric?: MatricResults | null): string => {
   const name = displayName(school);
-  const province = getProvinceForSchool(school);
-  const suburb = titleCase(school.suburb || school.town || school.district || province.name);
+  const region = regionOf(school);
+  const suburb = titleCase(school.suburb || school.town || school.district || region.name);
   const phase = school.phase ? titleCase(school.phase) : "";
   const principal = school.principal ? titleCase(school.principal) : "";
 
@@ -87,7 +102,8 @@ export const buildSchoolJsonLd = (
 ) => {
   const name = displayName(school);
   const place = placeOf(school);
-  const province = getProvinceForSchool(school);
+  const country = getCountryForSchool(school);
+  const region = regionOf(school);
   const identifiers: Array<Record<string, unknown>> = [
     { "@type": "PropertyValue", propertyID: "EMIS", value: school.emis },
   ];
@@ -97,8 +113,8 @@ export const buildSchoolJsonLd = (
 
   const address: Record<string, unknown> = {
     "@type": "PostalAddress",
-    addressRegion: province.name,
-    addressCountry: "ZA",
+    addressRegion: region.name,
+    addressCountry: country.iso,
   };
   if (school.streetAddress) address.streetAddress = titleCase(school.streetAddress);
   if (school.suburb) address.addressLocality = titleCase(school.suburb);
@@ -140,24 +156,37 @@ export const buildSchoolJsonLd = (
     };
   }
 
+  const countryHref = country.slug === "namibia" ? `${SITE_URL}/namibia` : `${SITE_URL}/south-africa`;
+  const breadcrumbItems: Array<Record<string, unknown>> = [
+    { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+    { "@type": "ListItem", position: 2, name: country.name, item: countryHref },
+  ];
+  if (country.hasProvinces) {
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      position: 3,
+      name: region.name,
+      item: region.href,
+    });
+    breadcrumbItems.push(
+      school.district
+        ? {
+            "@type": "ListItem",
+            position: 4,
+            name: `${titleCase(school.district)} District`,
+            item: region.href,
+          }
+        : { "@type": "ListItem", position: 4, name, item: pageUrl },
+    );
+    if (school.district) {
+      breadcrumbItems.push({ "@type": "ListItem", position: 5, name, item: pageUrl });
+    }
+  } else {
+    breadcrumbItems.push({ "@type": "ListItem", position: 3, name, item: pageUrl });
+  }
   const breadcrumbs = {
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "South Africa", item: `${SITE_URL}/south-africa` },
-      { "@type": "ListItem", position: 3, name: province.name, item: `${SITE_URL}/south-africa/${province.slug}` },
-      ...(school.district
-        ? [
-            {
-              "@type": "ListItem",
-              position: 4,
-              name: `${titleCase(school.district)} District`,
-              item: `${SITE_URL}/south-africa/${province.slug}`,
-            },
-            { "@type": "ListItem", position: 5, name, item: pageUrl },
-          ]
-        : [{ "@type": "ListItem", position: 4, name, item: pageUrl }]),
-    ],
+    itemListElement: breadcrumbItems,
   };
 
   const webPage = {
@@ -268,7 +297,7 @@ export const buildSchoolFaqs = (
   matric: MatricResults | null,
 ): Array<{ q: string; a: string }> => {
   const name = displayName(school);
-  const province = getProvinceForSchool(school);
+  const region = regionOf(school);
   const faqs: Array<{ q: string; a: string }> = [];
 
   if (school.principal) {
@@ -308,7 +337,7 @@ export const buildSchoolFaqs = (
     if (nearby.length > 0) {
       faqs.push({
         q: `How many ${phaseLabel.toLowerCase()} schools are near ${name}?`,
-        a: `There are ${nearby.length} other ${phaseLabel.toLowerCase()} school${nearby.length === 1 ? "" : "s"} in ${area} listed in the latest ${province.name} dataset.`,
+        a: `There are ${nearby.length} other ${phaseLabel.toLowerCase()} school${nearby.length === 1 ? "" : "s"} in ${area} listed in the latest ${region.name} dataset.`,
       });
     }
   }
@@ -320,7 +349,7 @@ export const buildSchoolFaqs = (
       .join(", ");
     faqs.push({
       q: `Where is ${name}?`,
-      a: `${name} is located at ${where}, ${province.name}, South Africa.`,
+      a: `${name} is located at ${where}, ${region.name}, ${getCountryForSchool(school).name}.`,
     });
   }
   if (school.telephone || school.email) {
