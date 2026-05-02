@@ -1,35 +1,36 @@
-import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import {
   findNamibiaSchoolByLegacySlug,
+  findSouthAfricanSchoolByLegacySlug,
   schoolHref,
-  LEGACY_NAMIBIA_SUFFIX,
 } from "@/lib/schools";
 
 /**
- * Catches legacy Namibia URLs like
- * `/a-a-denk-memorial-school-kalkrand-fees-registration-forms-contact-details-website-facebook-principal-code-results-telephone/`
- * and 301-style redirects (replace) to the canonical `/namibia/<name>-namibia` URL.
+ * Catches legacy single-segment URLs and 301-style redirects (replace) to the
+ * canonical school URL. Handles two patterns:
+ *
+ *  1. Namibia long-tail:
+ *     `/a-a-denk-memorial-school-kalkrand-fees-registration-forms-contact-details-website-facebook-principal-code-results-telephone/`
+ *     -> `/namibia/a-a-denk-memorial-school-namibia`
+ *
+ *  2. South Africa long-tail (any combo of marketing tokens, e.g.):
+ *     `/nhliziyonhle-primary-school-fees-registration-contact/`
+ *     -> `/south-africa/<province>/nhliziyonhle-primary-school-500230251`
+ *
  * If no match is found, falls through to <NotFound /> via a render.
  */
 const LegacyNamibiaRedirect = ({ fallback }: { fallback: React.ReactNode }) => {
   const location = useLocation();
   const raw = decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g, ""));
-  const school = findNamibiaSchoolByLegacySlug(raw);
-  useEffect(() => {
-    // No-op: render-time <Navigate replace> handles the redirect.
-  }, []);
-  if (school) {
-    return <Navigate to={schoolHref(school)} replace />;
+
+  // Only single-segment slugs qualify as legacy URLs.
+  if (raw && !raw.includes("/")) {
+    const na = findNamibiaSchoolByLegacySlug(raw);
+    if (na) return <Navigate to={schoolHref(na)} replace />;
+    const sa = findSouthAfricanSchoolByLegacySlug(raw);
+    if (sa) return <Navigate to={schoolHref(sa)} replace />;
   }
   return <>{fallback}</>;
-};
-
-/** Quick check used by the router to decide whether to mount this component. */
-export const isLegacyNamibiaPath = (pathname: string): boolean => {
-  const raw = decodeURIComponent(pathname.replace(/^\/+|\/+$/g, "")).toLowerCase();
-  return raw.endsWith(LEGACY_NAMIBIA_SUFFIX.slice(1)) ||
-    raw.endsWith(LEGACY_NAMIBIA_SUFFIX);
 };
 
 export default LegacyNamibiaRedirect;

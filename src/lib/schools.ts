@@ -453,6 +453,132 @@ export const findNamibiaSchoolByLegacySlug = (slug: string): School | undefined 
 };
 
 /**
+ * Tokens that historically appeared in the long-tail SA school URLs after the
+ * school name (and sometimes town). Order doesn't matter — the URL contains
+ * an arbitrary subset/permutation of these. Used to strip the suffix off
+ * legacy SA slugs so we can match the bare name back to a current school.
+ */
+const LEGACY_SA_SUFFIX_TOKENS = new Set<string>([
+  "fees",
+  "fee",
+  "registration",
+  "registrations",
+  "register",
+  "forms",
+  "form",
+  "contact",
+  "contacts",
+  "details",
+  "detail",
+  "website",
+  "websites",
+  "facebook",
+  "principal",
+  "principals",
+  "code",
+  "codes",
+  "results",
+  "result",
+  "telephone",
+  "telephones",
+  "phone",
+  "phones",
+  "address",
+  "addresses",
+  "email",
+  "emails",
+  "info",
+  "information",
+  "application",
+  "applications",
+  "apply",
+  "online",
+  "and",
+  "or",
+  "school",
+]);
+
+/** Lazily-built index: name-slug -> SA school (latest year wins). */
+let saSchoolsByNameSlug: Map<string, School> | null = null;
+/** Lazily-built index: name-slug + "-" + town-slug -> SA school. */
+let saSchoolsByNameTownSlug: Map<string, School> | null = null;
+
+const buildSaSlugIndexes = () => {
+  if (saSchoolsByNameSlug && saSchoolsByNameTownSlug) return;
+  const byName = new Map<string, School>();
+  const byNameTown = new Map<string, School>();
+  // Walk newest year first so the latest record wins on collisions.
+  for (const y of AVAILABLE_YEARS) {
+    for (const s of datasets[y]) {
+      const namePart = slugifyPart(s.name);
+      if (!namePart) continue;
+      if (!byName.has(namePart)) byName.set(namePart, s);
+      const townPart = slugifyPart(s.town);
+      if (townPart) {
+        const key = `${namePart}-${townPart}`;
+        if (!byNameTown.has(key)) byNameTown.set(key, s);
+      }
+    }
+  }
+  saSchoolsByNameSlug = byName;
+  saSchoolsByNameTownSlug = byNameTown;
+};
+
+/**
+ * Try to resolve a legacy South-African URL slug like
+ * "nhliziyonhle-primary-school-fees-registration-contact" (any subset of the
+ * marketing tokens, in any order) to a current SA school.
+ *
+ * Algorithm:
+ *   1. Strip a trailing run of LEGACY_SA_SUFFIX_TOKENS tokens.
+ *   2. Try `<name>-<town>` against the SA name+town index.
+ *   3. Try `<name>` against the SA name-only index.
+ *   4. Otherwise, walk the head from the right, peeling tokens off until
+ *      a match is found (handles cases where town/extra tokens are present).
+ */
+export const findSouthAfricanSchoolByLegacySlug = (
+  slug: string,
+): School | undefined => {
+  if (!slug) return undefined;
+  const cleaned = slug.toLowerCase().replace(/^\/+|\/+$/g, "");
+  if (!cleaned || cleaned.includes("/")) return undefined; // single-segment only
+  const parts = cleaned.split("-").filter(Boolean);
+  if (parts.length < 2) return undefined;
+
+  // Must contain at least one marketing token to qualify as a legacy URL,
+  // otherwise we'd hijack arbitrary unmatched paths.
+  const hasMarketingToken = parts.some((p) => LEGACY_SA_SUFFIX_TOKENS.has(p));
+  if (!hasMarketingToken) return undefined;
+
+  // 1) Strip trailing marketing tokens.
+  let end = parts.length;
+  while (end > 0 && LEGACY_SA_SUFFIX_TOKENS.has(parts[end - 1])) end--;
+  const head = parts.slice(0, end);
+  if (head.length === 0) return undefined;
+
+  buildSaSlugIndexes();
+
+  const fullSlug = head.join("-");
+
+  // 2) name + town
+  const nameTownHit = saSchoolsByNameTownSlug!.get(fullSlug);
+  if (nameTownHit) return nameTownHit;
+
+  // 3) name only
+  const nameHit = saSchoolsByNameSlug!.get(fullSlug);
+  if (nameHit) return nameHit;
+
+  // 4) Peel tokens off the right end until something matches.
+  for (let i = head.length - 1; i >= 1; i--) {
+    const candidate = head.slice(0, i).join("-");
+    const hit = saSchoolsByNameSlug!.get(candidate);
+    if (hit) return hit;
+  }
+
+  return undefined;
+};
+
+/**
  * Build a URL-safe slug from a school: "<kebab-name>-<EMIS id>".
  * Example: { name: "Eqinisweni Secondary School", id: "700261719" }
  *   -> "eqinisweni-secondary-school-700261719"
