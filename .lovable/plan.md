@@ -1,127 +1,124 @@
 ## Goal
 
-Add **Western Cape** as a second province alongside Gauteng so every page, SEO signal, sitemap, JSON-LD, FAQ, breadcrumbs and geo tag works the same way it does for Gauteng today — and make adding any future province a JSON drop-in.
+Add **Namibia** as a second country alongside South Africa, with a **flat permalink** of the form:
 
-## Province registry (single source of truth)
-
-Create `src/lib/provinces.ts`:
-
-```ts
-export type ProvinceSlug = "gauteng" | "western-cape";
-
-export interface ProvinceConfig {
-  slug: ProvinceSlug;
-  name: string;          // "Western Cape"
-  shortName: string;     // "WC"
-  geoRegion: string;     // "ZA-WC"
-  dataDir: string;       // "western-cape" — folder under src/data/
-  dept: string;          // "Western Cape Education Department"
-}
-
-export const PROVINCES: ProvinceConfig[] = [ /* gauteng + western-cape */ ];
-export const getProvince = (slug: string) => ...;
-export const getProvinceForSchool = (school) => ...; // looks up by school.provinceSlug
+```text
+/namibia/{school-name}-namibia
 ```
 
-Every Gauteng-specific string in the codebase becomes a lookup against this registry.
+(no province/region segment, country name appended to the slug as you requested). South African URLs stay exactly as they are today (`/south-africa/<province>/<slug>`).
+
+## Country model (new)
+
+Introduce a lightweight country layer next to the existing province registry.
+
+`src/lib/countries.ts` (new):
+
+```ts
+export type CountrySlug = "south-africa" | "namibia";
+
+export interface CountryConfig {
+  slug: CountrySlug;
+  name: string;                  // "Namibia"
+  shortName: string;             // "NA"
+  geoCountry: string;            // "NA" / "ZA"
+  hasProvinces: boolean;         // ZA: true, NA: false
+  // URL builder per country — keeps SA's existing path untouched and
+  // gives Namibia the flat shape you asked for.
+  schoolPath: (school) => string;
+}
+```
+
+- South Africa keeps `hasProvinces: true` and the existing `/south-africa/<province>/<slug>` builder.
+- Namibia uses `hasProvinces: false` and `(school) => /namibia/${slug(school.name)}-namibia`.
+
+`schoolHref()` in `src/lib/schools.ts` becomes a thin dispatcher to the country's `schoolPath`. Existing Gauteng/WC/etc. links don't change.
 
 ## Data layout
 
 ```text
 src/data/
-  gauteng/
-    schools-2023.json
-    schools-2024.json
-    schools-2025.json
-    matric-results.json
-  western-cape/
-    schools-2023.json
-    schools-2024.json
-    schools-2025.json
-    matric-results.json
+  namibia/
+    schools.json        ← single file (no year split unless you tell me otherwise)
 ```
 
-- Move existing `src/data/schools-*.json` and `matric-results.json` into `src/data/gauteng/`.
-- Add a `provinceSlug: ProvinceSlug` field to the `School` interface (set per dataset on load — file/folder is the source of truth, no manual tagging needed).
-- `getSchools(year)` returns **all provinces merged**; add `getSchools(year, provinceSlug?)` to filter.
-- For Western Cape, ship empty-but-valid arrays (`[]`) until the user supplies real data, so the build never breaks.
+Fields will mirror the existing `School` interface where the sheet has them; missing fields become `null`. The Google Sheet you linked requires OAuth that I can't access from here, so:
+
+**You upload the sheet** (export as `.xlsx` or `.csv`) the same way you did the special-schools files, and I:
+1. Inspect actual columns
+2. Map them to the `School` interface (name, town, region, contact, learners, etc.)
+3. Write `src/data/namibia/schools.json`
+
+If years like 2023/2024/2025 aren't in the sheet, Namibia ships as a single snapshot (no year filter on Namibia pages).
+
+## Schema changes
+
+`src/lib/schools.ts`:
+- `School.countrySlug: CountrySlug` (new, required)
+- `School.provinceSlug` becomes optional (`ProvinceSlug | null`) since Namibia rows won't have one
+- `getSchools(year, provinceSlug?)` extended with optional `countrySlug?`
+- New `getSchoolsByCountry(countrySlug)` for country-filtered listings
+- `findSchool` unchanged — still keyed on EMIS id (or whatever Namibia's id column is; if Namibia has no EMIS, I'll use a stable hash of `name+town`)
 
 ## Routing
 
-`src/App.tsx`:
+`src/App.tsx` adds:
 
 ```text
-/                                                → Index (all provinces)
-/south-africa                                    → Index
-/south-africa/:province                          → Index (filtered to province)
-/south-africa/:province/:slug                    → SchoolDetail
-/schools/:slug                                   → SchoolDetail (legacy redirect)
+/namibia                          → Index (country = NA)
+/namibia/:slug                    → SchoolDetail (Namibia school)
 ```
 
-`schoolHref(school)` becomes `/south-africa/${province.slug}/${schoolSlug(school)}` using `getProvinceForSchool(school)`.
+`SchoolDetail` already extracts the school via `idFromSlug`. For Namibia slugs ending in `-namibia` instead of `-<id>`, I'll teach `idFromSlug` to:
+1. Strip a trailing country-name segment (`-namibia`, `-south-africa`) if present
+2. Then look for the trailing numeric id, otherwise look up by exact slug match
 
-## SEO refactor (`src/lib/seo.ts` + `src/components/seo/SchoolSeo.tsx`)
+That way `cool-school-namibia` resolves to the right record.
 
-Replace every hardcoded `"Gauteng"` / `"ZA-GP"` with values from the school's province:
+`schoolHref` for SA stays `…<id>`; for Namibia it ends with `…-namibia` per your spec.
 
-- `buildTitle` → `… — ${place}, ${province.name} | Fees, Contact, Matric Results`
-- `buildDescription` → `… in ${place}, ${province.name}.`
-- `buildKeywords` → fallback uses `province.name` instead of `"Gauteng"`
-- `buildSchoolJsonLd` →
-  - `address.addressRegion = province.name`
-  - Breadcrumb position 3 → `{ name: province.name, item: ${SITE_URL}/south-africa/${province.slug} }`
-  - District breadcrumb → links to `/south-africa/${province.slug}` not the hardcoded gauteng path
-- `placeOf` fallback → `province.name`
-- `buildSchoolFaqs` → "in the latest ${province.name} dataset", "${where}, ${province.name}, South Africa"
-- `SchoolSeo`:
-  - `<meta name="geo.region" content={province.geoRegion} />`
-  - `geo.placename` fallback → `province.name`
+## UI changes
 
-## Page-level changes
+- **Landing (`src/pages/Landing.tsx`)** – add a "Browse by country" section with two cards: South Africa, Namibia. SA card links to `/south-africa`, Namibia card to `/namibia`.
+- **Index (`src/pages/Index.tsx`)** – when `:country === "namibia"`, switch the directory to country-mode: hide province filters, show region/town facets sourced from Namibia data, and update the hero copy ("Every school in Namibia").
+- **SchoolDetail** – breadcrumbs become country-aware: `Home › Namibia › <school>` (no province crumb when the country has no provinces). Principal-history copy and FAQ generators read `country.name` instead of always `province.name`.
+- **SchoolCard** – uses `schoolHref(school)` so it just works.
+- **SiteFooter** – data-source list adds the Namibian source ("Ministry of Education, Arts and Culture" — confirm with you).
 
-**`src/pages/SchoolDetail.tsx`**
-- Hero breadcrumb shows the school's actual province (`<Link to={"/south-africa/" + province.slug}>{province.name}</Link>`), not always "Gauteng".
-- Canonical path uses `schoolHref(school)`.
-- Principal-history sentences ("our Gauteng directory", "no other postings…") become `our ${province.name} directory` / `… in ${province.name}`.
+## SEO
 
-**`src/pages/Index.tsx`**
-- Read `:province` route param. If present, filter schools/facets to that province and adjust hero copy ("Every school in Western Cape…"); otherwise keep the all-South-Africa view.
-- Pass province context into `SchoolCard` links through the existing `schoolHref`.
-
-**`src/components/schools/SchoolIntro.tsx`** — same Gauteng→province substitution as `seo.ts`.
-
-**`src/components/schools/SiteFooter.tsx`** — replace the static "Data source: Gauteng Department of Education, 2023" with a list built from provinces actually present in the data, e.g. *"Data sources: Gauteng DoE, Western Cape Education Department"*.
-
-**`src/lib/year-context.tsx`** — rename `STORAGE_KEY` from `"gauteng-schools-year"` to `"sa-schools-year"` (purely cosmetic).
-
-**`src/lib/walk-in-centres.ts`** — gate `findWalkInCentresForSchool` on `province.slug === "gauteng"`. Western Cape returns `[]` and the section silently hides on the school page (per your choice).
-
-**`index.html`** — generic copy: "Every school in South Africa", drop province from `<title>` / OG / Twitter, update the SearchAction `target` to `/south-africa?q=...`.
+`src/lib/seo.ts` + `SchoolSeo`:
+- `addressCountry` already implied as ZA — make it dynamic from country
+- `geo.region` → ZA-XX for SA, `NA` (or `NA-XX` if Namibia regions are present) for Namibia
+- Breadcrumb JSON-LD: SA chain unchanged; Namibia chain is `Home › Namibia › School`
+- Title/description fall back to country name when no province is set
 
 ## Sitemap (`scripts/generate-sitemap.mjs`)
 
-- Walk every province in the registry, load each year's JSON from `src/data/<dataDir>/`.
-- Static URL list becomes:
-  - `/`, `/south-africa`, `/about`, `/admissions`
-  - One entry per province: `/south-africa/<slug>`
-- School URLs use the province-aware path.
-- Continue emitting `sitemap-static.xml`, `sitemap-schools.xml`, `sitemap.xml`, `sitemap-index.xml`. Optionally split schools by province later — not needed now.
+- Add a country loop. For SA, walk provinces (current behaviour). For Namibia, load `src/data/namibia/schools.json` directly.
+- Static URLs add `/namibia` plus per-school Namibia URLs.
+- Continue emitting `sitemap-static.xml`, `sitemap-schools.xml`, `sitemap.xml`, `sitemap-index.xml`.
 
-## Migration & safety net
+## Files touched
 
-- Keep the old `/schools/:slug` route (already present) and add a one-liner client redirect on `SchoolDetail` mount: if URL is `/schools/...` or `/south-africa/gauteng/...` for a school whose actual province is different, `navigate(schoolHref(school), { replace: true })`. This protects any old indexed URLs.
+**New**
+- `src/lib/countries.ts`
+- `src/data/namibia/schools.json` (after you upload the sheet)
 
-## Verification checklist
+**Edited**
+- `src/lib/provinces.ts` (province → optional, no behaviour change for SA)
+- `src/lib/schools.ts` (country dispatch in `schoolHref`, `idFromSlug` strips country suffix, Namibia dataset import, country-aware getters)
+- `src/lib/seo.ts`, `src/components/seo/SchoolSeo.tsx` (country-aware geo/breadcrumb)
+- `src/components/schools/SchoolIntro.tsx`, `SiteFooter.tsx`
+- `src/pages/Landing.tsx` (country picker), `Index.tsx` (country mode), `SchoolDetail.tsx` (breadcrumb)
+- `src/App.tsx` (`/namibia`, `/namibia/:slug`)
+- `scripts/generate-sitemap.mjs` (country loop)
 
-- `/south-africa/western-cape` renders the directory filtered to WC (currently empty placeholder).
-- `/south-africa/gauteng/<existing-slug>` still renders exactly as today (same title, JSON-LD, breadcrumbs).
-- `npm run build` followed by sitemap generation produces both province URL sets.
-- View-source on a Gauteng school page shows `addressRegion: "Gauteng"` / `geo.region: ZA-GP`; on a future WC school it shows `Western Cape` / `ZA-WC`.
+## What I need from you
 
-## Adding province #3 later
+1. **Upload the Namibia data** as `.xlsx` or `.csv` (export from the Google Sheet → File → Download). I can't read the sheet via the link directly because it needs OAuth.
+2. Confirm:
+   - Single snapshot (no year split) for Namibia? Default = **yes**.
+   - Show Namibia in the same global search as SA, or keep it country-scoped only? Default = **both** (global search includes NA, country pages stay focused).
 
-Once this lands, adding e.g. KwaZulu-Natal is just:
-1. Append a row to `PROVINCES` in `src/lib/provinces.ts`.
-2. Drop `src/data/kwazulu-natal/schools-{2023,2024,2025}.json` + `matric-results.json`.
-
-Everything else (routes, SEO, breadcrumbs, FAQ, sitemap, geo tags) is already generic.
+Once the file lands I'll wire it all up in one pass.
