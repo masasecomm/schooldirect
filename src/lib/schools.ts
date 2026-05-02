@@ -64,6 +64,8 @@ import ncSne2023 from "@/data/northern-cape/special-schools-2023.json";
 import ncSne2024 from "@/data/northern-cape/special-schools-2024.json";
 import ncSne2025 from "@/data/northern-cape/special-schools-2025.json";
 import { PROVINCES, getProvince, type ProvinceSlug } from "@/lib/provinces";
+import { type CountrySlug, getCountry } from "@/lib/countries";
+import naSchools from "@/data/namibia/schools.json";
 
 export interface School {
   id: string;
@@ -93,8 +95,15 @@ export interface School {
   educators: number | null;
   longitude: number | null;
   latitude: number | null;
-  /** Province this school belongs to. Set automatically from data folder. */
-  provinceSlug: ProvinceSlug;
+  /** Country this school belongs to. Defaults to "south-africa". */
+  countrySlug: CountrySlug;
+  /** Province (only set for countries with provinces, e.g. South Africa). */
+  provinceSlug?: ProvinceSlug;
+  /** Region (used by countries without formal provinces, e.g. Namibia). */
+  region?: string | null;
+  /** Grade range (used by Namibia data). */
+  gradeFrom?: string | null;
+  gradeTo?: string | null;
   /** True when the record comes from the Special Needs Education Centres dataset. */
   isSpecialNeeds?: boolean;
 }
@@ -108,8 +117,9 @@ const tag = (
   slug: ProvinceSlug,
   opts?: { specialNeeds?: boolean },
 ): School[] =>
-  (rows as Omit<School, "provinceSlug">[]).map((s) => ({
+  (rows as Omit<School, "provinceSlug" | "countrySlug">[]).map((s) => ({
     ...s,
+    countrySlug: "south-africa" as CountrySlug,
     provinceSlug: slug,
     ...(opts?.specialNeeds ? { isSpecialNeeds: true } : {}),
   }));
