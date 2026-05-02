@@ -64,6 +64,7 @@ import {
   findNamibiaSchoolBySlug,
 } from "@/lib/schools";
 import { getProvinceForSchool } from "@/lib/provinces";
+import { getCountryForSchool } from "@/lib/countries";
 import { toast } from "@/hooks/use-toast";
 import {
   findWalkInCentresForSchool,
@@ -2210,7 +2211,8 @@ const SchoolDetail = () => {
     {} as Record<DataYear, string | null>,
   );
   const matricResults = getMatricResults(school.emis);
-  const province = getProvinceForSchool(school);
+  const country = getCountryForSchool(school);
+  const province = country.hasProvinces ? getProvinceForSchool(school) : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -2226,18 +2228,27 @@ const SchoolDetail = () => {
               <BreadcrumbList className="text-primary-foreground/80">
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/south-africa" className="hover:text-primary-foreground">South Africa</Link>
+                    <Link
+                      to={country.slug === "namibia" ? "/namibia" : "/south-africa"}
+                      className="hover:text-primary-foreground"
+                    >
+                      {country.name}
+                    </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
+                {province && (
+                  <>
+                    <BreadcrumbSeparator className="text-primary-foreground/60" />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link to={`/south-africa/${province.slug}`} className="hover:text-primary-foreground">{province.name}</Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                  </>
+                )}
                 <BreadcrumbSeparator className="text-primary-foreground/60" />
                 <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to={`/south-africa/${province.slug}`} className="hover:text-primary-foreground">{province.name}</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="text-primary-foreground/60" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="break-all text-primary-foreground">{schoolSlug(school)}</BreadcrumbPage>
+                  <BreadcrumbPage className="break-all text-primary-foreground">{displayName(school)}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
