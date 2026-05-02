@@ -64,6 +64,8 @@ import ncSne2023 from "@/data/northern-cape/special-schools-2023.json";
 import ncSne2024 from "@/data/northern-cape/special-schools-2024.json";
 import ncSne2025 from "@/data/northern-cape/special-schools-2025.json";
 import { PROVINCES, getProvince, type ProvinceSlug } from "@/lib/provinces";
+import { type CountrySlug, getCountry } from "@/lib/countries";
+import naSchools from "@/data/namibia/schools.json";
 
 export interface School {
   id: string;
@@ -93,8 +95,15 @@ export interface School {
   educators: number | null;
   longitude: number | null;
   latitude: number | null;
-  /** Province this school belongs to. Set automatically from data folder. */
-  provinceSlug: ProvinceSlug;
+  /** Country this school belongs to. Defaults to "south-africa". */
+  countrySlug: CountrySlug;
+  /** Province (only set for countries with provinces, e.g. South Africa). */
+  provinceSlug?: ProvinceSlug;
+  /** Region (used by countries without formal provinces, e.g. Namibia). */
+  region?: string | null;
+  /** Grade range (used by Namibia data). */
+  gradeFrom?: string | null;
+  gradeTo?: string | null;
   /** True when the record comes from the Special Needs Education Centres dataset. */
   isSpecialNeeds?: boolean;
 }
@@ -108,8 +117,9 @@ const tag = (
   slug: ProvinceSlug,
   opts?: { specialNeeds?: boolean },
 ): School[] =>
-  (rows as Omit<School, "provinceSlug">[]).map((s) => ({
+  (rows as Omit<School, "provinceSlug" | "countrySlug">[]).map((s) => ({
     ...s,
+    countrySlug: "south-africa" as CountrySlug,
     provinceSlug: slug,
     ...(opts?.specialNeeds ? { isSpecialNeeds: true } : {}),
   }));
@@ -239,8 +249,36 @@ const datasets: Record<DataYear, School[]> = {
   "2025": PROVINCES.flatMap((p) => rawByProvince[p.slug]["2025"]),
 };
 
+/**
+ * Namibia dataset — single snapshot (no year split). Tagged as country
+ * "namibia" with no provinceSlug so country-aware helpers can branch on it.
+ */
+const namibiaSchools: School[] = (
+  naSchools as Omit<School, "countrySlug">[]
+).map((s) => ({
+  ...s,
+  countrySlug: "namibia" as CountrySlug,
+}));
+
+/** Schools for a given country across all years (deduped by id). */
+export const getSchoolsByCountry = (countrySlug: CountrySlug): School[] => {
+  if (countrySlug === "namibia") return namibiaSchools;
+  // South Africa: latest year wins
+  const map = new Map<string, School>();
+  for (const y of AVAILABLE_YEARS) {
+    for (const s of datasets[y]) if (!map.has(s.id)) map.set(s.id, s);
+  }
+  return Array.from(map.values());
+};
+
 export const getSchools = (year: DataYear, provinceSlug?: ProvinceSlug): School[] =>
   provinceSlug ? rawByProvince[provinceSlug][year] : datasets[year];
+
+/** All schools (every country) for a given year. Namibia is year-agnostic. */
+export const getAllSchools = (year: DataYear): School[] => [
+  ...datasets[year],
+  ...namibiaSchools,
+];
 
 /**
  * Special-needs education centres only. When provinceSlug is omitted, returns
@@ -361,7 +399,14 @@ export const getFacets = (year: DataYear, provinceSlug?: ProvinceSlug) => {
 };
 
 export const findSchool = (year: DataYear, id: string) =>
-  getSchools(year).find((s) => s.id === id);
+  getSchools(year).find((s) => s.id === id) ??
+  namibiaSchools.find((s) => s.id === id);
+
+/** Find a Namibia school by its slug (slug ends with "-namibia"). */
+export const findNamibiaSchoolBySlug = (slug: string): School | undefined => {
+  const stripped = slug.replace(/-namibia$/i, "");
+  return namibiaSchools.find((s) => schoolSlugBase(s) === stripped);
+};
 
 /**
  * Build a URL-safe slug from a school: "<kebab-name>-<EMIS id>".
@@ -380,14 +425,38 @@ export const schoolSlug = (school: { name?: string | null; id: string }): string
   return base ? `${base}-${school.id}` : school.id;
 };
 
-/** Extract the trailing numeric EMIS id from a slug like "name-700261719". */
-export const idFromSlug = (slug: string): string => {
-  const m = slug.match(/(\d+)$/);
-  return m ? m[1] : slug;
+/** Slug from name only (no trailing id). Used for Namibia "<name>-namibia" URLs. */
+const schoolSlugBase = (school: { name?: string | null; id: string }): string => {
+  const base = (school.name ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return base || school.id;
 };
 
-/** Convenience: build the canonical school detail URL. */
-export const schoolHref = (school: { name?: string | null; id: string; provinceSlug?: ProvinceSlug }) => {
+/**
+ * Extract the trailing numeric id from a slug like "name-700261719".
+ * For Namibia slugs ending with "-namibia" (no numeric id), returns null.
+ */
+export const idFromSlug = (slug: string): string => {
+  // Strip a trailing country suffix first.
+  const cleaned = slug.replace(/-(namibia|south-africa)$/i, "");
+  const m = cleaned.match(/(\d+)$/);
+  return m ? m[1] : cleaned;
+};
+
+/** Convenience: build the canonical school detail URL. Country-aware. */
+export const schoolHref = (school: {
+  name?: string | null;
+  id: string;
+  provinceSlug?: ProvinceSlug;
+  countrySlug?: CountrySlug;
+}) => {
+  if (school.countrySlug === "namibia") {
+    return `/namibia/${schoolSlugBase(school)}-namibia`;
+  }
   const province = getProvince(school.provinceSlug ?? null);
   return `/south-africa/${province.slug}/${schoolSlug(school)}`;
 };

@@ -33,6 +33,9 @@ const App = () => (
           <Route path="/south-africa/:province" element={<Index />} />
           <Route path="/south-africa/:province/special-needs" element={<SpecialNeedsSchools />} />
           <Route path="/south-africa/:province/:slug" element={<SchoolDetail />} />
+          {/* Namibia (no provinces — flat permalinks) */}
+          <Route path="/namibia" element={<Index />} />
+          <Route path="/namibia/:slug" element={<SchoolDetail />} />
           {/* Backwards-compat: old /schools/:slug links still resolve */}
           <Route path="/schools/:slug" element={<SchoolDetail />} />
           <Route path="/about" element={<About />} />
