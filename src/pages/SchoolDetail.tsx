@@ -61,6 +61,7 @@ import {
   getMatricResults,
   type MatricResults,
   findPrincipalAtOtherSchools,
+  findNamibiaSchoolBySlug,
 } from "@/lib/schools";
 import { getProvinceForSchool } from "@/lib/provinces";
 import { toast } from "@/hooks/use-toast";
@@ -2117,9 +2118,14 @@ const SimilarSchoolsCard = ({
 const SchoolDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const isNamibiaSlug = !!slug && /-namibia$/i.test(slug);
+  const namibiaSchool = useMemo(
+    () => (isNamibiaSlug && slug ? findNamibiaSchoolBySlug(slug) : undefined),
+    [isNamibiaSlug, slug],
+  );
   // Slug format: "<kebab-name>-<EMIS id>". Old links of the form
   // "/schools/<id>" still work because idFromSlug returns the trailing digits.
-  const id = slug ? idFromSlug(slug) : undefined;
+  const id = !isNamibiaSlug && slug ? idFromSlug(slug) : undefined;
   // Multi-year lookup. The "primary" record is the most recent year that has data.
   const records = useMemo(() => {
     const map = {} as Record<DataYear, ReturnType<typeof findSchool>>;
@@ -2127,12 +2133,13 @@ const SchoolDetail = () => {
     return map;
   }, [id]);
   const school = useMemo(() => {
+    if (namibiaSchool) return namibiaSchool;
     for (let i = HISTORY_YEARS.length - 1; i >= 0; i--) {
       const r = records[HISTORY_YEARS[i]];
       if (r) return r;
     }
     return undefined;
-  }, [records]);
+  }, [records, namibiaSchool]);
   // If the user landed on a non-canonical URL (e.g. just the EMIS id, or a
   // wrong/old slug), redirect to the canonical "<name>-<id>" slug.
   useEffect(() => {
