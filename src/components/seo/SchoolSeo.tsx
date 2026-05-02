@@ -8,6 +8,7 @@ import {
 } from "@/lib/seo";
 import type { School, MatricResults } from "@/lib/schools";
 import { getProvinceForSchool } from "@/lib/provinces";
+import { getCountryForSchool } from "@/lib/countries";
 
 type Props = {
   school: School;
@@ -15,7 +16,13 @@ type Props = {
 };
 
 export const SchoolSeo = ({ school, matric }: Props) => {
-  const province = getProvinceForSchool(school);
+  const country = getCountryForSchool(school);
+  const province = country.hasProvinces ? getProvinceForSchool(school) : null;
+  const geoRegion = province ? province.geoRegion : country.geoRegion;
+  const placeName =
+    school.suburb || school.town || (province?.name ?? school.region ?? country.name);
+  const lang = country.iso === "ZA" ? "en-ZA" : "en";
+  const ogLocale = country.iso === "ZA" ? "en_ZA" : "en";
   const url = schoolPageUrl(school);
   const title = buildTitle(school);
   const description = buildDescription(school, matric);
@@ -32,7 +39,7 @@ export const SchoolSeo = ({ school, matric }: Props) => {
 
   return (
     <Helmet>
-      <html lang="en-ZA" />
+      <html lang={lang} />
       <title>{title}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
@@ -40,8 +47,8 @@ export const SchoolSeo = ({ school, matric }: Props) => {
       <link rel="canonical" href={url} />
 
       {/* Local SEO */}
-      <meta name="geo.region" content={province.geoRegion} />
-      <meta name="geo.placename" content={school.suburb || school.town || province.name} />
+      <meta name="geo.region" content={geoRegion} />
+      <meta name="geo.placename" content={placeName} />
       {geoPos && <meta name="geo.position" content={geoPos} />}
       {icbm && <meta name="ICBM" content={icbm} />}
 
@@ -50,7 +57,7 @@ export const SchoolSeo = ({ school, matric }: Props) => {
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content="website" />
-      <meta property="og:locale" content="en_ZA" />
+      <meta property="og:locale" content={ogLocale} />
       <meta property="og:site_name" content="School Direct" />
       <meta property="og:image" content="https://schooldirect.org/favicon.png" />
 
