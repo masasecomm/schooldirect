@@ -495,7 +495,6 @@ const LEGACY_SA_SUFFIX_TOKENS = new Set<string>([
   "online",
   "and",
   "or",
-  "school",
 ]);
 
 /** Lazily-built index: name-slug -> SA school (latest year wins). */
