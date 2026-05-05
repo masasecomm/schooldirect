@@ -170,6 +170,31 @@ const HumanFigure = ({ active }: { active: boolean }) => (
 );
 
 /**
+ * Google AdSense 300x600 skyscraper unit.
+ * Loader script is included once globally in index.html.
+ */
+const AdSenseSkyscraper = () => {
+  useEffect(() => {
+    try {
+      // @ts-ignore - adsbygoogle is injected by the AdSense loader
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch {
+      /* noop */
+    }
+  }, []);
+  return (
+    <div className="flex justify-center my-2">
+      <ins
+        className="adsbygoogle"
+        style={{ display: "inline-block", width: 300, height: 600 }}
+        data-ad-client="ca-pub-3860151941190347"
+        data-ad-slot="3081508385"
+      />
+    </div>
+  );
+};
+
+/**
  * Learner Enrolment card with human-figure pictograms.
  * Each row = one year. A row of FIGURE_COUNT figures shows the proportion
  * relative to the highest value across the displayed years.
