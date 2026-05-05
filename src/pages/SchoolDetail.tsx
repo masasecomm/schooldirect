@@ -2399,6 +2399,7 @@ const SchoolDetail = () => {
           </Card>
 
           <div className="flex flex-col gap-6">
+            <AdSenseSkyscraper />
             <LearnerEnrolmentCard
               values={learnersByYear}
               educators={educatorsByYear}
