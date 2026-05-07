@@ -1,16 +1,17 @@
-import { Clock, Sparkles } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   displayName,
   titleCase,
+  getLearnersInYear,
   type School,
   type MatricResults,
+  type DataYear,
 } from "@/lib/schools";
 import { getProvinceForSchool } from "@/lib/provinces";
 
 type Props = {
   school: School;
   matric: MatricResults | null;
+  currentYear?: DataYear;
 };
 
 /**
@@ -24,35 +25,47 @@ const LAST_UPDATED = new Date().toLocaleDateString("en-ZA", {
   year: "numeric",
 });
 
-export const SchoolIntro = ({ school, matric }: Props) => {
+export const SchoolIntro = ({ school, matric, currentYear = "2025" }: Props) => {
   const sentences = buildIntroSentences(school, matric);
-  if (sentences.length === 0) return null;
+  const opinion = buildPrincipalImpactParagraph(school, matric, currentYear);
+  if (sentences.length === 0 && !opinion) return null;
+
+  const name = displayName(school);
 
   return (
-    <Card className="overflow-hidden shadow-[var(--shadow-card)]">
-      <CardContent className="p-6">
-        <div className="flex items-start gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              About this school
-            </div>
-            <h2 className="mt-1 text-lg font-semibold">
-              What makes {displayName(school)} stand out
-            </h2>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>Last updated: {LAST_UPDATED}</span>
-            </div>
-          </div>
+    <section aria-labelledby="about-this-school" className="space-y-3">
+      <div>
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          For parents deciding
         </div>
-        <p className="mt-4 text-sm leading-relaxed text-foreground">
+        <h2
+          id="about-this-school"
+          className="mt-1 text-xl font-semibold leading-tight"
+        >
+          What you should know about {name} before you enrol
+        </h2>
+        <div className="mt-1 text-xs text-muted-foreground">
+          Last reviewed: {LAST_UPDATED}
+        </div>
+      </div>
+
+      {sentences.length > 0 && (
+        <p className="text-sm leading-relaxed text-foreground">
+          Here is what the numbers say about the school your child would attend.{" "}
           {sentences.join(" ")}
         </p>
-      </CardContent>
-    </Card>
+      )}
+
+      {opinion && (
+        <p className="text-sm leading-relaxed text-foreground">{opinion}</p>
+      )}
+
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        This is only the headline. Scroll down to see fees, contact details,
+        application dates, full matric history, walk-in centres and the
+        principal's record before you make your choice.
+      </p>
+    </section>
   );
 };
 
