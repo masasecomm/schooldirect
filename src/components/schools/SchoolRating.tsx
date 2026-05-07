@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ratingForSchool, reviewCountForSchool } from "@/lib/school-rating";
 import { Star } from "lucide-react";
 import {
   Dialog,
@@ -15,28 +16,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 
-/**
- * Deterministic per-school rating between 3.0 and 5.0 (one decimal).
- * Stable across renders/sessions because it's derived from the school id.
- */
-export const ratingForSchool = (id: string): number => {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  }
-  // 0..20 inclusive -> 3.0..5.0 in 0.1 steps
-  const steps = hash % 21;
-  return Math.round((3 + steps / 10) * 10) / 10;
-};
-
-/** Pseudo review count derived from the same hash so schema stays consistent. */
-export const reviewCountForSchool = (id: string): number => {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 17 + id.charCodeAt(i)) >>> 0;
-  }
-  return 12 + (hash % 88); // 12..99
-};
+export { ratingForSchool, reviewCountForSchool };
 
 type Props = {
   schoolId: string;
