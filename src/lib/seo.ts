@@ -1,7 +1,7 @@
 import { titleCase, displayName, schoolHref, getSchools, type School, type MatricResults } from "@/lib/schools";
 import { getProvinceForSchool } from "@/lib/provinces";
 import { getCountryForSchool } from "@/lib/countries";
-import { ratingForSchool, reviewCountForSchool } from "@/components/schools/SchoolRating";
+import { ratingForSchool, reviewCountForSchool } from "@/lib/school-rating";
 
 // Build-time constant: when this build was produced. Used as dateModified
 // so search engines can show a stable "Last updated" in the SERP rather
