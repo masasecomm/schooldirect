@@ -142,7 +142,7 @@ const Landing = () => {
               Browse by country
             </h2>
             <p className="mt-2 text-base text-muted-foreground">
-              We currently track schools in {1 + (namibiaSchools.length > 0 ? 1 : 0)} countries.
+              We currently track schools in {1 + (namibiaTotal > 0 ? 1 : 0)} countries.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
