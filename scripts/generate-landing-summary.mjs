@@ -61,6 +61,11 @@ const namibiaHref = (s) => {
   return `/namibia/${base}-namibia`;
 };
 
+const singaporeHref = (s) => {
+  const base = slugify(s.name) || s.id;
+  return `/singapore/${base}-singapore`;
+};
+
 const FEATURED = 3;
 
 const provinceData = [];
@@ -125,15 +130,34 @@ const namibiaFeatured = [...namibia]
     principal: s.principal ? titleCase(s.principal) : null,
   }));
 
+// Singapore
+const singapore = readJson(resolve(root, "src/data/singapore/schools.json"));
+const singaporeFeatured = [...singapore]
+  .sort((a, b) => String(a.name).localeCompare(String(b.name)))
+  .slice(0, FEATURED)
+  .map((s) => ({
+    id: s.id,
+    href: singaporeHref(s),
+    name: titleCase(s.name),
+    phase: s.type ? titleCase(s.type) : null,
+    sector: s.sector ? titleCase(s.sector) : null,
+    suburb: s.suburb ? titleCase(s.suburb) : null,
+    town: s.town ? titleCase(s.town) : null,
+    learners: typeof s.learners === "number" ? s.learners : null,
+    principal: s.principal ? titleCase(s.principal) : null,
+  }));
+
 const summary = {
   generatedAt: new Date().toISOString(),
   totalSchools,
   totalSpecial,
   provinces: provinceData,
   namibia: { total: namibia.length, featured: namibiaFeatured },
+  singapore: { total: singapore.length, featured: singaporeFeatured },
   activeDepts: [
     ...provinceData.map((p) => p.dept),
     ...(namibia.length > 0 ? ["Namibia Ministry of Education"] : []),
+    ...(singapore.length > 0 ? ["Singapore Ministry of Education"] : []),
   ],
 };
 
@@ -142,5 +166,5 @@ mkdirSync(outDir, { recursive: true });
 writeFileSync(resolve(outDir, "landing-summary.json"), JSON.stringify(summary));
 
 console.log(
-  `[landing-summary] ${provinceData.length} provinces, ${totalSchools} SA schools, ${namibia.length} Namibia schools, ${totalSpecial} special`,
+  `[landing-summary] ${provinceData.length} provinces, ${totalSchools} SA schools, ${namibia.length} Namibia, ${singapore.length} Singapore, ${totalSpecial} special`,
 );
