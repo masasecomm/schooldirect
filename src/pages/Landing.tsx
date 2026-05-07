@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowRight, Heart, MapPin, Search, User, Users } from "lucide-react";
@@ -8,56 +7,36 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
-import { PROVINCES } from "@/lib/provinces";
-import {
-  getSchools,
-  getSpecialSchools,
-  getSchoolsByCountry,
-  schoolHref,
-  displayName,
-  titleCase,
-  type School,
-} from "@/lib/schools";
+import { LANDING_SUMMARY, type FeaturedSchoolLite } from "@/lib/landing-summary";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const FEATURED_PER_PROVINCE = 3;
-
-/** Pick the N largest currently-open schools per province (by 2025 learner count). */
-const pickFeatured = (province: { slug: string }, n: number): School[] => {
-  const all = getSchools("2025", province.slug as never);
-  return [...all]
-    .filter((s) => typeof s.learners === "number" && s.learners > 0)
-    .sort((a, b) => (b.learners ?? 0) - (a.learners ?? 0))
-    .slice(0, n);
-};
-
-const FeaturedSchoolCard = ({ school }: { school: School }) => (
+const FeaturedSchoolCard = ({ school }: { school: FeaturedSchoolLite }) => (
   <Link
-    to={schoolHref(school)}
+    to={school.href}
     className="group flex h-full flex-col rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-card)]"
   >
     <div className="flex flex-wrap gap-1.5">
       {school.phase && (
         <Badge className="bg-primary-soft text-primary hover:bg-primary-soft/80 font-medium">
-          {titleCase(school.phase)}
+          {school.phase}
         </Badge>
       )}
       {school.sector && (
         <Badge variant="secondary" className="font-medium">
-          {titleCase(school.sector)}
+          {school.sector}
         </Badge>
       )}
     </div>
     <h3 className="mt-3 text-base font-semibold leading-snug tracking-tight group-hover:text-primary">
-      {displayName(school)}
+      {school.name}
     </h3>
     <div className="mt-2 space-y-1.5 text-sm text-muted-foreground">
       {(school.suburb || school.town) && (
         <div className="flex items-start gap-1.5">
           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
           <span className="line-clamp-1">
-            {[titleCase(school.suburb), titleCase(school.town)].filter(Boolean).join(", ")}
+            {[school.suburb, school.town].filter(Boolean).join(", ")}
           </span>
         </div>
       )}
@@ -78,7 +57,7 @@ const FeaturedSchoolCard = ({ school }: { school: School }) => (
           <span className="line-clamp-1">
             Principal:{" "}
             <span className="font-medium text-foreground">
-              {titleCase(school.principal)}
+              {school.principal}
             </span>
           </span>
         </div>
@@ -95,26 +74,10 @@ const Landing = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
 
-  const provinceData = useMemo(
-    () =>
-      PROVINCES.map((p) => ({
-        province: p,
-        total: getSchools("2025", p.slug).length,
-        featured: pickFeatured(p, FEATURED_PER_PROVINCE),
-      })).filter((row) => row.total > 0),
-    [],
-  );
-
-  const totalSchools = provinceData.reduce((sum, r) => sum + r.total, 0);
-  const totalSpecial = useMemo(() => getSpecialSchools("2025").length, []);
-  const namibiaSchools = useMemo(() => getSchoolsByCountry("namibia"), []);
-  const namibiaFeatured = useMemo(
-    () =>
-      [...namibiaSchools]
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .slice(0, FEATURED_PER_PROVINCE),
-    [namibiaSchools],
-  );
+  const provinceData = LANDING_SUMMARY.provinces;
+  const totalSchools = LANDING_SUMMARY.totalSchools;
+  const totalSpecial = LANDING_SUMMARY.totalSpecial;
+  const namibiaTotal = LANDING_SUMMARY.namibia.total;
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,7 +142,7 @@ const Landing = () => {
               Browse by country
             </h2>
             <p className="mt-2 text-base text-muted-foreground">
-              We currently track schools in {1 + (namibiaSchools.length > 0 ? 1 : 0)} countries.
+              We currently track schools in {1 + (namibiaTotal > 0 ? 1 : 0)} countries.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -209,7 +172,7 @@ const Landing = () => {
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">
                 <div className="text-xl font-bold group-hover:text-primary">
-                  {namibiaSchools.length.toLocaleString()} schools
+                  {namibiaTotal.toLocaleString()} schools
                 </div>
                 <ArrowRight className="h-5 w-5 text-primary transition-transform group-hover:translate-x-0.5" />
               </div>
@@ -261,7 +224,7 @@ const Landing = () => {
         </div>
 
         <div className="space-y-12">
-          {provinceData.map(({ province, total, featured }) => (
+          {provinceData.map((province) => (
             <section key={province.slug} aria-labelledby={`province-${province.slug}`}>
               <Card className="overflow-hidden shadow-[var(--shadow-card)]">
                 <CardContent className="p-6 md:p-8">
@@ -278,7 +241,7 @@ const Landing = () => {
                         {province.name}
                       </h3>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {total.toLocaleString()} schools tracked
+                        {province.total.toLocaleString()} schools tracked
                       </p>
                     </div>
                     <Button asChild variant="outline">
@@ -289,9 +252,9 @@ const Landing = () => {
                     </Button>
                   </div>
 
-                  {featured.length > 0 ? (
+                  {province.featured.length > 0 ? (
                     <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {featured.map((school) => (
+                      {province.featured.map((school) => (
                         <FeaturedSchoolCard key={school.id} school={school} />
                       ))}
                     </div>

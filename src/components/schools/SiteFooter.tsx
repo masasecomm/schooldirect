@@ -1,14 +1,9 @@
-import { PROVINCES } from "@/lib/provinces";
-import { getSchools, getSchoolsByCountry } from "@/lib/schools";
-import { COUNTRIES } from "@/lib/countries";
+import { LANDING_SUMMARY } from "@/lib/landing-summary";
 
-// Only credit provinces/countries we actually have data for.
-const activeSaDepts = PROVINCES.filter((p) => getSchools("2025", p.slug).length > 0)
-  .map((p) => p.dept);
-const activeOtherDepts = COUNTRIES.filter(
-  (c) => c.slug !== "south-africa" && getSchoolsByCountry(c.slug).length > 0,
-).map((c) => c.dept);
-const activeDepts = [...activeSaDepts, ...activeOtherDepts].join(" · ");
+// Pre-computed at build time so the footer doesn't pull the full school dataset.
+const activeDepts =
+  LANDING_SUMMARY.activeDepts.join(" · ") ||
+  "South African provincial education departments";
 
 export const SiteFooter = () => (
   <footer className="border-t border-border/60 bg-background mt-16">
