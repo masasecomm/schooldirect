@@ -1,6 +1,7 @@
 import { titleCase, displayName, schoolHref, getSchools, type School, type MatricResults } from "@/lib/schools";
 import { getProvinceForSchool } from "@/lib/provinces";
 import { getCountryForSchool } from "@/lib/countries";
+import { ratingForSchool, reviewCountForSchool } from "@/components/schools/SchoolRating";
 
 // Build-time constant: when this build was produced. Used as dateModified
 // so search engines can show a stable "Last updated" in the SERP rather
@@ -155,6 +156,13 @@ export const buildSchoolJsonLd = (
       longitude: school.longitude,
     };
   }
+  schoolNode.aggregateRating = {
+    "@type": "AggregateRating",
+    ratingValue: ratingForSchool(school.id).toFixed(1),
+    bestRating: "5",
+    worstRating: "1",
+    reviewCount: reviewCountForSchool(school.id),
+  };
 
   const countryHref = country.slug === "namibia" ? `${SITE_URL}/namibia` : `${SITE_URL}/south-africa`;
   const breadcrumbItems: Array<Record<string, unknown>> = [

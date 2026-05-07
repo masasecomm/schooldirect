@@ -38,6 +38,7 @@ import { SchoolFeesCard } from "@/components/schools/SchoolFeesCard";
 import { SchoolIntro } from "@/components/schools/SchoolIntro";
 import { SchoolSeo } from "@/components/seo/SchoolSeo";
 import { SchoolFaq } from "@/components/seo/SchoolFaq";
+import { SchoolRating } from "@/components/schools/SchoolRating";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -2361,6 +2362,9 @@ const SchoolDetail = () => {
             <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl">
               {displayName(school)}
             </h1>
+            <div className="mt-3 flex justify-center">
+              <SchoolRating schoolId={school.id} schoolName={displayName(school)} />
+            </div>
             {school.district && (
               <p className="mt-2 text-base text-primary-foreground/85 md:text-lg">
                 {titleCase(school.district)} District
