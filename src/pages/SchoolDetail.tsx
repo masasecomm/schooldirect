@@ -2467,7 +2467,7 @@ const SchoolDetail = () => {
           </Card>
 
           <div className="flex flex-col gap-6">
-            <AdSenseSkyscraper />
+            <AdSenseSkyscraper key={`ad-${school.id ?? school.slug ?? ""}`} />
             <LearnerEnrolmentCard
               values={learnersByYear}
               educators={educatorsByYear}
