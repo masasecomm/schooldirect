@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { AVAILABLE_YEARS, type DataYear } from "@/lib/schools";
+import { AVAILABLE_YEARS, type DataYear } from "@/lib/years";
 
 interface YearContextValue {
   year: DataYear;

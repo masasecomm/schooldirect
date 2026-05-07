@@ -108,9 +108,8 @@ export interface School {
   isSpecialNeeds?: boolean;
 }
 
-export type DataYear = "2023" | "2024" | "2025";
-
-export const AVAILABLE_YEARS: DataYear[] = ["2025", "2024", "2023"];
+export { AVAILABLE_YEARS, type DataYear } from "@/lib/years";
+import type { DataYear } from "@/lib/years";
 
 const tag = (
   rows: unknown,
