@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -175,22 +175,36 @@ const HumanFigure = ({ active }: { active: boolean }) => (
  * Loader script is included once globally in index.html.
  */
 const AdSenseSkyscraper = () => {
+  const insRef = useRef<HTMLModElement | null>(null);
+  const pushedRef = useRef(false);
   useEffect(() => {
     let cancelled = false;
     let attempts = 0;
     const tryPush = () => {
-      if (cancelled) return;
-      try {
-        // @ts-ignore - adsbygoogle is injected by the AdSense loader
-        if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
-          // @ts-ignore
-          window.adsbygoogle.push({});
-          return;
-        }
-      } catch {
-        /* noop */
+      if (cancelled || pushedRef.current) return;
+      const ins = insRef.current;
+      if (!ins) {
+        if (attempts++ < 40) setTimeout(tryPush, 250);
+        return;
       }
-      if (attempts++ < 20) setTimeout(tryPush, 500);
+      // Already processed by AdSense — don't push again or it errors and stays blank.
+      if (ins.getAttribute("data-adsbygoogle-status")) {
+        pushedRef.current = true;
+        return;
+      }
+      // Wait until the slot has real width, otherwise AdSense marks it "unfilled".
+      if (ins.offsetWidth < 50) {
+        if (attempts++ < 40) setTimeout(tryPush, 250);
+        return;
+      }
+      try {
+        // @ts-ignore - adsbygoogle injected by loader script
+        const queue = (window.adsbygoogle = window.adsbygoogle || []);
+        queue.push({});
+        pushedRef.current = true;
+      } catch {
+        if (attempts++ < 40) setTimeout(tryPush, 500);
+      }
     };
     tryPush();
     return () => {
@@ -198,12 +212,14 @@ const AdSenseSkyscraper = () => {
     };
   }, []);
   return (
-    <div className="flex justify-center my-2">
+    <div className="flex justify-center my-2" style={{ minWidth: 300 }}>
       <ins
+        ref={insRef}
         className="adsbygoogle"
         style={{ display: "inline-block", width: 300, height: 600 }}
         data-ad-client="ca-pub-3860151941190347"
         data-ad-slot="3081508385"
+        data-full-width-responsive="false"
       />
     </div>
   );
