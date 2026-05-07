@@ -711,6 +711,21 @@ export const getLearnerTrend = (
 };
 
 /**
+ * Look up a school's learner count for a specific data year.
+ * Returns null if the school is not present in that year's dataset.
+ */
+export const getLearnersInYear = (
+  schoolId: string,
+  year: DataYear,
+): number | null => {
+  const match = datasets[year].find((s) => s.id === schoolId);
+  if (!match || typeof match.learners !== "number" || match.learners <= 0) {
+    return null;
+  }
+  return match.learners;
+};
+
+/**
  * Strip common SA titles + short tokens from a principal name and return the
  * set of meaningful tokens. Used to fuzzy-match the same person captured
  * with different spellings or initials across years and schools.
