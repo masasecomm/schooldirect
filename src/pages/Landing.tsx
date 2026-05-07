@@ -78,6 +78,7 @@ const Landing = () => {
   const totalSchools = LANDING_SUMMARY.totalSchools;
   const totalSpecial = LANDING_SUMMARY.totalSpecial;
   const namibiaTotal = LANDING_SUMMARY.namibia.total;
+  const singaporeTotal = LANDING_SUMMARY.singapore?.total ?? 0;
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,10 +143,10 @@ const Landing = () => {
               Browse by country
             </h2>
             <p className="mt-2 text-base text-muted-foreground">
-              We currently track schools in {1 + (namibiaTotal > 0 ? 1 : 0)} countries.
+              We currently track schools in {1 + (namibiaTotal > 0 ? 1 : 0) + (singaporeTotal > 0 ? 1 : 0)} countries.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Link
               to="/south-africa"
               className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-card)]"
@@ -180,6 +181,25 @@ const Landing = () => {
                 14 regions · primary, secondary &amp; combined
               </p>
             </Link>
+            {singaporeTotal > 0 && (
+              <Link
+                to="/singapore"
+                className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-card)]"
+              >
+                <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Singapore
+                </div>
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <div className="text-xl font-bold group-hover:text-primary">
+                    {singaporeTotal.toLocaleString()} schools
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-primary transition-transform group-hover:translate-x-0.5" />
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  MOE primary, secondary, JC &amp; mixed-level
+                </p>
+              </Link>
+            )}
           </div>
         </section>
 
