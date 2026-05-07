@@ -108,8 +108,8 @@ export interface School {
   isSpecialNeeds?: boolean;
 }
 
-export { AVAILABLE_YEARS, type DataYear } from "@/lib/years";
-import type { DataYear } from "@/lib/years";
+import { AVAILABLE_YEARS, type DataYear } from "@/lib/years";
+export { AVAILABLE_YEARS, type DataYear };
 
 const tag = (
   rows: unknown,
