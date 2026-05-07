@@ -218,7 +218,7 @@ const AdSenseSkyscraper = () => {
         className="adsbygoogle"
         style={{ display: "inline-block", width: 300, height: 600 }}
         data-ad-client="ca-pub-3860151941190347"
-        data-ad-slot="3081508385"
+        data-ad-slot="5879622265"
         data-full-width-responsive="false"
       />
     </div>
