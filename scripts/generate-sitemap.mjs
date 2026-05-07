@@ -100,6 +100,7 @@ const staticUrls = [
   { loc: "/south-africa", priority: "0.5", changefreq: "monthly" },
   { loc: "/south-africa/special-needs", priority: "0.7", changefreq: "monthly" },
   { loc: "/namibia", priority: "0.7", changefreq: "weekly" },
+  { loc: "/singapore", priority: "0.7", changefreq: "weekly" },
   ...PROVINCES.map((p) => ({
     loc: `/south-africa/${p.slug}`,
     priority: "0.7",
@@ -162,6 +163,29 @@ if (existsSync(naPath)) {
   }
 }
 const allSchoolEntries = [...schoolEntries, ...naEntries];
+
+// Singapore schools — flat /singapore/<name>-singapore permalinks.
+const sgPath = resolve(root, "src/data/singapore/schools.json");
+let sgEntries = [];
+if (existsSync(sgPath)) {
+  const sgMtime = statSync(sgPath).mtime;
+  if (sgMtime > latestDataMtime) latestDataMtime = sgMtime;
+  const sgLastmod = sgMtime.toISOString().slice(0, 10);
+  const sgSchools = JSON.parse(readFileSync(sgPath, "utf-8"));
+  const seen = new Set();
+  for (const s of sgSchools) {
+    const slug = `${slugifyNoId(s.name)}-singapore`;
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    sgEntries.push({
+      loc: `${SITE_URL}/singapore/${slug}`,
+      lastmod: sgLastmod,
+      changefreq: "monthly",
+      priority: "0.8",
+    });
+  }
+  allSchoolEntries.push(...sgEntries);
+}
 
 writeFileSync(resolve(root, "public/sitemap-static.xml"), buildUrlset(staticEntries), "utf-8");
 writeFileSync(resolve(root, "public/sitemap-schools.xml"), buildUrlset(allSchoolEntries), "utf-8");
