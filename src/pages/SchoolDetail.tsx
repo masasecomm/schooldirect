@@ -171,7 +171,7 @@ const HumanFigure = ({ active }: { active: boolean }) => (
 );
 
 /**
- * Google AdSense 300x600 skyscraper unit.
+ * Google AdSense in-article fluid unit.
  * Loader script is included once globally in index.html.
  */
 const AdSenseSkyscraper = () => {
@@ -212,14 +212,15 @@ const AdSenseSkyscraper = () => {
     };
   }, []);
   return (
-    <div className="flex justify-center my-2" style={{ minWidth: 300 }}>
+    <div className="my-2 w-full">
       <ins
         ref={insRef}
         className="adsbygoogle"
-        style={{ display: "inline-block", width: 300, height: 600 }}
+        style={{ display: "block", textAlign: "center" }}
+        data-ad-layout="in-article"
+        data-ad-format="fluid"
         data-ad-client="ca-pub-3860151941190347"
         data-ad-slot="5879622265"
-        data-full-width-responsive="false"
       />
     </div>
   );
