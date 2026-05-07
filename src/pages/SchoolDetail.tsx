@@ -175,12 +175,26 @@ const HumanFigure = ({ active }: { active: boolean }) => (
  */
 const AdSenseSkyscraper = () => {
   useEffect(() => {
-    try {
-      // @ts-ignore - adsbygoogle is injected by the AdSense loader
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch {
-      /* noop */
-    }
+    let cancelled = false;
+    let attempts = 0;
+    const tryPush = () => {
+      if (cancelled) return;
+      try {
+        // @ts-ignore - adsbygoogle is injected by the AdSense loader
+        if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
+          // @ts-ignore
+          window.adsbygoogle.push({});
+          return;
+        }
+      } catch {
+        /* noop */
+      }
+      if (attempts++ < 20) setTimeout(tryPush, 500);
+    };
+    tryPush();
+    return () => {
+      cancelled = true;
+    };
   }, []);
   return (
     <div className="flex justify-center my-2">

@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { YearProvider } from "@/lib/year-context";
 import Landing from "./pages/Landing.tsx";
+import ScrollToTop from "./components/ScrollToTop";
 const Index = lazy(() => import("./pages/Index.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const SchoolDetail = lazy(() => import("./pages/SchoolDetail.tsx"));
@@ -25,6 +26,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Landing />} />
