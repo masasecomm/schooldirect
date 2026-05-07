@@ -26,6 +26,7 @@ export interface LandingSummary {
   totalSpecial: number;
   provinces: ProvinceSummary[];
   namibia: { total: number; featured: FeaturedSchoolLite[] };
+  singapore: { total: number; featured: FeaturedSchoolLite[] };
   activeDepts: string[];
 }
 

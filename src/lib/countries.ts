@@ -1,6 +1,6 @@
 import type { ProvinceSlug } from "@/lib/provinces";
 
-export type CountrySlug = "south-africa" | "namibia";
+export type CountrySlug = "south-africa" | "namibia" | "singapore";
 
 export interface CountryConfig {
   slug: CountrySlug;
@@ -32,6 +32,15 @@ export const COUNTRIES: CountryConfig[] = [
     geoRegion: "NA",
     hasProvinces: false,
     dept: "Namibia Ministry of Education, Arts and Culture",
+  },
+  {
+    slug: "singapore",
+    name: "Singapore",
+    shortName: "SG",
+    iso: "SG",
+    geoRegion: "SG",
+    hasProvinces: false,
+    dept: "Singapore Ministry of Education",
   },
 ];
 

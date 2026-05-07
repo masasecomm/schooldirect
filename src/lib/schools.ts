@@ -66,6 +66,7 @@ import ncSne2025 from "@/data/northern-cape/special-schools-2025.json";
 import { PROVINCES, getProvince, type ProvinceSlug } from "@/lib/provinces";
 import { type CountrySlug, getCountry } from "@/lib/countries";
 import naSchools from "@/data/namibia/schools.json";
+import sgSchools from "@/data/singapore/schools.json";
 
 export interface School {
   id: string;
@@ -259,9 +260,20 @@ const namibiaSchools: School[] = (
   countrySlug: "namibia" as CountrySlug,
 }));
 
+/**
+ * Singapore dataset — single snapshot, flat permalinks like Namibia.
+ */
+const singaporeSchools: School[] = (
+  sgSchools as Omit<School, "countrySlug">[]
+).map((s) => ({
+  ...s,
+  countrySlug: "singapore" as CountrySlug,
+}));
+
 /** Schools for a given country across all years (deduped by id). */
 export const getSchoolsByCountry = (countrySlug: CountrySlug): School[] => {
   if (countrySlug === "namibia") return namibiaSchools;
+  if (countrySlug === "singapore") return singaporeSchools;
   // South Africa: latest year wins
   const map = new Map<string, School>();
   for (const y of AVAILABLE_YEARS) {
@@ -277,6 +289,7 @@ export const getSchools = (year: DataYear, provinceSlug?: ProvinceSlug): School[
 export const getAllSchools = (year: DataYear): School[] => [
   ...datasets[year],
   ...namibiaSchools,
+  ...singaporeSchools,
 ];
 
 /**
@@ -399,12 +412,19 @@ export const getFacets = (year: DataYear, provinceSlug?: ProvinceSlug) => {
 
 export const findSchool = (year: DataYear, id: string) =>
   getSchools(year).find((s) => s.id === id) ??
-  namibiaSchools.find((s) => s.id === id);
+  namibiaSchools.find((s) => s.id === id) ??
+  singaporeSchools.find((s) => s.id === id);
 
 /** Find a Namibia school by its slug (slug ends with "-namibia"). */
 export const findNamibiaSchoolBySlug = (slug: string): School | undefined => {
   const stripped = slug.replace(/-namibia$/i, "");
   return namibiaSchools.find((s) => schoolSlugBase(s) === stripped);
+};
+
+/** Find a Singapore school by its slug (slug ends with "-singapore"). */
+export const findSingaporeSchoolBySlug = (slug: string): School | undefined => {
+  const stripped = slug.replace(/-singapore$/i, "");
+  return singaporeSchools.find((s) => schoolSlugBase(s) === stripped);
 };
 
 /** Slugify a free-form string the same way schoolSlugBase does. */
@@ -610,7 +630,7 @@ const schoolSlugBase = (school: { name?: string | null; id: string }): string =>
  */
 export const idFromSlug = (slug: string): string => {
   // Strip a trailing country suffix first.
-  const cleaned = slug.replace(/-(namibia|south-africa)$/i, "");
+  const cleaned = slug.replace(/-(namibia|singapore|south-africa)$/i, "");
   const m = cleaned.match(/(\d+)$/);
   return m ? m[1] : cleaned;
 };
@@ -624,6 +644,9 @@ export const schoolHref = (school: {
 }) => {
   if (school.countrySlug === "namibia") {
     return `/namibia/${schoolSlugBase(school)}-namibia`;
+  }
+  if (school.countrySlug === "singapore") {
+    return `/singapore/${schoolSlugBase(school)}-singapore`;
   }
   const province = getProvince(school.provinceSlug ?? null);
   return `/south-africa/${province.slug}/${schoolSlug(school)}`;
