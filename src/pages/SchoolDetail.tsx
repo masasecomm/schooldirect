@@ -2561,13 +2561,13 @@ const SchoolDetail = () => {
                 noFee={school.noFee}
               />
             )}
-            {schoolYear && (
-              <SimilarSchoolsCard school={school} year={schoolYear} />
-            )}
             <ContactSchoolCard
               schoolName={displayName(school)}
               emisId={String(school.id)}
             />
+            {schoolYear && (
+              <SimilarSchoolsCard school={school} year={schoolYear} />
+            )}
           </div>
         </div>
         <SchoolFaq school={school} matric={matricResults} />

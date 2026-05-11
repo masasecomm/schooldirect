@@ -280,7 +280,7 @@ export const ContactSchoolCard = ({ schoolName, emisId }: Props) => {
           <div className="flex flex-col gap-2 pt-2 sm:flex-row">
             <Button
               type="button"
-              className="flex-1"
+              className="flex-1 bg-black text-white hover:bg-black/90"
               disabled={submitting}
               onClick={handleSubmit(submitToSheet)}
             >
