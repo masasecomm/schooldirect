@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { YearProvider } from "@/lib/year-context";
 import Landing from "./pages/Landing.tsx";
 import ScrollToTop from "./components/ScrollToTop";
+import TrafficTracker from "./components/TrafficTracker";
 const Index = lazy(() => import("./pages/Index.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const SchoolDetail = lazy(() => import("./pages/SchoolDetail.tsx"));
@@ -27,6 +28,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <TrafficTracker />
         <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Landing />} />
