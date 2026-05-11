@@ -2033,34 +2033,33 @@ const SimilarSchoolsCard = ({
   school: ReturnType<typeof findSchool>;
   year: DataYear;
 }) => {
+  type MatchField = "Township" | "Suburb" | "Town" | "Municipality" | "Circuit";
   const similar = useMemo(() => {
-    if (!school?.phase) return [] as { school: NonNullable<ReturnType<typeof findSchool>>; matchedField: "Township" | "Suburb" | "Town"; matchedValue: string }[];
+    if (!school?.phase) return [] as { school: NonNullable<ReturnType<typeof findSchool>>; matchedField: MatchField; matchedValue: string }[];
     const norm = (v?: string | null) => (v ?? "").trim().toLowerCase();
     const phase = norm(school.phase);
-    const fields: { key: "Township" | "Suburb" | "Town"; raw: string | null | undefined }[] = [
-      { key: "Township", raw: school.township },
-      { key: "Suburb", raw: school.suburb },
-      { key: "Town", raw: school.town },
+    const fields: { key: MatchField; raw: string | null | undefined; getter: (s: NonNullable<ReturnType<typeof findSchool>>) => string | null | undefined }[] = [
+      { key: "Township", raw: school.township, getter: (s) => s.township },
+      { key: "Suburb", raw: school.suburb, getter: (s) => s.suburb },
+      { key: "Town", raw: school.town, getter: (s) => s.town },
+      { key: "Municipality", raw: school.municipality, getter: (s) => s.municipality },
+      { key: "Circuit", raw: school.circuit, getter: (s) => s.circuit },
     ];
     const targets = fields
-      .map((f) => ({ key: f.key, value: norm(f.raw) }))
+      .map((f) => ({ key: f.key, value: norm(f.raw), getter: f.getter }))
       .filter((f) => f.value.length > 0);
     if (targets.length === 0) return [];
 
     const all = getSchools(year);
     const seen = new Set<string>();
-    const out: { school: NonNullable<ReturnType<typeof findSchool>>; matchedField: "Township" | "Suburb" | "Town"; matchedValue: string }[] = [];
+    const out: { school: NonNullable<ReturnType<typeof findSchool>>; matchedField: MatchField; matchedValue: string }[] = [];
     for (const s of all) {
       if (s.id === school.id) continue;
       if (norm(s.phase) !== phase) continue;
-      let match: { key: "Township" | "Suburb" | "Town"; value: string } | null = null;
+      let match: { key: MatchField; value: string } | null = null;
       for (const t of targets) {
-        if (
-          (t.key === "Township" && norm(s.township) === t.value) ||
-          (t.key === "Suburb" && norm(s.suburb) === t.value) ||
-          (t.key === "Town" && norm(s.town) === t.value)
-        ) {
-          match = t;
+        if (norm(t.getter(s)) === t.value) {
+          match = { key: t.key, value: t.value };
           break;
         }
       }
@@ -2069,8 +2068,8 @@ const SimilarSchoolsCard = ({
       seen.add(s.id);
       out.push({ school: s, matchedField: match.key, matchedValue: titleCase(match.value) });
     }
-    // Stable sort: same-field matches together, then alphabetical by name.
-    const order: Record<string, number> = { Township: 0, Suburb: 1, Town: 2 };
+    // Stable sort: tighter location matches first, then alphabetical.
+    const order: Record<MatchField, number> = { Township: 0, Suburb: 1, Town: 2, Municipality: 3, Circuit: 4 };
     out.sort((a, b) => {
       const f = order[a.matchedField] - order[b.matchedField];
       if (f !== 0) return f;
@@ -2085,10 +2084,12 @@ const SimilarSchoolsCard = ({
   // Phase descriptor without trailing "School(s)" so we can safely append
   // " school" / " schools" without producing "primary school schools".
   const phaseWord = phaseLabel.replace(/\s*schools?$/i, "").trim() || phaseLabel;
-  const fieldStyles: Record<"Township" | "Suburb" | "Town", string> = {
+  const fieldStyles: Record<MatchField, string> = {
     Township: "bg-accent/15 text-accent",
     Suburb: "bg-primary-soft text-primary",
     Town: "bg-muted text-foreground",
+    Municipality: "bg-muted text-foreground",
+    Circuit: "bg-muted text-foreground",
   };
 
   return (
@@ -2118,6 +2119,10 @@ const SimilarSchoolsCard = ({
                 push("Suburb", school.suburb);
                 push("Township", school.township);
                 push("Town", school.town);
+                if (parts.length === 0) {
+                  push("Municipality", school.municipality);
+                  push("Circuit", school.circuit);
+                }
                 if (parts.length === 0) return "Similar Schools";
                 return (
                   <>
