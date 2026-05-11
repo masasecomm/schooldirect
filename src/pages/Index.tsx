@@ -11,13 +11,13 @@ import { SiteFooter } from "@/components/schools/SiteFooter";
 import { SchoolCard } from "@/components/schools/SchoolCard";
 import { FilterPanel, type Filters } from "@/components/schools/FilterPanel";
 import { getSchools, getFacets, titleCase, getSchoolsByCountry, uniqueSorted } from "@/lib/schools";
-import { getProvince, isProvinceSlug } from "@/lib/provinces";
+import { getProvince, isProvinceSlug, PROVINCES } from "@/lib/provinces";
 import { useLocation } from "react-router-dom";
 import { useYear } from "@/lib/year-context";
 
 const PAGE_SIZE = 24;
 
-const emptyFilters: Filters = { district: "", sector: "", phase: "", quintile: "", town: "" };
+const emptyFilters: Filters = { province: "", district: "", sector: "", phase: "", quintile: "", town: "" };
 
 const Index = () => {
   const { year } = useYear();
@@ -53,12 +53,21 @@ const Index = () => {
         towns: uniqueSorted(schools.map((s) => s.town)),
       };
     }
-    return getFacets(year, province?.slug);
+    const base = getFacets(year, province?.slug);
+    // Show Province filter only on the all-of-South-Africa view.
+    if (!province) {
+      return {
+        ...base,
+        provinces: PROVINCES.map((p) => ({ value: p.slug, label: p.name })),
+      };
+    }
+    return base;
   }, [isFlatCountry, schools, year, province?.slug]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let result = schools.filter((s) => {
+      if (filters.province && s.provinceSlug !== filters.province) return false;
       if (filters.district) {
         const key = isFlatCountry ? s.region : s.district;
         if (key !== filters.district) return false;
