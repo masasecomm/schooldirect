@@ -128,7 +128,7 @@ export const ContactSchoolCard = ({ schoolName, emisId }: Props) => {
         mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
-          sheet: "Contact Form",
+          sheet: "Sheet1",
           schoolName,
           emisId: emisId ?? "",
           parentName: v.parentName,

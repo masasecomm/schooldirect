@@ -65,7 +65,7 @@ const TrafficTracker = () => {
 
     const payload = {
       type: "traffic",
-      sheet: "Traffic",
+      sheet: "Sheet2",
       visitorId: getVisitorId(),
       sessionId: getSessionId(),
       path,
