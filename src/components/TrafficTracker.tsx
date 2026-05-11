@@ -47,13 +47,25 @@ const TrafficTracker = () => {
     if (typeof window === "undefined") return;
     if (!hasContactSheetEndpoint()) return;
 
+    // Skip traffic from Lovable preview/editor environments.
+    const host = window.location.hostname;
+    if (
+      host.endsWith("lovable.dev") ||
+      host.endsWith("lovable.app") ||
+      host.endsWith("lovableproject.com") ||
+      host === "localhost" ||
+      host === "127.0.0.1"
+    ) {
+      return;
+    }
+
     const path = pathname + search;
     if (lastSent.current === path) return;
     lastSent.current = path;
 
     const payload = {
       type: "traffic",
-      sheet: "traffic",
+      sheet: "Sheet2",
       visitorId: getVisitorId(),
       sessionId: getSessionId(),
       path,
