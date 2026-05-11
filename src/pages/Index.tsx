@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, RotateCcw } from "lucide-react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { ArrowRight, MapPin, Search, SlidersHorizontal, User, Users, X, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,8 @@ import { getSchools, getFacets, titleCase, getSchoolsByCountry, uniqueSorted } f
 import { getProvince, isProvinceSlug, PROVINCES } from "@/lib/provinces";
 import { useLocation } from "react-router-dom";
 import { useYear } from "@/lib/year-context";
+import { Card, CardContent } from "@/components/ui/card";
+import { LANDING_SUMMARY, type FeaturedSchoolLite } from "@/lib/landing-summary";
 
 const PAGE_SIZE = 24;
 
@@ -27,6 +29,11 @@ const Index = () => {
   const isSingapore = pathname.startsWith("/singapore");
   const isFlatCountry = isNamibia || isSingapore;
   const province = isProvinceSlug(provinceParam) ? getProvince(provinceParam) : null;
+  const showProvincesBlock = !isFlatCountry && !province;
+  const provincesByCount = useMemo(
+    () => [...LANDING_SUMMARY.provinces].sort((a, b) => b.total - a.total),
+    [],
+  );
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [filters, setFilters] = useState<Filters>(emptyFilters);
@@ -159,6 +166,107 @@ const Index = () => {
       </section>
 
       <main className="container flex-1 py-8">
+        {showProvincesBlock && (
+          <section aria-labelledby="provinces-block" className="mb-12">
+            <div className="mx-auto mb-8 max-w-3xl text-center">
+              <h2 id="provinces-block" className="text-2xl font-bold tracking-tight md:text-3xl">
+                Browse by province
+              </h2>
+              <p className="mt-2 text-base text-muted-foreground">
+                Provinces ranked by number of schools tracked. Each card shows the
+                three largest schools by 2025 enrolment.
+              </p>
+            </div>
+            <div className="space-y-8">
+              {provincesByCount.map((p) => (
+                <Card key={p.slug} className="overflow-hidden shadow-[var(--shadow-card)]">
+                  <CardContent className="p-6 md:p-8">
+                    <div className="flex flex-wrap items-end justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {p.dept}
+                        </div>
+                        <h3 className="mt-1 text-xl font-bold tracking-tight md:text-2xl">
+                          {p.name}
+                        </h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {p.total.toLocaleString()} schools tracked
+                        </p>
+                      </div>
+                      <Button asChild variant="outline" size="sm">
+                        <Link to={`/south-africa/${p.slug}`}>
+                          View all {p.name} schools
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                    {p.featured.length > 0 && (
+                      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {p.featured.slice(0, 3).map((school: FeaturedSchoolLite) => (
+                          <Link
+                            key={school.id}
+                            to={school.href}
+                            className="group flex h-full flex-col rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-card)]"
+                          >
+                            <div className="flex flex-wrap gap-1.5">
+                              {school.phase && (
+                                <Badge className="bg-primary-soft text-primary hover:bg-primary-soft/80 font-medium">
+                                  {school.phase}
+                                </Badge>
+                              )}
+                              {school.sector && (
+                                <Badge variant="secondary" className="font-medium">
+                                  {school.sector}
+                                </Badge>
+                              )}
+                            </div>
+                            <h4 className="mt-3 text-base font-semibold leading-snug tracking-tight group-hover:text-primary">
+                              {school.name}
+                            </h4>
+                            <div className="mt-2 space-y-1.5 text-sm text-muted-foreground">
+                              {(school.suburb || school.town) && (
+                                <div className="flex items-start gap-1.5">
+                                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
+                                  <span className="line-clamp-1">
+                                    {[school.suburb, school.town].filter(Boolean).join(", ")}
+                                  </span>
+                                </div>
+                              )}
+                              {typeof school.learners === "number" && school.learners > 0 && (
+                                <div className="flex items-center gap-1.5">
+                                  <Users className="h-4 w-4 shrink-0 text-primary/70" />
+                                  <span>
+                                    <span className="font-medium text-foreground">
+                                      {school.learners.toLocaleString()}
+                                    </span>{" "}
+                                    learners
+                                  </span>
+                                </div>
+                              )}
+                              {school.principal && (
+                                <div className="flex items-start gap-1.5">
+                                  <User className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
+                                  <span className="line-clamp-1">
+                                    Principal:{" "}
+                                    <span className="font-medium text-foreground">
+                                      {school.principal}
+                                    </span>
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="mx-auto mb-10 max-w-3xl text-center">
           <p className="text-base text-muted-foreground md:text-lg">
             Beyond EMIS numbers and circuit data, we give you the full picture. Track
