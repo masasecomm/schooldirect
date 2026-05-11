@@ -14,6 +14,7 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const SchoolDetail = lazy(() => import("./pages/SchoolDetail.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Admissions = lazy(() => import("./pages/Admissions.tsx"));
+const WCEDApplication = lazy(() => import("./pages/WCEDApplication.tsx"));
 const SpecialNeedsSchools = lazy(() => import("./pages/SpecialNeedsSchools.tsx"));
 const LegacyNamibiaRedirect = lazy(() => import("./pages/LegacyNamibiaRedirect.tsx"));
 
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/schools/:slug" element={<SchoolDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/admissions" element={<Admissions />} />
+          <Route path="/wced-online-application" element={<WCEDApplication />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           {/* Legacy Namibia URLs (single root-level slug) — try to redirect, else 404 */}
           <Route path="*" element={<LegacyNamibiaRedirect fallback={<NotFound />} />} />

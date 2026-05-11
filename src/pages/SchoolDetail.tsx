@@ -35,6 +35,7 @@ import { SiteFooter } from "@/components/schools/SiteFooter";
 import { ContactSchoolCard } from "@/components/schools/ContactSchoolCard";
 import { SchoolCalendarCard } from "@/components/schools/SchoolCalendarCard";
 import { SchoolFeesCard } from "@/components/schools/SchoolFeesCard";
+import { WCEDApplicationCard } from "@/components/schools/WCEDApplicationCard";
 import { SchoolIntro } from "@/components/schools/SchoolIntro";
 import { SchoolSeo } from "@/components/seo/SchoolSeo";
 import { SchoolFaq } from "@/components/seo/SchoolFaq";
@@ -2545,6 +2546,9 @@ const SchoolDetail = () => {
             )}
             {school.sector?.toUpperCase() === "PUBLIC" && school.provinceSlug === "gauteng" && (
               <WalkInCentreCard school={school} />
+            )}
+            {school.provinceSlug === "western-cape" && (
+              <WCEDApplicationCard schoolName={displayName(school)} />
             )}
             {school.sector?.toUpperCase() === "PUBLIC" && (
               <SchoolCalendarCard schoolName={displayName(school)} />
