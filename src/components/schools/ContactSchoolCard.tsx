@@ -172,25 +172,25 @@ export const ContactSchoolCard = ({ schoolName, emisId }: Props) => {
     msg ? <p className="mt-1 text-xs font-medium text-destructive">{msg}</p> : null;
 
   return (
-    <Card className="overflow-hidden shadow-[var(--shadow-card)]">
+    <Card className="overflow-hidden border-0 text-primary-foreground shadow-[var(--shadow-elevated)] [background:var(--hero-gradient)]">
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-primary-foreground/80">
               <MessageSquare className="h-3.5 w-3.5" />
               Get in touch
             </div>
             <h2 className="mt-1 text-lg font-semibold">Contact {schoolName}</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-primary-foreground/80">
               Let us help you contact the school
             </p>
           </div>
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/15 text-primary-foreground ring-1 ring-white/30">
             <Mail className="h-5 w-5" />
           </div>
         </div>
 
-        <form className="mt-6 space-y-4" noValidate>
+        <form className="mt-6 space-y-4 [&_label]:text-primary-foreground [&_input]:bg-white [&_input]:text-foreground [&_textarea]:bg-white [&_textarea]:text-foreground [&_button[role=combobox]]:bg-white [&_button[role=combobox]]:text-foreground" noValidate>
           <div>
             <Label htmlFor="parentName">Parent / Guardian name</Label>
             <Input
