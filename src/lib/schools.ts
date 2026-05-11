@@ -781,6 +781,15 @@ export const findPrincipalAtOtherSchools = (
   const target = normalisePrincipalName(principalName);
   if (!target) return [];
 
+  // A surname on its own (e.g. "Mkhwanazi") is far too common in SA to
+  // safely attribute to one person across the country. Gauteng records
+  // almost always carry first name + surname, which is why the same
+  // strict-match strategy produces clean results there. For provinces
+  // where many records only capture a surname, we require at least two
+  // distinct meaningful tokens before claiming a cross-school match —
+  // otherwise the "career history" inflates with unrelated namesakes.
+  if (target.split(" ").filter(Boolean).length < 2) return [];
+
   const byKey = new Map<string, OtherPrincipalAppearance>();
   for (const year of AVAILABLE_YEARS) {
     for (const s of datasets[year]) {
