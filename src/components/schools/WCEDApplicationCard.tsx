@@ -18,7 +18,7 @@ const TRANSFERS: Item[] = [
 ];
 
 export const WCEDApplicationCard = ({ schoolName }: { schoolName: string }) => {
-  const year = new Date().getFullYear();
+  const year = new Date().getFullYear() + 1;
   return (
     <Card className="overflow-hidden shadow-[var(--shadow-card)] md:col-span-2 xl:col-span-3">
       <CardContent className="p-6">
