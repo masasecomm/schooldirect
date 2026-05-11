@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { titleCase } from "@/lib/schools";
 
 export interface Filters {
+  province: string;
   district: string;
   sector: string;
   phase: string;
@@ -14,6 +15,7 @@ export interface Filters {
 interface Props {
   filters: Filters;
   facets: {
+    provinces?: { value: string; label: string }[];
     districts: string[];
     sectors: string[];
     phases: string[];
@@ -73,6 +75,28 @@ export const FilterPanel = ({ filters, facets, onChange, onClear }: Props) => {
           </Button>
         )}
       </div>
+
+      {facets.provinces && facets.provinces.length > 0 && (
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">Province</Label>
+          <Select
+            value={filters.province || ALL}
+            onValueChange={(v) => set("province", v === ALL ? "" : v)}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="All provinces" />
+            </SelectTrigger>
+            <SelectContent className="max-h-72">
+              <SelectItem value={ALL}>All provinces</SelectItem>
+              {facets.provinces.map((p) => (
+                <SelectItem key={p.value} value={p.value}>
+                  {p.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <FilterSelect
         label="District"
