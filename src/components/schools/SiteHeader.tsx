@@ -72,6 +72,9 @@ export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
           <NavLink to="/admissions" className={({ isActive }) => linkClass(isActive)}>
             Admissions
           </NavLink>
+          <NavLink to="/wced-online-application" className={({ isActive }) => linkClass(isActive)}>
+            WCED Application
+          </NavLink>
           <NavLink to="/about" className={({ isActive }) => linkClass(isActive)}>
             About
           </NavLink>
@@ -120,6 +123,18 @@ export const SiteHeader = ({ overHero = false }: SiteHeaderProps) => {
                   }
                 >
                   Admissions
+                </NavLink>
+              </SheetClose>
+              <SheetClose asChild>
+                <NavLink
+                  to="/wced-online-application"
+                  className={({ isActive }) =>
+                    `rounded-md px-3 py-2.5 transition-colors ${
+                      isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+                    }`
+                  }
+                >
+                  WCED Application
                 </NavLink>
               </SheetClose>
               <SheetClose asChild>
