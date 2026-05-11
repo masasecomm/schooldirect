@@ -42,14 +42,69 @@ const Admissions = () => {
       <SiteHeader />
       <main className="container flex-1 py-10">
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-medium uppercase tracking-wider text-primary">2027 GDE Admissions &amp; Application</p>
+          <p className="text-sm font-medium uppercase tracking-wider text-primary">
+            Gauteng school applications 2027
+          </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-            Decentralised Walk-In Centres
+            GDE Admissions registration
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Grade 1 &amp; Grade 8 admissions support across Gauteng. Find the centre nearest to your suburb.
+            Online registration for Grade 1 2027 Gauteng school and Grade 8 2027 Gauteng learners. Apply through the
+            Gauteng Department of Education on Www GDEAdmissions gov za registration online 2026 schools login, then
+            visit a walk-in centre if you need help.
           </p>
         </header>
+
+        <section className="mx-auto mt-10 max-w-3xl space-y-4 text-sm leading-relaxed text-foreground">
+          <h2 className="text-xl font-semibold tracking-tight">How the GDE Admissions process works</h2>
+          <p>
+            The Gauteng Department of Education runs one central online system for parents. Use it for Grade 1
+            application for 2027 Gauteng and Grade 8 application 2027 Gauteng. The process has four simple steps.
+          </p>
+          <ol className="list-decimal space-y-2 pl-5">
+            <li>
+              <strong>Register as a parent.</strong> Go to{" "}
+              <a
+                href="https://www.gdeadmissions.gov.za"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-primary hover:underline"
+              >
+                www.gdeadmissions.gov.za
+              </a>{" "}
+              and complete the GDE Admissions parent registration online. You need your South African ID or passport
+              and a working cellphone number.
+            </li>
+            <li>
+              <strong>Capture each child.</strong> Add your child's details, home address, and current school (for
+              Online registration for Grade 8 2026 Gauteng school applicants moving from Grade 7).
+            </li>
+            <li>
+              <strong>Choose up to five schools.</strong> The system uses your home and work address to suggest
+              feeder schools by distance.
+            </li>
+            <li>
+              <strong>Submit and upload documents.</strong> Upload the child's birth certificate or ID, proof of
+              residence, immunisation card, and the latest school report. Then wait for placement SMS updates.
+            </li>
+          </ol>
+          <p className="text-muted-foreground">
+            Reviewed for the 2026 admissions cycle. Dates for the 2027 cycle are confirmed by the GDE each year in mid-July.
+          </p>
+        </section>
+
+        <section className="mx-auto mt-10 max-w-3xl space-y-3 text-sm leading-relaxed text-foreground">
+          <h2 className="text-xl font-semibold tracking-tight">What are Decentralised Walk-In Centres?</h2>
+          <p>
+            Decentralised Walk-In Centres are GDE-run help desks placed across Gauteng districts. Staff help parents
+            who cannot apply online, who do not have data, or who need help to upload documents. You can walk in
+            during the application window and get assisted on the same system used at home.
+          </p>
+          <p>
+            Find the centre closest to your suburb below. Each card lists the address, the areas it serves, and the
+            officials you can phone first.
+          </p>
+        </section>
 
         <div className="mx-auto mt-8 max-w-3xl space-y-4">
           <div className="relative">

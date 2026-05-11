@@ -1821,6 +1821,7 @@ const WalkInCentreCard = ({
     town?: string | null;
     municipality?: string | null;
     district?: string | null;
+    provinceSlug?: string | null;
   };
 }) => {
   const matches = useMemo(() => findWalkInCentresForSchool(school), [school]);
@@ -1842,6 +1843,11 @@ const WalkInCentreCard = ({
     }
     return Array.from(map.values());
   }, [matches]);
+
+  const phaseUp = (school.phase || "").toUpperCase();
+  const isPrimaryLike = phaseUp.includes("PRIMARY") || phaseUp.includes("INTERMEDIATE") || phaseUp.includes("COMBINED");
+  const isSecondaryLike = phaseUp.includes("SECONDARY") || phaseUp.includes("COMBINED");
+  const schoolName = displayName(school);
 
   return (
     <Card className="overflow-hidden shadow-[var(--shadow-card)]">
@@ -1891,17 +1897,37 @@ const WalkInCentreCard = ({
             </Table>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Apply on the official GDE Online Admissions portal:{" "}
-            <a
-              href="https://www.gdeadmissions.gov.za"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-primary hover:underline"
-            >
-              www.gdeadmissions.gov.za
-            </a>
-            .
+            Apply through the GDE Admissions process. See full steps, dates, and walk-in centres on our{" "}
+            <Link to="/admissions" className="font-medium text-primary hover:underline">
+              GDE Admissions registration
+            </Link>{" "}
+            page.
           </p>
+          {(isPrimaryLike || isSecondaryLike) && (
+            <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+              {isPrimaryLike && (
+                <>
+                  <p>
+                    <Link to="/admissions" className="font-medium text-primary hover:underline">
+                      {schoolName} Grade 1 registration 2027 online application
+                    </Link>
+                  </p>
+                  <p>
+                    <Link to="/admissions" className="font-medium text-primary hover:underline">
+                      {schoolName} Grade R registration 2027 online application
+                    </Link>
+                  </p>
+                </>
+              )}
+              {isSecondaryLike && (
+                <p>
+                  <Link to="/admissions" className="font-medium text-primary hover:underline">
+                    {schoolName} Grade 8 registration 2027 online application
+                  </Link>
+                </p>
+              )}
+            </div>
+          )}
           <p className="mt-2 text-xs text-muted-foreground">
             Prefer help from a real person? Visit one of the walk-in centres below — staff will assist you to apply in person.
           </p>
@@ -2512,7 +2538,7 @@ const SchoolDetail = () => {
                 year={schoolYear}
               />
             )}
-            {school.sector?.toUpperCase() === "PUBLIC" && (
+            {school.sector?.toUpperCase() === "PUBLIC" && school.provinceSlug === "gauteng" && (
               <WalkInCentreCard school={school} />
             )}
             {school.sector?.toUpperCase() === "PUBLIC" && (
