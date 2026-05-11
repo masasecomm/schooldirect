@@ -63,6 +63,28 @@ const TrafficTracker = () => {
     if (lastSent.current === path) return;
     lastSent.current = path;
 
+    // Extract search query — first try this page's own ?q=, then the referrer's query params.
+    let searchQuery = "";
+    try {
+      const params = new URLSearchParams(search);
+      searchQuery =
+        params.get("q") ||
+        params.get("query") ||
+        params.get("s") ||
+        params.get("search") ||
+        "";
+      if (!searchQuery && document.referrer) {
+        const refUrl = new URL(document.referrer);
+        searchQuery =
+          refUrl.searchParams.get("q") ||
+          refUrl.searchParams.get("query") ||
+          refUrl.searchParams.get("p") ||
+          "";
+      }
+    } catch {
+      // ignore
+    }
+
     const payload = {
       type: "traffic",
       sheet: "Traffic",
@@ -70,6 +92,8 @@ const TrafficTracker = () => {
       sessionId: getSessionId(),
       path,
       title: document.title,
+      pageName: document.title,
+      searchQuery,
       referrer: document.referrer || "",
       pageUrl: window.location.href,
       userAgent: navigator.userAgent,
