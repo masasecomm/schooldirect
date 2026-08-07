@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, MapPin, Search, Heart } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { ArrowRight, MapPin, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +21,6 @@ const SpecialNeedsSchools = () => {
     ? getProvince(provinceParam)
     : null;
 
-  const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const schools = useMemo(
@@ -39,15 +37,10 @@ const SpecialNeedsSchools = () => {
     [year],
   );
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const result = schools.filter((s) => {
-      if (!q) return true;
-      const hay = `${s.name} ${s.suburb ?? ""} ${s.town ?? ""} ${s.district ?? ""} ${s.specialisation ?? ""} ${s.emis}`.toLowerCase();
-      return hay.includes(q);
-    });
-    return [...result].sort((a, b) => (b.learners ?? -1) - (a.learners ?? -1));
-  }, [query, schools]);
+  const filtered = useMemo(
+    () => [...schools].sort((a, b) => (b.learners ?? -1) - (a.learners ?? -1)),
+    [schools],
+  );
 
   const totalCountry = useMemo(
     () => getSpecialSchools(year).length,
@@ -99,24 +92,6 @@ const SpecialNeedsSchools = () => {
               {province ? ` in ${province.name}` : ""} for learners with
               specific learning, sensory, physical or developmental needs.
             </p>
-
-            <div className="mx-auto mt-8 max-w-xl">
-              <div className="flex items-center gap-2 rounded-full bg-background/95 p-2 shadow-[var(--shadow-elevated)] ring-1 ring-black/5 backdrop-blur">
-                <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
-                  <Input
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      setVisible(PAGE_SIZE);
-                    }}
-                    placeholder="Search by name, suburb, specialisation…"
-                    className="h-12 rounded-full border-0 bg-transparent pl-14 pr-4 text-base text-foreground shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    aria-label="Search special needs schools"
-                  />
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
