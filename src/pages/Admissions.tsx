@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
-import { MapPin, Phone, Search } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,23 +16,14 @@ import {
 import { cn } from "@/lib/utils";
 
 const Admissions = () => {
-  const [query, setQuery] = useState("");
   const [region, setRegion] = useState<Region | "All">("All");
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
     return walkInCentres.filter((c) => {
       if (region !== "All" && c.region !== region) return false;
-      if (!q) return true;
-      return (
-        c.centre.toLowerCase().includes(q) ||
-        c.address.toLowerCase().includes(q) ||
-        c.subRegion.toLowerCase().includes(q) ||
-        c.areasServed.some((a) => a.toLowerCase().includes(q)) ||
-        c.contacts.some((p) => p.name.toLowerCase().includes(q))
-      );
+      return true;
     });
-  }, [query, region]);
+  }, [region]);
 
   const grouped = useMemo(() => groupBySubRegion(filtered), [filtered]);
 
@@ -107,15 +97,6 @@ const Admissions = () => {
         </section>
 
         <div className="mx-auto mt-8 max-w-3xl space-y-4">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by centre, area, suburb, or contact name…"
-              className="pl-9"
-            />
-          </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {(["All", ...REGIONS] as const).map((r) => {
               const active = region === r;
@@ -143,7 +124,7 @@ const Admissions = () => {
 
         <div className="mx-auto mt-10 max-w-5xl space-y-10">
           {grouped.length === 0 && (
-            <p className="text-center text-muted-foreground">No centres match your search.</p>
+            <p className="text-center text-muted-foreground">No centres match the selected region.</p>
           )}
           {grouped.map(([heading, centres]) => (
             <section key={heading}>
