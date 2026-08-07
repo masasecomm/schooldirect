@@ -139,11 +139,6 @@ const SpecialNeedsSchools = () => {
             >
               {filtered.length.toLocaleString()} school
               {filtered.length === 1 ? "" : "s"}
-              {query && (
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  matching “{query}”
-                </span>
-              )}
             </h2>
             {province && (
               <Button asChild variant="outline" size="sm">
@@ -157,7 +152,7 @@ const SpecialNeedsSchools = () => {
           {filtered.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center text-muted-foreground">
-                No special needs schools found. Try clearing your search.
+                No special needs schools found in this province.
               </CardContent>
             </Card>
           ) : (
