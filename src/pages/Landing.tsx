@@ -1,15 +1,12 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, Heart, MapPin, Search, User, Users } from "lucide-react";
+import { ArrowRight, Heart, MapPin, User, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { LANDING_SUMMARY, type FeaturedSchoolLite } from "@/lib/landing-summary";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const FeaturedSchoolCard = ({ school }: { school: FeaturedSchoolLite }) => (
   <Link
@@ -71,21 +68,11 @@ const FeaturedSchoolCard = ({ school }: { school: FeaturedSchoolLite }) => (
 );
 
 const Landing = () => {
-  const navigate = useNavigate();
-  const [query, setQuery] = useState("");
-
   const provinceData = LANDING_SUMMARY.provinces;
   const totalSchools = LANDING_SUMMARY.totalSchools;
   const totalSpecial = LANDING_SUMMARY.totalSpecial;
   const namibiaTotal = LANDING_SUMMARY.namibia.total;
   const singaporeTotal = LANDING_SUMMARY.singapore?.total ?? 0;
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = query.trim();
-    // Search lives on the all-schools directory page.
-    navigate(`/south-africa${q ? `?q=${encodeURIComponent(q)}` : ""}`);
-  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -110,27 +97,8 @@ const Landing = () => {
             </h1>
             <p className="mt-3 text-base opacity-90 md:text-lg">
               {totalSchools.toLocaleString()} schools across {provinceData.length}{" "}
-              province{provinceData.length === 1 ? "" : "s"}. Pick a province below or
-              search the full directory.
+              province{provinceData.length === 1 ? "" : "s"}. Pick a province below.
             </p>
-
-            <form onSubmit={onSubmit} className="mx-auto mt-10 max-w-2xl">
-              <div className="flex items-center gap-2 rounded-full bg-background/95 p-2 shadow-[var(--shadow-elevated)] ring-1 ring-black/5 backdrop-blur">
-                <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
-                  <Input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search schools, suburbs, districts…"
-                    className="h-14 rounded-full border-0 bg-transparent pl-14 pr-4 text-base text-foreground shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    aria-label="Search schools"
-                  />
-                </div>
-                <Button type="submit" className="h-12 rounded-full px-6">
-                  Search
-                </Button>
-              </div>
-            </form>
           </div>
         </div>
       </section>
