@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowRight, MapPin, Search, SlidersHorizontal, User, Users, X, RotateCcw } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Link, useParams } from "react-router-dom";
+import { ArrowRight, MapPin, SlidersHorizontal, User, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,8 +33,6 @@ const Index = () => {
     () => [...LANDING_SUMMARY.provinces].sort((a, b) => b.total - a.total),
     [],
   );
-  const [searchParams] = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [sort, setSort] = useState<"learners" | "name" | "district">("learners");
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -72,7 +69,6 @@ const Index = () => {
   }, [isFlatCountry, schools, year, province?.slug]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
     let result = schools.filter((s) => {
       if (filters.province && s.provinceSlug !== filters.province) return false;
       if (filters.district) {
@@ -86,10 +82,6 @@ const Index = () => {
       }
       if (filters.quintile && s.quintile !== filters.quintile) return false;
       if (filters.town && s.town !== filters.town) return false;
-      if (q) {
-        const hay = `${s.name} ${s.suburb ?? ""} ${s.town ?? ""} ${s.district ?? ""} ${s.region ?? ""} ${s.emis}`.toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
       return true;
     });
     if (sort === "learners")
@@ -104,9 +96,9 @@ const Index = () => {
           ) || a.name.localeCompare(b.name),
       );
     return result;
-  }, [query, filters, sort, schools, isFlatCountry]);
+  }, [filters, sort, schools, isFlatCountry]);
 
-  useEffect(() => setVisible(PAGE_SIZE), [query, filters, sort, year]);
+  useEffect(() => setVisible(PAGE_SIZE), [filters, sort, year]);
 
   const activeChips: { key: keyof Filters; value: string }[] = (Object.keys(filters) as (keyof Filters)[])
     .filter((k) => filters[k])
@@ -135,32 +127,6 @@ const Index = () => {
               quintile and contact details. Search the data the schools do not publish themselves.
             </p>
 
-            <div className="mx-auto mt-10 max-w-2xl">
-              <div className="flex items-center gap-2 rounded-full bg-background/95 p-2 shadow-[var(--shadow-elevated)] ring-1 ring-black/5 backdrop-blur">
-                <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
-                  <Input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search schools, suburbs, districts…"
-                    className="h-14 rounded-full border-0 bg-transparent pl-14 pr-4 text-base text-foreground shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    aria-label="Search schools"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery("");
-                    setFilters(emptyFilters);
-                  }}
-                  className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
-                  aria-label="Reset filters"
-                  title="Reset filters"
-                >
-                  <RotateCcw className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -355,17 +321,14 @@ const Index = () => {
 
             {filtered.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
-                <p className="text-base font-medium">No schools match your search</p>
+                <p className="text-base font-medium">No schools match your filters</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Try clearing some filters or using a different search term.
+                  Try clearing some filters to see more results.
                 </p>
                 <Button
                   variant="outline"
                   className="mt-4"
-                  onClick={() => {
-                    setQuery("");
-                    setFilters(emptyFilters);
-                  }}
+                  onClick={() => setFilters(emptyFilters)}
                 >
                   Reset
                 </Button>
