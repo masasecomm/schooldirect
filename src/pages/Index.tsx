@@ -9,7 +9,7 @@ import { SiteHeader } from "@/components/schools/SiteHeader";
 import { SiteFooter } from "@/components/schools/SiteFooter";
 import { SchoolCard } from "@/components/schools/SchoolCard";
 import { FilterPanel, type Filters } from "@/components/schools/FilterPanel";
-import { getSchools, getFacets, titleCase } from "@/lib/schools";
+import { getSchools, getFacets, titleCase, getSchoolsByCountry, uniqueSorted } from "@/lib/schools";
 import { getProvince, isProvinceSlug, PROVINCES } from "@/lib/provinces";
 import { useLocation } from "react-router-dom";
 import { useYear } from "@/lib/year-context";
@@ -321,17 +321,14 @@ const Index = () => {
 
             {filtered.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
-                <p className="text-base font-medium">No schools match your search</p>
+                <p className="text-base font-medium">No schools match your filters</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Try clearing some filters or using a different search term.
+                  Try clearing some filters to see more results.
                 </p>
                 <Button
                   variant="outline"
                   className="mt-4"
-                  onClick={() => {
-                    setQuery("");
-                    setFilters(emptyFilters);
-                  }}
+                  onClick={() => setFilters(emptyFilters)}
                 >
                   Reset
                 </Button>
