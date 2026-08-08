@@ -43,15 +43,16 @@ jobs:
           VITE_BASE: "/"
         run: bun run build
 
+      - name: Save SPA shell for the 404 fallback
+        run: cp dist/index.html dist/404.html
+
       - name: Prerender pages for SEO
         env:
           PRERENDER_MODE: ${{ github.event.inputs.prerender_mode || 'key' }}
         run: node scripts/prerender.mjs
 
-      - name: Add SPA fallback + disable Jekyll
-        run: |
-          cp dist/index.html dist/404.html
-          touch dist/.nojekyll
+      - name: Disable Jekyll
+        run: touch dist/.nojekyll
 
       - uses: actions/configure-pages@v5
 
