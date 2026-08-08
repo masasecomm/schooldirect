@@ -5,14 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      prerender:
-        description: "Prerender all school pages? (slow, but ships static HTML)"
+      prerender_mode:
+        description: "Prerender scope: key hub pages (fast) or every school page (slow)"
         required: true
-        default: "false"
+        default: "key"
         type: choice
         options:
-          - "false"
-          - "true"
+          - "key"
+          - "full"
 
 permissions:
   contents: read
@@ -44,7 +44,8 @@ jobs:
         run: bun run build
 
       - name: Prerender pages for SEO
-        if: ${{ github.event.inputs.prerender == 'true' }}
+        env:
+          PRERENDER_MODE: ${{ github.event.inputs.prerender_mode || 'key' }}
         run: node scripts/prerender.mjs
 
       - name: Add SPA fallback + disable Jekyll
