@@ -31,16 +31,36 @@ const NAV_TIMEOUT = Number(process.env.PRERENDER_TIMEOUT ?? 120) * 1000;
 // Allow this many failed routes before we mark the whole build as failed.
 // A handful of stragglers shouldn't block deployment of the other ~3,000 pages.
 const FAILURE_THRESHOLD = Number(process.env.PRERENDER_FAILURE_THRESHOLD ?? 25);
+// "key" = only high-value hub pages (fast, runs on every deploy).
+// "full" = every route in the sitemap (slow, manual/scheduled runs).
+const MODE = (process.env.PRERENDER_MODE ?? "key").toLowerCase();
+// Hard cap so the published output can never blow past hosting file limits.
+const MAX_PAGES = Number(process.env.PRERENDER_MAX_PAGES ?? 20000);
+
+// A "key" route is the home page, a country/province directory, or a
+// standalone content page — i.e. anything that is not an individual school.
+const isKeyRoute = (p) => {
+  if (p === "/") return true;
+  const segs = p.split("/").filter(Boolean);
+  if (segs[0] === "south-africa") return segs.length <= 1 || segs[1] === "special-needs" || (segs.length === 2) || (segs.length === 3 && segs[2] === "special-needs");
+  if (segs[0] === "namibia" || segs[0] === "singapore") return segs.length === 1;
+  return segs.length === 1; // /about, /admissions, /wced-online-application, ...
+};
 
 // 1. Read routes from the just-generated sitemap.
 const sitemapXml = readFileSync(resolve(distDir, "sitemap.xml"), "utf-8");
-const routes = Array.from(sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g))
+let routes = Array.from(sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g))
   .map((m) => m[1].replace(SITE_URL, ""))
   .map((p) => (p === "" ? "/" : p))
   // SPA fallback file lives at the root; never overwrite it with a deep route.
   .filter((p, i, arr) => arr.indexOf(p) === i);
 
-console.log(`[prerender] ${routes.length} routes to render with concurrency ${CONCURRENCY}`);
+if (MODE !== "full") routes = routes.filter(isKeyRoute);
+if (routes.length > MAX_PAGES) routes = routes.slice(0, MAX_PAGES);
+
+console.log(
+  `[prerender] mode=${MODE} — ${routes.length} routes to render with concurrency ${CONCURRENCY}`,
+);
 
 // 2. Spin up a static file server over dist/ with SPA fallback to /index.html.
 const server = createServer((req, res) =>

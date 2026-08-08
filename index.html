@@ -12,9 +12,17 @@
     <link rel="canonical" href="https://schooldirect.org/" />
     <link rel="icon" href="/favicon.png" type="image/png" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Load webfonts without blocking first paint; system fonts render immediately. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    </noscript>
 
     <meta property="og:title" content="School Direct — Find a school in South Africa" />
     <meta property="og:description" content="Search every school across South Africa. Filter by province, district, phase, sector and quintile." />
