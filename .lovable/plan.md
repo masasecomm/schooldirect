@@ -1,25 +1,40 @@
-# Fix blank AdSense unit on SchoolDetail
+# Make pages paint instantly (HTML-first, no blank screen)
 
-## Problem
-The 300x600 skyscraper between the details and enrolment sections renders blank. The markup and slot ID match the snippet you pasted, so the issue is how the React component drives AdSense in a SPA, not the slot config.
+## What's happening now
 
-Two known AdSense-in-React failure modes are present in `AdSenseSkyscraper` (`src/pages/SchoolDetail.tsx` lines 177–210):
+The deployed site ships an empty `index.html` with `<div id="root"></div>`. The browser must download and execute the React bundle, then the router picks the page, then content appears — that's the ~5 seconds of white screen.
 
-1. **Double push on the same `<ins>`** — React 18 StrictMode mounts effects twice in dev, and SPA navigation re-mounts the component. Calling `adsbygoogle.push({})` on an `<ins>` that already has `data-adsbygoogle-status="done"` (or `"unfilled"`) throws *"All 'ins' elements... already have ads in them"* and the slot stays blank.
-2. **Zero-width parent at push time** — if the `<ins>` is measured at 0px wide when push runs (e.g. inside a collapsed flex parent on first paint), AdSense marks it `unfilled` and never retries.
+A prerender script already exists (`scripts/prerender.mjs`) that writes fully-rendered static HTML for every route, but the GitHub Pages workflow only runs it when someone manually triggers the workflow with `prerender: true`. Normal pushes deploy the empty shell.
 
-## Fix (single file: `src/pages/SchoolDetail.tsx`)
+## Can it be pure HTML and CSS?
 
-Rewrite `AdSenseSkyscraper` so each mount gets a fresh `<ins>` and only pushes once after the element has real width:
+Partly, and that's the right goal. Rather than rebuilding the whole site as hand-written HTML (which would mean losing the filters, province browsing, rating dialog and contact form), the plan is:
 
-- Use a `ref` to the `<ins>` and a `pushedRef` guard so we never push twice.
-- Before pushing, check `ins.getAttribute('data-adsbygoogle-status')` is null (not yet processed).
-- Wait for the ins to have `offsetWidth > 0` (poll up to ~10s) before pushing, so the unit fills reliably on slow first paints.
-- Add `data-full-width-responsive="false"` and keep the fixed 300x600 inline style (matches your snippet).
-- Force a fresh DOM node on route change by giving the wrapper a `key` derived from the school slug at the call site.
+- Every page is served as real, complete HTML + CSS — visible instantly, crawlable, no blank flash.
+- JavaScript still loads afterwards, in the background, only to power the interactive bits (filters, menus, dialogs). If it never loads, the page still reads fine.
 
-No other components, routes, styles, or business logic change. The global loader script in `index.html` stays as-is.
+That gives AMP-like speed without throwing away functionality.
 
-## Out of scope
-- No new ad units, no layout/visual changes, no changes to other pages.
-- No edits to `index.html` (loader is already correct).
+## Plan
+
+1. **Always prerender on deploy**
+   Change the GitHub Pages workflow to run `node scripts/prerender.mjs` on every push, not only on manual dispatch. Result: each route ships static HTML with its text, headings, meta tags and JSON-LD already in the file.
+
+2. **Inline critical CSS + preload the stylesheet**
+   Ensure the prerendered HTML carries the stylesheet link early so text and layout paint without waiting for JS.
+
+3. **Defer the JS so it never blocks paint**
+   Keep the module script deferred and drop render-blocking third-party work from the head: self-host or `font-display: swap` the Inter font (currently a blocking Google Fonts stylesheet), and keep AdSense/analytics on the existing idle-callback path.
+
+4. **Trim the first-load JavaScript**
+   - Make the landing page not pull in the heavy shared UI it doesn't need (sheet/menu, tooltip provider, toasters, react-query) — load those only where used.
+   - Confirm the multi-MB school data stays out of the entry chunk and is fetched per-route only.
+
+5. **Prerender build reliability**
+   The site has ~26k routes; prerendering all of them on every push is slow. Prerender the high-value routes on every push (home, country and province directories, admissions, special needs, WCED) and keep the full school-page prerender as the manual/scheduled run.
+
+## Technical notes
+
+- Files touched: `.github/workflows/deploy-github-pages.yml`, `scripts/prerender.mjs` (route filtering + optional full mode), `index.html` (font loading), `src/App.tsx` and `src/pages/Landing.tsx` (provider/import slimming).
+- No data, routing, or content changes — URLs stay identical.
+- Verification: build locally, inspect a prerendered `dist/.../index.html` to confirm visible text is present in the file, and check the entry JS size.
