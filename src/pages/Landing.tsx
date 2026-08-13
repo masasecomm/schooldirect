@@ -93,11 +93,10 @@ const Landing = () => {
         <div className="container pb-16 pt-28 md:pb-24 md:pt-36">
           <div className="mx-auto max-w-3xl text-center text-primary-foreground">
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
-              Every school in South Africa, in one place
+              Every school in the country, in one place
             </h1>
             <p className="mt-3 text-base opacity-90 md:text-lg">
-              {totalSchools.toLocaleString()} schools across {provinceData.length}{" "}
-              province{provinceData.length === 1 ? "" : "s"}. Pick a province below.
+              Select your country below
             </p>
           </div>
         </div>
